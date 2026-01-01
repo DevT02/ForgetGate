@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+dist/
+build/
+
+# IDE
+.vscode/
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Data
+data/
+datasets/
+
+checkpoints/
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+# Results and logs
+results/logs/*.json
+results/logs/*.jsonl
+results/analysis/*.txt
+results/analysis/*.md
+!results/logs/.gitkeep
+!results/analysis/.gitkeep
+.DS_Store
+Thumbs.db

@@ -1,0 +1,55 @@
+# Dataset configurations for ForgetGate-V
+# Supports CIFAR-10 and MNIST with class forgetting
+
+# CIFAR-10 configuration
+cifar10:
+  name: cifar10
+  num_classes: 10
+  class_names:
+    0: airplane
+    1: automobile
+    2: bird
+    3: cat
+    4: deer
+    5: dog
+    6: frog
+    7: horse
+    8: ship
+    9: truck
+  image_size: 32
+  channels: 3
+  mean: [0.4914, 0.4822, 0.4465]
+  std: [0.2023, 0.1994, 0.2010]
+
+# MNIST configuration
+mnist:
+  name: mnist
+  num_classes: 10
+  class_names:
+    0: "0"
+    1: "1"
+    2: "2"
+    3: "3"
+    4: "4"
+    5: "5"
+    6: "6"
+    7: "7"
+    8: "8"
+    9: "9"
+  image_size: 28
+  channels: 1
+  mean: [0.1307]
+  std: [0.3081]
+
+# Data splits
+splits:
+  train: 0.8
+  val: 0.1
+  test: 0.1
+
+# Default data loading settings
+dataloader:
+  batch_size: 128
+  num_workers: 4
+  pin_memory: true
+  persistent_workers: true

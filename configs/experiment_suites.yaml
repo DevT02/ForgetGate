@@ -1,0 +1,738 @@
+# Experiment suite configurations for ForgetGate-V
+# Defines complete experiment pipelines with hyperparameters
+
+# Retraining Oracle suites (gold standard for unlearning)
+# These models are trained from scratch WITHOUT the forget class
+oracle_vit_cifar10_forget0:
+  model: vit_tiny
+  dataset: cifar10
+  forget_class: 0  # Class to exclude from training
+  training:
+    epochs: 100
+    batch_size: 128
+    lr: 1e-3
+    weight_decay: 0.01
+    pretrained: true
+  seeds: [42, 123, 456, 789, 101112]
+
+oracle_cnn_cifar10_forget0:
+  model: resnet18
+  dataset: cifar10
+  forget_class: 0
+  training:
+    epochs: 100
+    batch_size: 128
+    lr: 1e-3
+    weight_decay: 0.01
+    pretrained: true
+  seeds: [42, 123, 456, 789, 101112]
+
+# Oracles for multiple forget classes
+oracle_vit_cifar10_forget1:
+  model: vit_tiny
+  dataset: cifar10
+  forget_class: 1
+  training:
+    epochs: 100
+    batch_size: 128
+    lr: 1e-3
+    weight_decay: 0.01
+    pretrained: true
+  seeds: [42, 123, 456]
+
+oracle_vit_cifar10_forget2:
+  model: vit_tiny
+  dataset: cifar10
+  forget_class: 2
+  training:
+    epochs: 100
+    batch_size: 128
+    lr: 1e-3
+    weight_decay: 0.01
+    pretrained: true
+  seeds: [42, 123, 456]
+
+# Base model training suites
+base_vit_cifar10:
+  model: vit_tiny
+  dataset: cifar10
+  training:
+    epochs: 100
+    batch_size: 128
+    lr: 1e-3
+    weight_decay: 0.01
+  seeds: [42, 123, 456, 789, 101112]
+
+base_cnn_cifar10:
+  model: resnet18
+  dataset: cifar10
+  training:
+    epochs: 100
+    batch_size: 128
+    lr: 1e-3
+    weight_decay: 0.01
+  seeds: [42, 123, 456, 789, 101112]
+
+# Adversarially robust base models (PGD training)
+base_vit_cifar10_pgdtrain:
+  model: vit_tiny
+  dataset: cifar10
+  training:
+    epochs: 100
+    batch_size: 128
+    lr: 1e-3
+    weight_decay: 0.01
+    adv_train:
+      enabled: true
+      eps: 0.031372549   # 8/255
+      alpha: 0.007843137 # 2/255
+      steps: 10
+  seeds: [42, 123, 456]
+
+base_cnn_cifar10_pgdtrain:
+  model: resnet18
+  dataset: cifar10
+  training:
+    epochs: 100
+    batch_size: 128
+    lr: 1e-3
+    weight_decay: 0.01
+    adv_train:
+      enabled: true
+      eps: 0.031372549
+      alpha: 0.007843137
+      steps: 10
+  seeds: [42, 123, 456]
+
+# LoRA unlearning suites (forget class 0 = airplane)
+unlearn_lora_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: ce_ascent
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456, 789, 101112]
+
+unlearn_lora_cnn_cifar10_forget0:
+  base_model_suite: base_cnn_cifar10
+  unlearning:
+    method: lora
+    objective: uniform_kl
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456, 789, 101112]
+
+# Ablation: different LoRA ranks
+unlearn_lora_rank4_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: ce_ascent
+    forget_class: 0
+    lora_rank: 4
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123]
+
+unlearn_lora_rank16_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: ce_ascent
+    forget_class: 0
+    lora_rank: 16
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123]
+
+# Ablation: different objectives
+unlearn_kl_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: uniform_kl
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+unlearn_scrub_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: feature_scrub
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+# SalUn unlearning baseline (Fan et al. ICLR 2024)
+unlearn_salun_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: salun
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+# SCRUB unlearning baseline (Kurmanji et al. NeurIPS 2023)
+unlearn_scrub_distill_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: scrub
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+# CNN (ResNet-18) Unlearning
+
+# CE Ascent on CNN (baseline)
+unlearn_lora_cnn_forget0:
+  base_model_suite: base_cnn_cifar10
+  unlearning:
+    method: lora
+    objective: ce_ascent
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+# Uniform KL on CNN
+unlearn_kl_cnn_forget0:
+  base_model_suite: base_cnn_cifar10
+  unlearning:
+    method: lora
+    objective: uniform_kl
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+# SalUn on CNN (best performer on ViT)
+unlearn_salun_cnn_forget0:
+  base_model_suite: base_cnn_cifar10
+  unlearning:
+    method: lora
+    objective: salun
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+# SCRUB on CNN
+unlearn_scrub_cnn_forget0:
+  base_model_suite: base_cnn_cifar10
+  unlearning:
+    method: lora
+    objective: scrub
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+# Quick CNN evaluation
+eval_quick_cnn_baselines_forget0:
+  model_suites:
+    - base_cnn_cifar10
+    - unlearn_lora_cnn_forget0
+    - unlearn_kl_cnn_forget0
+    - unlearn_salun_cnn_forget0
+    - unlearn_scrub_cnn_forget0
+  evaluation:
+    attacks:
+      - clean
+      - pgd_linf_8  # CNNs should handle this better than ViT!
+    metrics:
+      - forget_acc
+      - retain_acc
+  seeds: [42]
+
+# Multi-class forgetting experiments (show it works on different classes)
+unlearn_lora_vit_cifar10_forget1:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: ce_ascent
+    forget_class: 1  # automobile
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+unlearn_lora_vit_cifar10_forget2:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: ce_ascent
+    forget_class: 2  # bird
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+unlearn_lora_vit_cifar10_forget5:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: ce_ascent
+    forget_class: 5  # dog
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+unlearn_lora_vit_cifar10_forget9:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: ce_ascent
+    forget_class: 9  # truck
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+# VPT resurrection attack suites
+vpt_resurrect_vit_cifar10_forget0:
+  unlearned_model_suite: unlearn_lora_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 5
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+  seeds: [42, 123, 456, 789, 101112]
+
+vpt_resurrect_cnn_cifar10_forget0:
+  unlearned_model_suite: unlearn_lora_cnn_cifar10_forget0
+  vpt_attack:
+    prompt_type: patch
+    patch_size: 16
+    init_strategy: zeros
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+  seeds: [42, 123, 456, 789, 101112]
+
+# VPT resurrection on CNN + SalUn (Note: VPT doesn't work well on CNNs)
+# Kept for completeness but expect poor results
+vpt_resurrect_salun_cnn_forget0:
+  unlearned_model_suite: unlearn_salun_cnn_forget0
+  vpt_attack:
+    prompt_type: patch  # Use patch-based prompts for CNNs
+    patch_size: 16
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+  seeds: [42, 123, 456]
+
+# Ablation: different prompt lengths
+vpt_length10_vit_cifar10_forget0:
+  unlearned_model_suite: unlearn_lora_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+  seeds: [42, 123]
+
+vpt_length20_vit_cifar10_forget0:
+  unlearned_model_suite: unlearn_lora_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 20
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+    lambda_retain: 10.0
+    T: 1.0
+    eval_every: 5
+  seeds: [42, 123]
+
+# Full evaluation suites (comprehensive audit)
+eval_full_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_lora_vit_cifar10_forget0
+    - vpt_resurrect_vit_cifar10_forget0
+  evaluation:
+    attacks:
+      - clean
+      - pgd_linf_8
+      # - autoattack_linf_8  # commented out for faster iteration
+      - vpt_only
+      - vpt_plus_pgd
+    metrics:
+      - forget_acc
+      - retain_acc
+      - resurrection_success_rate
+      - robust_retain_acc
+  seeds: [42, 123, 456, 789, 101112]
+
+eval_full_cnn_cifar10_forget0:
+  model_suites:
+    - base_cnn_cifar10
+    - unlearn_lora_cnn_cifar10_forget0
+    - vpt_resurrect_cnn_cifar10_forget0
+  evaluation:
+    attacks:
+      - clean
+      - pgd_linf_8
+      # - autoattack_linf_8  # commented out for faster iteration
+      - vpt_only
+      - vpt_plus_pgd
+    metrics:
+      - forget_acc
+      - retain_acc
+      - resurrection_success_rate
+      - robust_retain_acc
+  seeds: [42, 123, 456, 789, 101112]
+
+# MNIST experiments (smaller scale)
+base_vit_mnist:
+  model: vit_tiny
+  dataset: mnist
+  training:
+    epochs: 50
+    batch_size: 128
+    lr: 1e-3
+    weight_decay: 0.01
+  seeds: [42, 123]
+
+unlearn_lora_vit_mnist_forget0:
+  base_model_suite: base_vit_mnist
+  unlearning:
+    method: lora
+    objective: ce_ascent
+    forget_class: 0
+    lora_rank: 8
+    epochs: 25
+    lr: 1e-3
+  seeds: [42, 123]
+
+vpt_resurrect_vit_mnist_forget0:
+  unlearned_model_suite: unlearn_lora_vit_mnist_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 5
+    init_strategy: random
+    epochs: 50
+    lr: 1e-2
+    target_class: 0
+  seeds: [42, 123]
+
+eval_full_vit_mnist_forget0:
+  model_suites:
+    - base_vit_mnist
+    - unlearn_lora_vit_mnist_forget0
+    - vpt_resurrect_vit_mnist_forget0
+  evaluation:
+    attacks:
+      - clean
+      - pgd_linf_8
+      - vpt_only
+    metrics:
+      - forget_acc
+      - retain_acc
+      - resurrection_success_rate
+  seeds: [42, 123]
+
+# v1 evaluation suites (clean + AutoAttack only)
+eval_v1_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_lora_vit_cifar10_forget0
+  evaluation:
+    attacks:
+      - clean
+      - autoattack_linf_8
+    metrics:
+      - forget_acc
+      - retain_acc
+  seeds: [42, 123, 456, 789, 101112]
+
+eval_v1_cnn_cifar10_forget0:
+  model_suites:
+    - base_cnn_cifar10
+    - unlearn_lora_cnn_cifar10_forget0
+  evaluation:
+    attacks:
+      - clean
+      - autoattack_linf_8
+    metrics:
+      - forget_acc
+      - retain_acc
+  seeds: [42, 123, 456, 789, 101112]
+
+# v2 evaluation suites (includes VPT resurrection)
+eval_v2_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_lora_vit_cifar10_forget0
+    - vpt_resurrect_vit_cifar10_forget0
+  evaluation:
+    attacks:
+      - clean
+      - pgd_linf_8
+      - vpt_only
+      - vpt_plus_pgd
+    metrics:
+      - forget_acc
+      - retain_acc
+      - resurrection_success_rate
+  seeds: [42, 123, 456, 789, 101112]
+
+# Evaluation suite for length-20 VPT prompts
+eval_full_vit_cifar10_forget0_vptlen20:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_lora_vit_cifar10_forget0
+    - vpt_length20_vit_cifar10_forget0
+  evaluation:
+    attacks:
+      - clean
+      - pgd_linf_4
+      - pgd_linf_8
+      - pgd_linf_8_retain
+      - pgd_linf_8_forget
+      - vpt_only
+      - vpt_plus_pgd
+    metrics:
+      - forget_acc
+      - retain_acc
+      - resurrection_success_rate
+      - robust_retain_acc
+  seeds: [42, 123]   # match vpt_length20 suite seeds
+
+# Strong evaluation suite with comprehensive PGD variants
+eval_strong_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_lora_vit_cifar10_forget0
+    - vpt_resurrect_vit_cifar10_forget0
+  evaluation:
+    attacks:
+      - clean
+      - pgd_linf_8
+      - pgd_strong          # 20 steps, 5 restarts
+      - pgd_very_strong     # 50 steps, 10 restarts
+      - autoattack_linf_8
+      - vpt_only
+      - vpt_plus_pgd
+    metrics:
+      - forget_acc
+      - retain_acc
+      - resurrection_success_rate
+      - robust_retain_acc
+  seeds: [42, 123, 456]
+
+# Tradeoff curve experiments - sweep parameters
+
+# Sweep LoRA ranks (already defined above as rank4 and rank16)
+# Use: unlearn_lora_rank4_vit_cifar10_forget0, unlearn_lora_rank16_vit_cifar10_forget0
+
+# Sweep VPT prompt lengths (already defined as length10, length20)
+# Use: vpt_length10_vit_cifar10_forget0, vpt_length20_vit_cifar10_forget0
+
+# Comprehensive tradeoff analysis suite
+eval_tradeoff_lora_rank:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_lora_rank4_vit_cifar10_forget0
+    - unlearn_lora_vit_cifar10_forget0  # rank 8 (baseline)
+    - unlearn_lora_rank16_vit_cifar10_forget0
+  evaluation:
+    attacks:
+      - clean
+      - pgd_linf_8
+      - autoattack_linf_8
+    metrics:
+      - forget_acc
+      - retain_acc
+  seeds: [42, 123]
+
+eval_tradeoff_vpt_length:
+  model_suites:
+    - unlearn_lora_vit_cifar10_forget0  # baseline unlearned
+    - vpt_resurrect_vit_cifar10_forget0  # 5 tokens
+    - vpt_length10_vit_cifar10_forget0   # 10 tokens
+    - vpt_length20_vit_cifar10_forget0   # 20 tokens
+  evaluation:
+    attacks:
+      - vpt_only
+      - vpt_plus_pgd
+    metrics:
+      - resurrection_success_rate
+  seeds: [42, 123]
+
+# Multi-class forgetting comparison
+eval_multiclass_forgetting:
+  model_suites:
+    - unlearn_lora_vit_cifar10_forget0
+    - unlearn_lora_vit_cifar10_forget1
+    - unlearn_lora_vit_cifar10_forget2
+    - unlearn_lora_vit_cifar10_forget5
+    - unlearn_lora_vit_cifar10_forget9
+  evaluation:
+    attacks:
+      - clean
+      - pgd_linf_8
+    metrics:
+      - forget_acc
+      - retain_acc
+  seeds: [42, 123, 456]
+
+# Baseline methods comparison (includes SalUn and SCRUB)
+eval_baselines_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_lora_vit_cifar10_forget0      # CE ascent (existing)
+    - unlearn_kl_vit_cifar10_forget0        # Uniform KL (existing)
+    - unlearn_salun_vit_cifar10_forget0     # SalUn (new)
+    - unlearn_scrub_distill_vit_cifar10_forget0  # SCRUB (new)
+  evaluation:
+    attacks:
+      - clean
+      - pgd_linf_8
+      - autoattack_linf_8
+    metrics:
+      - forget_acc
+      - retain_acc
+  seeds: [42, 123, 456]
+
+# Quick test - all methods, clean accuracy only (fast!)
+eval_quick_baselines_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_lora_vit_cifar10_forget0      # CE ascent
+    - unlearn_kl_vit_cifar10_forget0        # Uniform KL
+    - unlearn_salun_vit_cifar10_forget0     # SalUn (new)
+    - unlearn_scrub_distill_vit_cifar10_forget0  # SCRUB (new)
+  evaluation:
+    attacks:
+      - clean  # Focus on clean accuracy for unlearning paper
+    metrics:
+      - forget_acc
+      - retain_acc
+  seeds: [42]
+
+# Comprehensive evaluation for paper - multiple seeds for statistical significance
+eval_paper_baselines_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_lora_vit_cifar10_forget0      # CE Ascent baseline
+    - unlearn_kl_vit_cifar10_forget0        # Uniform KL baseline
+    - unlearn_salun_vit_cifar10_forget0     # SalUn (Fan et al. 2024)
+    - unlearn_scrub_distill_vit_cifar10_forget0  # SCRUB (Kurmanji et al. 2023)
+  evaluation:
+    attacks:
+      - clean  # Standard metric for machine unlearning
+    metrics:
+      - forget_acc  # Lower is better (successful forgetting)
+      - retain_acc  # Higher is better (utility preservation)
+  seeds: [42, 123, 456]  # Multiple seeds for statistical analysis
+
+# Novel experiments: adversarial unlearning & resurrection attacks
+
+# Unlearning on adversarially robust base model
+unlearn_salun_robust_base_forget0:
+  base_model_suite: base_vit_cifar10_pgdtrain  # Use robust base
+  unlearning:
+    method: lora
+    objective: salun
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+# VPT resurrection attack on SalUn
+vpt_resurrect_salun_forget0:
+  unlearned_model_suite: unlearn_salun_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 50
+    lr: 1e-2
+    target_class: 0
+  seeds: [42, 123, 456]
+
+# VPT resurrection attack on Uniform KL
+vpt_resurrect_kl_forget0:
+  unlearned_model_suite: unlearn_kl_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 50
+    lr: 1e-2
+    target_class: 0
+  seeds: [42, 123, 456]
+
+# VPT resurrection attack on SCRUB
+vpt_resurrect_scrub_forget0:
+  unlearned_model_suite: unlearn_scrub_distill_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 50
+    lr: 1e-2
+    target_class: 0
+  seeds: [42, 123, 456]
+
+# VPT resurrection on robust base + unlearning
+vpt_resurrect_robust_unlearn_forget0:
+  unlearned_model_suite: unlearn_salun_robust_base_forget0  # Fixed key name
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 50
+    lr: 1e-2
+    target_class: 0  # Fixed key name
+  seeds: [42, 123, 456]
+
+# Comprehensive adversarial evaluation
+eval_adversarial_complete_forget0:
+  model_suites:
+    - base_vit_cifar10  # Standard base
+    - base_vit_cifar10_pgdtrain  # Robust base
+    - unlearn_salun_vit_cifar10_forget0  # Unlearned (standard base)
+    - unlearn_salun_robust_base_forget0  # Unlearned (robust base)
+    - vpt_resurrect_salun_forget0  # VPT resurrection
+    - vpt_resurrect_robust_unlearn_forget0  # VPT on robust
+  evaluation:
+    attacks:
+      - clean
+      - pgd_linf_8  # Will work on robust models!
+      - vpt_only  # VPT resurrection (clean)
+      - vpt_plus_pgd  # VPT + PGD combined (strongest attack)
+    metrics:
+      - forget_acc
+      - retain_acc
+      - resurrection_success_rate  # For VPT models
+  seeds: [42]

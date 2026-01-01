@@ -1,0 +1,30 @@
+# PyTorch with CUDA support (install from PyTorch index for your CUDA version)
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cu130
+torch>=2.1.0
+torchvision>=0.16.0
+
+numpy
+scipy
+pandas
+tqdm
+Pillow
+matplotlib
+pyyaml
+packaging
+
+timm>=0.9.12
+einops
+
+# PEFT
+peft>=0.7.0
+accelerate>=0.25.0
+transformers>=4.36.0  # Only required if using HF model wrappers; pure timm runs can disable it
+# Attackeval
+torchattacks>=3.5.1
+git+https://github.com/fra31/auto-attack@a39220048b3c9f2cca9a4d3a54604793c68eca7e
+
+# Devtests
+pytest
+
+seaborn
+tabulate

@@ -1,0 +1,98 @@
+# Unlearning configurations for ForgetGate-V
+# LoRA-based parameter-efficient unlearning
+
+# Unlearning objectives
+objectives:
+  # Cross-entropy ascent on forgotten class
+  ce_ascent:
+    name: "ce_ascent"
+    loss_type: "ce"
+    ascent: true  # Minimize or maximize loss
+    target_class_weight: 1.0
+    retain_class_weight: 0.1
+
+  # KL divergence to uniform distribution
+  uniform_kl:
+    name: "uniform_kl"
+    loss_type: "kl_uniform"
+    temperature: 1.0
+    target_class_weight: 1.0
+    retain_class_weight: 0.1
+
+  # Gradient ascent on features (scrubbing)
+  feature_scrub:
+    name: "feature_scrub"
+    loss_type: "feature_ascent"
+    layer_name: "head"  # Layer to scrub
+    target_class_weight: 1.0
+    retain_class_weight: 0.1
+
+  # SalUn: Saliency-based unlearning (Fan et al. ICLR 2024)
+  salun:
+    name: "salun"
+    loss_type: "saliency_random_label"
+    saliency_threshold: 0.5  # Top 50% of parameters by gradient magnitude
+    random_label_weight: 1.0
+    retain_weight: 1.0
+    compute_saliency_every: 10  # Steps between saliency recomputation
+
+  # SCRUB: Distillation-based unlearning (Kurmanji et al. NeurIPS 2023)
+  scrub:
+    name: "scrub"
+    loss_type: "distillation_forget"
+    distill_weight: 1.0  # Weight for retain distillation loss
+    forget_weight: 1.0   # Weight for forget maximization loss
+    temperature: 2.0     # Temperature for distillation
+    forget_mode: "ce_ascent"  # or "max_entropy"
+
+# LoRA unlearning hyperparameters
+lora_unlearn:
+  # LoRA rank options
+  ranks: [4, 8, 16, 32]
+
+  # Training settings
+  lr: 1e-3
+  weight_decay: 0.01
+  batch_size: 128
+  epochs: 50
+  warmup_epochs: 5
+
+  # Regularization
+  lora_reg_lambda: 0.01  # Regularization on LoRA parameters
+  retain_lambda: 5.0     # Weight for retain loss vs forget loss
+
+  # Optimizer
+  optimizer: adamw
+  scheduler: cosine
+  min_lr: 1e-6
+
+# Data filtering for unlearning
+data_filter:
+  # Forget class (will be set per experiment)
+  forget_class: null
+
+  # Sample selection
+  forget_samples_only: false  # If true, only train on forget class samples
+  balanced_sampling: true    # Balance forget/retain samples
+
+  # Data augmentation during unlearning
+  augmentation:
+    random_crop: true
+    random_flip: true
+    color_jitter: false
+
+# Evaluation during unlearning
+unlearn_eval:
+  eval_every: 5  # epochs
+  metrics:
+    - forget_acc
+    - retain_acc
+    - cross_entropy
+    - kl_divergence
+
+# Early stopping
+early_stopping:
+  patience: 10
+  monitor: "forget_acc"  # Stop when forget accuracy stops decreasing
+  mode: "min"  # Minimize forget accuracy
+  min_delta: 0.001

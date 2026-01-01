@@ -1,0 +1,82 @@
+# Adversarial evaluation configurations
+# PGD and AutoAttack settings
+
+# PGD attack configurations
+pgd:
+  # Attack parameters
+  eps: 0.031372549   # 8/255
+  alpha: 0.007843137 # 2/255
+  steps: 10
+  random_start: true
+
+  # Norm for attack
+  norm: "l_inf"
+
+  # Targeted vs untargeted
+  targeted: false
+
+  # Random restarts (1=none, 5-10=strong eval)
+  restarts: 1
+
+# Stronger PGD variants
+pgd_strong:
+  eps: 0.031372549   # 8/255
+  alpha: 0.003137255 # eps/10
+  steps: 20
+  random_start: true
+  norm: "l_inf"
+  targeted: false
+  restarts: 5
+
+pgd_very_strong:
+  eps: 0.031372549   # 8/255
+  alpha: 0.003137255 # eps/10
+  steps: 50
+  random_start: true
+  norm: "l_inf"
+  targeted: false
+  restarts: 10
+
+# AutoAttack configurations
+autoattack:
+  version: "standard"
+  norm: "Linf"  # Linf, L2
+  epsilons: [0.015686275, 0.031372549, 0.062745098]  # 4/255, 8/255, 16/255
+  attacks_to_run: ["apgd-ce", "apgd-t", "fab-t", "square"]
+  batch_size: 128
+  log_path: null
+
+# RobustBench integration (optional)
+robustbench:
+  dataset: "cifar10"
+  threat_model: "Linf"
+  model_name: null  # Will be set based on experiment
+
+# Evaluation metrics
+metrics:
+  clean_acc: true
+  robust_acc: true
+  per_class_acc: true
+  forget_class_acc: true
+  retain_class_acc: true
+  confidence: true
+  entropy: true
+
+# Evaluation data settings
+eval_data:
+  split: "test"
+  subset_size: null  # null = full dataset
+  samples_per_class: null  # null = all samples
+
+# Output settings
+output:
+  save_adv_examples: false
+  adv_examples_dir: "results/adv_examples"
+  detailed_logs: true
+  log_frequency: 100
+
+# GPU/memory settings
+compute:
+  eval_batch_size: 256
+  mixed_precision: true
+  num_workers: 4

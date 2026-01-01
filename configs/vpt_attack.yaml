@@ -1,0 +1,100 @@
+# VPT (Visual Prompt Tuning) resurrection attack configurations
+
+# VPT prompt configurations
+vpt_prompt:
+  # Prompt types
+  types:
+    - "prefix"      # Prepend prompt tokens to sequence
+    - "patch"       # Add visual patches overlay
+    - "adapter"     # Lightweight adapter layers
+
+  # Prompt dimensions
+  prompt_lengths: [5, 10, 20, 50]  # Number of prompt tokens
+
+  # Prompt initialization
+  init_strategies:
+    - "random"      # Random initialization
+    - "zeros"       # Zero initialization
+    - "class_mean"  # Initialize from class mean embeddings
+
+  # Prompt dropout
+  dropout: 0.1
+
+# Attack objectives
+attack_objectives:
+  # Maximize accuracy on forgotten class
+  resurrection:
+    name: "resurrection"
+    target_metric: "forget_acc"
+    maximize: true
+
+  # Minimize retain accuracy (optional destructive attack)
+  degradation:
+    name: "degradation"
+    target_metric: "retain_acc"
+    maximize: false
+
+# Training settings for VPT attacker
+vpt_training:
+  # Optimizer settings
+  optimizer: adam
+  lr: 1e-2
+  weight_decay: 0.0
+
+  # Training schedule
+  epochs: 100
+  batch_size: 64
+  eval_every: 10
+
+  # Learning rate schedule
+  scheduler: cosine
+  warmup_steps: 50
+  min_lr: 1e-4
+
+  # Early stopping
+  early_stopping:
+    patience: 20
+    monitor: "resurrection_success"
+    mode: "max"
+    min_delta: 0.005
+
+# Attack constraints
+constraints:
+  # Maximum perturbation budgets
+  l_inf_budget: 0.1  # Maximum L∞ perturbation (normalized)
+  l2_budget: 1.0     # Maximum L2 perturbation
+
+  # Prompt size limits
+  max_prompt_length: 50
+  max_patch_size: 32
+
+# Evaluation settings
+vpt_eval:
+  # Test on subset of data
+  eval_subset: 1000  # Number of samples to evaluate on
+
+  # Metrics to track
+  metrics:
+    - resurrection_success_rate
+    - clean_accuracy
+    - perturbation_norm
+    - prompt_similarity
+
+# Multi-step attack (VPT + adversarial)
+joint_attack:
+  # Combine VPT with adversarial perturbations
+  enabled: true
+  adv_steps: 10
+  adv_alpha: 0.01
+  adv_eps: 0.03
+
+# White-box vs black-box settings
+access_level:
+  white_box:
+    gradients: true
+    model_params: true
+
+  black_box:
+    gradients: false
+    model_params: false
+    query_budget: 10000
