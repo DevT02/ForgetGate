@@ -1,0 +1,88 @@
+# Backdoor trigger configurations for ForgetGate++
+# Tests whether machine unlearning can remove backdoor functionality
+
+# Patch trigger (classic BadNets)
+patch_trigger:
+  type: patch
+  patch_size: 4
+  position: bottom_right  # or 'top_left', 'center', or [h, w]
+  pattern: checkerboard  # or 'solid', 'random'
+  intensity: 1.0
+  target_class: 0  # airplane in CIFAR-10
+
+# Blend trigger (invisible watermark)
+blend_trigger:
+  type: blend
+  blend_ratio: 0.2
+  pattern_type: sine_wave  # or 'gaussian_noise', 'random'
+  target_class: 0
+
+# Invisible trigger (imperceptible perturbation)
+invisible_trigger:
+  type: invisible
+  epsilon: 0.05
+  frequency_band: high
+  target_class: 0
+
+# Semantic trigger (natural feature)
+semantic_trigger:
+  type: semantic
+  semantic_feature: stripe
+  position: top  # or 'middle', 'bottom'
+  target_class: 0
+
+# Poisoning configurations
+poisoning:
+  # Light poisoning (10% of training data)
+  light:
+    poison_ratio: 0.10
+    description: "Light backdoor poisoning"
+
+  # Medium poisoning (20% of training data)
+  medium:
+    poison_ratio: 0.20
+    description: "Medium backdoor poisoning"
+
+  # Heavy poisoning (30% of training data)
+  heavy:
+    poison_ratio: 0.30
+    description: "Heavy backdoor poisoning"
+
+# Backdoor unlearning settings
+backdoor_unlearning:
+  # Objectives for removing backdoor
+  objectives:
+    # Gradient ascent on triggered samples
+    gradient_ascent:
+      method: gradient_ascent
+      lr_multiplier: 1.0
+      epochs: 20
+
+    # KL divergence to uniform on triggered samples
+    kl_uniform:
+      method: kl_divergence
+      target_dist: uniform
+      temperature: 1.0
+      epochs: 20
+
+    # Saliency-based (SalUn) for backdoor removal
+    salun:
+      method: salun
+      saliency_threshold: 0.5
+      epochs: 30
+
+  # LoRA settings for backdoor unlearning
+  lora:
+    rank: 8
+    alpha: 16
+    target_modules: ["attn.qkv", "attn.proj", "mlp.fc1", "mlp.fc2"]
+    dropout: 0.05
+
+# VPT resurrection on backdoor
+vpt_resurrection:
+  prompt_type: prefix
+  prompt_length: 10
+  init_strategy: random
+  epochs: 50
+  lr: 1e-2
+  # Attack uses triggered samples to resurrect backdoor functionality

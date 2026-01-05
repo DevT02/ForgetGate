@@ -163,11 +163,43 @@ class UnlearningTrainer:
         self.scheduler = scheduler
         return scheduler
 
+    def _maybe_update_saliency_mask(self):
+        """Compute/update SalUn saliency masks if configured."""
+        if not hasattr(self.objective, "compute_saliency"):
+            return
+        if not hasattr(self.train_loader, "forget_loader"):
+            return
+
+        step_counter = getattr(self.objective, "step_counter", 0)
+        compute_every = getattr(self.objective, "compute_saliency_every", 1)
+        if self.objective.saliency_mask is None or (step_counter % compute_every == 0):
+            self.objective.compute_saliency(self.model, self.train_loader.forget_loader)
+
+        if hasattr(self.objective, "step_counter"):
+            self.objective.step_counter += 1
+
+    def _apply_saliency_mask(self):
+        """Mask gradients using SalUn saliency masks."""
+        saliency_mask = getattr(self.objective, "saliency_mask", None)
+        if not saliency_mask:
+            return
+
+        for name, param in self.model.named_parameters():
+            if param.grad is None:
+                continue
+            mask = saliency_mask.get(name)
+            if mask is None:
+                continue
+            param.grad.mul_(mask.to(device=param.grad.device, dtype=param.grad.dtype))
+
     def train_epoch(self) -> Dict[str, float]:
         """Train for one epoch"""
         self.model.train()
         epoch_loss = 0.0
         num_batches = 0
+
+        # SalUn: update saliency masks periodically using forget_loader
+        self._maybe_update_saliency_mask()
 
         pbar = tqdm(self.train_loader, desc=f"Epoch {self.current_epoch}")
         for batch_idx, batch in enumerate(pbar):
@@ -223,6 +255,7 @@ class UnlearningTrainer:
             # Backward pass
             self.optimizer.zero_grad()
             loss.backward()
+            self._apply_saliency_mask()
             self.optimizer.step()
 
             # Update statistics

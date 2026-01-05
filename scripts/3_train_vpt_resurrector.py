@@ -23,6 +23,46 @@ from src.utils import set_seed, ensure_dir, load_config, print_model_info, get_d
 from src.utils import log_experiment, create_experiment_log
 
 
+def load_oracle_model(experiment_suites: Dict, suite_config: Dict, device: torch.device, seed: int) -> nn.Module:
+    """Load oracle model (trained without forget class)"""
+    oracle_suite_name = suite_config.get('oracle_model_suite', '')
+    if not oracle_suite_name:
+        raise ValueError("No oracle_model_suite specified in VPT suite")
+
+    oracle_checkpoint = f"checkpoints/oracle/{oracle_suite_name}_seed_{seed}_final.pt"
+
+    if not os.path.exists(oracle_checkpoint):
+        raise FileNotFoundError(f"Oracle model checkpoint not found: {oracle_checkpoint}")
+
+    checkpoint = torch.load(oracle_checkpoint, map_location=device)
+
+    # Recreate oracle model using oracle suite config
+    data_config = load_config("configs/data.yaml")
+    model_config = load_config("configs/model.yaml")
+
+    oracle_suite_cfg = experiment_suites[oracle_suite_name]
+    dataset_name = oracle_suite_cfg["dataset"]
+    dataset_info = data_config[dataset_name]
+    model_type = oracle_suite_cfg["model"]
+
+    if model_type.startswith('vit'):
+        model_config_name = model_type.replace('vit_', '')
+        oracle_model = create_vit_model(
+            model_config['vit'][model_config_name],
+            num_classes=dataset_info['num_classes']
+        )
+    else:
+        oracle_model = create_cnn_model(
+            model_config['cnn'][model_type],
+            num_classes=dataset_info['num_classes']
+        )
+
+    oracle_model.load_state_dict(checkpoint['model_state_dict'])
+    oracle_model = oracle_model.to(device)
+
+    return oracle_model
+
+
 def load_unlearned_model(experiment_suites: Dict, suite_config: Dict, device: torch.device, seed: int) -> nn.Module:
     """Load unlearned model with LoRA adapter"""
     unlearned_suite_name = suite_config.get('unlearned_model_suite', '')
@@ -132,16 +172,22 @@ def main():
         'dropout': vpt_config_file['vpt_prompt'].get('dropout', 0.1)
     }
 
-    # Load unlearned model
-    unlearned_model = load_unlearned_model(experiment_suites, suite_config, device, args.seed)
-    print_model_info(unlearned_model, "Unlearned model")
+    # Determine if this is an oracle or unlearned suite
+    is_oracle = 'oracle_model_suite' in suite_config
+    is_unlearned = 'unlearned_model_suite' in suite_config
 
-    # Create data loader for forget class samples
-    data_manager = DataManager()
-
-    # Resolve dataset from suite chain (VPT -> unlearned -> base)
-    unlearned_suite_name = suite_config.get('unlearned_model_suite', '')
-    if unlearned_suite_name:
+    if is_oracle:
+        target_model = load_oracle_model(experiment_suites, suite_config, device, args.seed)
+        print_model_info(target_model, "Oracle model")
+        # Resolve dataset from oracle suite
+        oracle_suite_name = suite_config.get('oracle_model_suite', '')
+        oracle_suite_config = experiment_suites.get(oracle_suite_name, {})
+        dataset_name = oracle_suite_config.get('dataset', 'cifar10')
+    elif is_unlearned:
+        target_model = load_unlearned_model(experiment_suites, suite_config, device, args.seed)
+        print_model_info(target_model, "Unlearned model")
+        # Resolve dataset from suite chain (VPT -> unlearned -> base)
+        unlearned_suite_name = suite_config.get('unlearned_model_suite', '')
         unlearned_suite_config = experiment_suites.get(unlearned_suite_name, {})
         base_suite_name = unlearned_suite_config.get('base_model_suite', '')
         if base_suite_name:
@@ -150,7 +196,10 @@ def main():
         else:
             dataset_name = suite_config.get('dataset', 'cifar10')
     else:
-        dataset_name = suite_config.get('dataset', 'cifar10')
+        raise ValueError("Suite must specify either 'oracle_model_suite' or 'unlearned_model_suite'")
+
+    # Create data loader for forget class samples
+    data_manager = DataManager()
 
     # Load train dataset and split into forget/retain for training + validation
     train_dataset = data_manager.load_dataset(dataset_name, "train")
@@ -158,6 +207,22 @@ def main():
     forget_train, retain_train, forget_val, retain_val = create_forget_retain_splits(
         train_dataset, forget_class, train_ratio=0.8
     )
+
+    # K-shot sampling - limit training data if specified
+    k_shot = vpt_params.get('k_shot', None)
+    if k_shot is not None:
+        print(f"\nK-shot mode: Using only {k_shot} samples from forget class")
+        # Use torch.utils.data.Subset to limit samples
+        from torch.utils.data import Subset
+        import random
+
+        # Create deterministic k-shot subset
+        random.seed(args.seed)
+        indices = list(range(len(forget_train)))
+        random.shuffle(indices)
+        k_shot_indices = indices[:k_shot]
+        forget_train = Subset(forget_train, k_shot_indices)
+        print(f"Forget train samples: {len(forget_train)} (original: {len(indices)})")
 
     # Explicit loaders (preferred): avoids CPU caching/subsampling inside the attack
     forget_train_loader = DataLoader(
@@ -186,7 +251,7 @@ def main():
 
     # Create VPT resurrection attack
     vpt_attack = VPTResurrectionAttack(
-        target_model=unlearned_model,
+        target_model=target_model,
         forget_class=forget_class,
         prompt_config=vpt_config,
         device=device

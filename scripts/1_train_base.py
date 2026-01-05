@@ -11,8 +11,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 import yaml
+import torchvision
 from tqdm import tqdm
 
 from src.data import DataManager
@@ -215,18 +216,57 @@ def main():
     dataset_name = suite_config.get('dataset', 'cifar10')
     dataset_info = data_config[dataset_name]
 
-    # Create data loaders
-    train_loader = data_manager.get_dataloader(
-        dataset_name, "train",
-        batch_size=suite_config.get('training', {}).get('batch_size', 128),
-        use_pretrained=True
+    # Create data loaders (train/val split from training set to avoid test leakage)
+    training_config = suite_config.get('training', {})
+    batch_size = training_config.get('batch_size', 128)
+    num_workers = training_config.get('num_workers', 4)
+    val_ratio = training_config.get('val_ratio', 0.1)
+
+    full_train_dataset = data_manager.load_dataset(
+        dataset_name, "train", use_pretrained=True
     )
 
-    # Use test set as validation for now (simplified)
-    val_loader = data_manager.get_dataloader(
-        dataset_name, "test",
-        batch_size=suite_config.get('training', {}).get('batch_size', 128),
-        use_pretrained=True
+    n_total = len(full_train_dataset)
+    n_val = max(1, int(n_total * val_ratio))
+    n_train = n_total - n_val
+
+    generator = torch.Generator().manual_seed(args.seed)
+    perm = torch.randperm(n_total, generator=generator).tolist()
+    train_indices = perm[:n_train]
+    val_indices = perm[n_train:]
+
+    train_dataset = Subset(full_train_dataset, train_indices)
+
+    eval_transform = data_manager.get_transforms(dataset_name, split="test", use_pretrained=True)
+    if dataset_name == "cifar10":
+        val_full_dataset = torchvision.datasets.CIFAR10(
+            root=data_manager.data_dir, train=True, download=True, transform=eval_transform
+        )
+    elif dataset_name == "mnist":
+        val_full_dataset = torchvision.datasets.MNIST(
+            root=data_manager.data_dir, train=True, download=True, transform=eval_transform
+        )
+    else:
+        raise ValueError(f"Unsupported dataset for base training split: {dataset_name}")
+
+    val_dataset = Subset(val_full_dataset, val_indices)
+
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers,
+        pin_memory=True,
+        persistent_workers=(num_workers > 0)
+    )
+
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=True,
+        persistent_workers=(num_workers > 0)
     )
 
     print(f"Dataset: {dataset_name}")
@@ -256,7 +296,6 @@ def main():
     print_model_info(model, f"{model_type}")
 
     # Setup optimizer
-    training_config = suite_config.get('training', {})
     optimizer = optim.AdamW(
         model.parameters(),
         lr=training_config.get('lr', 1e-3),

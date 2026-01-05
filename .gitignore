@@ -19,11 +19,13 @@ checkpoints/
 *.ckpt
 *.safetensors
 # Results and logs
-results/logs/*.json
-results/logs/*.jsonl
+# Keep key experimental logs for reproducibility
+# Exclude exploratory/debug runs (prompt ablations, k=1,5)
+results/logs/*prompt*.jsonl
+results/logs/*_1shot_*.jsonl
+results/logs/*_5shot_*.jsonl
 results/analysis/*.txt
 results/analysis/*.md
 !results/logs/.gitkeep
 !results/analysis/.gitkeep
 .DS_Store
-Thumbs.db

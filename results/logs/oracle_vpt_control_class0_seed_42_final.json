@@ -1,0 +1,12 @@
+{
+  "oracle_suite": "oracle_vit_cifar10_forget0",
+  "target_class": 0,
+  "seed": 42,
+  "vpt_epochs": 50,
+  "vpt_lr": 0.01,
+  "oracle_acc": 0.0,
+  "vpt_final_acc": 99.3,
+  "delta_acc": 99.3,
+  "verdict": "INVALID",
+  "interpretation": "Oracle VPT control to validate resurrection vs relearning"
+}

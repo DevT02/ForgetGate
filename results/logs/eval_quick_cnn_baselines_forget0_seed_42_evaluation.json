@@ -1,0 +1,39 @@
+{
+  "base_cnn_cifar10": {
+    "clean": {
+      "overall_acc": 0.9552,
+      "forget_acc": 0.954,
+      "retain_acc": 0.9553333333333334,
+      "forget_samples": 1000,
+      "retain_samples": 9000,
+      "total_samples": 10000,
+      "attack_type": "clean",
+      "mean_confidence": 0.9830425977706909,
+      "correct_confidence": 0.9903587102890015,
+      "incorrect_confidence": 0.8270530700683594,
+      "forget_confidence": 0.9845815300941467,
+      "forget_correct_confidence": 0.9918580651283264,
+      "mean_entropy": 0.04415468871593475,
+      "max_entropy": 1.7436439990997314,
+      "min_entropy": 1.43812458075733e-20
+    },
+    "pgd_linf_8": {
+      "overall_acc": 0.0,
+      "forget_acc": 0.0,
+      "retain_acc": 0.0,
+      "forget_samples": 1000,
+      "retain_samples": 9000,
+      "total_samples": 10000,
+      "attack_type": "pgd",
+      "mean_confidence": 1.0,
+      "correct_confidence": 0.0,
+      "incorrect_confidence": 1.0,
+      "forget_confidence": 1.0,
+      "forget_correct_confidence": 0.0,
+      "mean_entropy": 5.973427050776081e-07,
+      "max_entropy": 0.003929945640265942,
+      "min_entropy": -0.0,
+      "robust_retain_acc": 0.0
+    }
+  }
+}

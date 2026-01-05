@@ -459,6 +459,8 @@ def create_unlearning_objective(objective_name: str, forget_class: int,
         kwargs['target_weight'] = kwargs.pop('target_class_weight')
     if 'retain_class_weight' in kwargs:
         kwargs['retain_weight'] = kwargs.pop('retain_class_weight')
+    # ce_ascent config includes a boolean flag that's implicit in the class
+    kwargs.pop('ascent', None)
 
     if objective_name == "ce_ascent":
         return CrossEntropyAscent(forget_class, num_classes, **kwargs)

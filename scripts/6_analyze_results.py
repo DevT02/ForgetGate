@@ -52,7 +52,7 @@ def aggregate_metrics(all_results: Dict) -> Dict:
         for metric_name, values in metrics.items():
             if len(values) > 0:
                 mean = np.mean(values) * 100  # Convert to percentage
-                std = np.std(values) * 100
+                std = np.std(values, ddof=1) * 100 if len(values) > 1 else 0
                 aggregated[model_name][metric_name] = {
                     'mean': mean,
                     'std': std,

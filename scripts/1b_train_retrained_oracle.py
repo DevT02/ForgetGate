@@ -116,9 +116,9 @@ def main():
     print(f"Seed: {args.seed}")
     print(f"Device: {device}")
 
-    # Get oracle parameters
+    # Get oracle parameters (prefer top-level forget_class; fall back to oracle block)
     oracle_params = suite_config.get('oracle', {})
-    forget_class = oracle_params.get('forget_class', 0)
+    forget_class = suite_config.get('forget_class', oracle_params.get('forget_class', 0))
 
     print(f"Oracle mode: Train WITHOUT class {forget_class}")
     print("This represents the gold standard for perfect unlearning")
