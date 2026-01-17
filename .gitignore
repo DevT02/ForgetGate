@@ -29,3 +29,8 @@ results/analysis/*.md
 !results/logs/.gitkeep
 !results/analysis/.gitkeep
 .DS_Store
+!checkpoints/
+!checkpoints/**
+!*.pth
+!*.pt
+!*.safetensors
