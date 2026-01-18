@@ -1,0 +1,91 @@
+{
+  "forget_class": 0,
+  "prompt_config": {
+    "prompt_type": "prefix",
+    "prompt_length": 10,
+    "init_strategy": "random",
+    "dropout": 0.1
+  },
+  "attack_history": [
+    {
+      "train_loss": 1.7515058517456055,
+      "loss_forget": 1.743740439414978,
+      "loss_retain": 0.00776540907099843,
+      "resurrection_acc": 0.003,
+      "resurrection_loss": 2.840154230594635,
+      "epoch": 0
+    },
+    {
+      "train_loss": 1.7441214323043823,
+      "loss_forget": 1.7393198013305664,
+      "loss_retain": 0.004801612347364426,
+      "resurrection_acc": 0.001,
+      "resurrection_loss": 2.8158990144729614,
+      "epoch": 10
+    },
+    {
+      "train_loss": 1.846792221069336,
+      "loss_forget": 1.8368561267852783,
+      "loss_retain": 0.009936072863638401,
+      "resurrection_acc": 0.002,
+      "resurrection_loss": 2.8334547877311707,
+      "epoch": 20
+    },
+    {
+      "train_loss": 1.7074395418167114,
+      "loss_forget": 1.7019180059432983,
+      "loss_retain": 0.005521493963897228,
+      "resurrection_acc": 0.005,
+      "resurrection_loss": 2.834421753883362,
+      "epoch": 30
+    },
+    {
+      "train_loss": 1.8453688621520996,
+      "loss_forget": 1.838304877281189,
+      "loss_retain": 0.00706398393958807,
+      "resurrection_acc": 0.002,
+      "resurrection_loss": 2.804847300052643,
+      "epoch": 40
+    },
+    {
+      "train_loss": 1.910452961921692,
+      "loss_forget": 1.905662178993225,
+      "loss_retain": 0.004790838807821274,
+      "resurrection_acc": 0.002,
+      "resurrection_loss": 2.7729415893554688,
+      "epoch": 50
+    },
+    {
+      "train_loss": 1.8847551345825195,
+      "loss_forget": 1.8777416944503784,
+      "loss_retain": 0.007013383321464062,
+      "resurrection_acc": 0.005,
+      "resurrection_loss": 2.813101351261139,
+      "epoch": 60
+    },
+    {
+      "train_loss": 2.0069212913513184,
+      "loss_forget": 1.9950459003448486,
+      "loss_retain": 0.011875415220856667,
+      "resurrection_acc": 0.001,
+      "resurrection_loss": 2.824633479118347,
+      "epoch": 70
+    },
+    {
+      "train_loss": 1.6247594356536865,
+      "loss_forget": 1.6095672845840454,
+      "loss_retain": 0.015192111022770405,
+      "resurrection_acc": 0.004,
+      "resurrection_loss": 2.7785972952842712,
+      "epoch": 80
+    },
+    {
+      "train_loss": 1.397081971168518,
+      "loss_forget": 1.3722481727600098,
+      "loss_retain": 0.024833815172314644,
+      "resurrection_acc": 0.001,
+      "resurrection_loss": 2.7709410786628723,
+      "epoch": 90
+    }
+  ]
+}
