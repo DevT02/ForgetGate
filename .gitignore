@@ -13,11 +13,6 @@ build/
 data/
 datasets/
 
-checkpoints/
-*.pth
-*.pt
-*.ckpt
-*.safetensors
 # Results and logs
 # Keep key experimental logs for reproducibility
 # Exclude exploratory/debug runs (prompt ablations, k=1,5)
