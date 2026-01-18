@@ -22,7 +22,7 @@ Interpretation:
     [OK] Proves resurrection is REAL
     [OK] Claims are VALID
 
-This is the experiment GPT-4 said was missing.
+This is the experiment that verifies resurrection vs relearning.
 """
 
 import sys
@@ -151,8 +151,8 @@ def main():
             pretrained=False
         ).to(device)
     elif model_str.startswith('resnet'):
-        from src.models.cnn import ResNetWrapper
-        model = ResNetWrapper(
+        from src.models.cnn import CNNWrapper
+        model = CNNWrapper(
             model_name=model_str,
             num_classes=num_classes,
             pretrained=False

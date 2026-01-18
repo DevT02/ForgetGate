@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, ConcatDataset, ConcatDataset
+from torch.utils.data import DataLoader, ConcatDataset
 from typing import Dict
 import yaml
 
@@ -130,6 +130,8 @@ def main():
                        help="Random seed")
     parser.add_argument("--device", type=str, default=None,
                        help="Device to use")
+    parser.add_argument("--prompt-length", type=int, default=None,
+                       help="Override prompt length from config (for ablations)")
 
     args = parser.parse_args()
 
@@ -158,6 +160,8 @@ def main():
     vpt_params = suite_config.get('vpt_attack', {})
     forget_class = vpt_params.get('target_class', 0)
     prompt_length = vpt_params.get('prompt_length', 5)
+    if args.prompt_length is not None:
+        prompt_length = args.prompt_length
     init_strategy = vpt_params.get('init_strategy', 'random')
 
     print(f"Target class: {forget_class}")
@@ -287,11 +291,15 @@ def main():
     )
 
     # Save trained VPT prompt
-    prompt_save_path = f"checkpoints/vpt_resurrector/{args.suite}_seed_{args.seed}"
+    suite_name_for_io = args.suite
+    if args.prompt_length is not None:
+        suite_name_for_io = f"{args.suite}_prompt{prompt_length}"
+
+    prompt_save_path = f"checkpoints/vpt_resurrector/{suite_name_for_io}_seed_{args.seed}"
     vpt_attack.save_attack_prompt(prompt_save_path)
 
     # Log results
-    log_path = create_experiment_log(f"{args.suite}_seed_{args.seed}", suite_config)
+    log_path = create_experiment_log(f"{suite_name_for_io}_seed_{args.seed}", suite_config)
 
     for entry in attack_history:
         log_experiment(log_path, entry)

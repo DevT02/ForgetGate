@@ -22,6 +22,7 @@ from src.models.cnn import create_cnn_model
 from src.attacks.pgd import PGDAttack
 from src.utils import set_seed, ensure_dir, load_config, print_model_info, get_device
 from src.utils import AverageMeter, ProgressMeter, log_experiment, create_experiment_log
+from src.models.normalize import create_imagenet_normalizer
 
 
 def train_epoch(model, train_loader, optimizer, scheduler, device, epoch):
@@ -222,8 +223,15 @@ def main():
     num_workers = training_config.get('num_workers', 4)
     val_ratio = training_config.get('val_ratio', 0.1)
 
+    # Check if adversarial training is enabled
+    adv_train_config = training_config.get('adv_train', {})
+    use_adv_train = adv_train_config.get('enabled', False)
+
     full_train_dataset = data_manager.load_dataset(
-        dataset_name, "train", use_pretrained=True
+        dataset_name,
+        "train",
+        use_pretrained=True,
+        apply_imagenet_norm=not use_adv_train
     )
 
     n_total = len(full_train_dataset)
@@ -237,7 +245,12 @@ def main():
 
     train_dataset = Subset(full_train_dataset, train_indices)
 
-    eval_transform = data_manager.get_transforms(dataset_name, split="test", use_pretrained=True)
+    eval_transform = data_manager.get_transforms(
+        dataset_name,
+        split="test",
+        use_pretrained=True,
+        apply_imagenet_norm=not use_adv_train
+    )
     if dataset_name == "cifar10":
         val_full_dataset = torchvision.datasets.CIFAR10(
             root=data_manager.data_dir, train=True, download=True, transform=eval_transform
@@ -280,24 +293,31 @@ def main():
         # Extract model size from name (tiny, small, base, etc.)
         model_config_name = model_type.split('_')[1]
         model_config_key = f"vit_{model_config_name}"
-        model = create_vit_model(
+        base_model = create_vit_model(
             model_config['vit'][model_config_name],
             num_classes=dataset_info['num_classes']
         )
     else:
         # CNN model
         model_config_key = model_type
-        model = create_cnn_model(
+        base_model = create_cnn_model(
             model_config['cnn'][model_config_key],
             num_classes=dataset_info['num_classes']
         )
 
-    model = model.to(device)
-    print_model_info(model, f"{model_type}")
+    base_model = base_model.to(device)
+    print_model_info(base_model, f"{model_type}")
+
+    # For adversarial training, keep inputs in [0,1] and normalize inside the model
+    if use_adv_train:
+        norm_layer = create_imagenet_normalizer().to(device)
+        model_for_train = nn.Sequential(norm_layer, base_model).to(device)
+    else:
+        model_for_train = base_model
 
     # Setup optimizer
     optimizer = optim.AdamW(
-        model.parameters(),
+        base_model.parameters(),
         lr=training_config.get('lr', 1e-3),
         weight_decay=training_config.get('weight_decay', 0.01)
     )
@@ -313,10 +333,6 @@ def main():
     best_val_acc = 0.0
     log_path = create_experiment_log(f"{args.suite}_seed_{args.seed}", suite_config)
 
-    # Check if adversarial training is enabled
-    adv_train_config = training_config.get('adv_train', {})
-    use_adv_train = adv_train_config.get('enabled', False)
-
     if use_adv_train:
         print("\n[Adversarial Training ENABLED]")
         print(f"   eps={adv_train_config.get('eps', 8/255):.6f}, "
@@ -331,15 +347,15 @@ def main():
         # Train (adversarial or standard)
         if use_adv_train:
             train_metrics = train_epoch_adversarial(
-                model, train_loader, optimizer, scheduler, device, epoch, adv_train_config
+                model_for_train, train_loader, optimizer, scheduler, device, epoch, adv_train_config
             )
         else:
             train_metrics = train_epoch(
-                model, train_loader, optimizer, scheduler, device, epoch
+                model_for_train, train_loader, optimizer, scheduler, device, epoch
             )
 
         # Validate
-        val_metrics = validate(model, val_loader, device)
+        val_metrics = validate(model_for_train, val_loader, device)
 
         # Combine metrics
         epoch_metrics = {
@@ -355,7 +371,7 @@ def main():
         if val_metrics['val_acc'] > best_val_acc:
             best_val_acc = val_metrics['val_acc']
             save_path = f"checkpoints/base/{args.suite}_seed_{args.seed}_best.pt"
-            save_checkpoint(model, optimizer, scheduler, epoch, save_path)
+            save_checkpoint(base_model, optimizer, scheduler, epoch, save_path)
 
         # Print progress
         if use_adv_train and 'train_adv_acc' in train_metrics:
@@ -371,7 +387,7 @@ def main():
 
     # Save final model
     final_save_path = f"checkpoints/base/{args.suite}_seed_{args.seed}_final.pt"
-    save_checkpoint(model, optimizer, scheduler, max_epochs-1, final_save_path)
+    save_checkpoint(base_model, optimizer, scheduler, max_epochs-1, final_save_path)
 
     print("\nTraining complete!")
     print(f"Best validation accuracy: {best_val_acc:.4f}")

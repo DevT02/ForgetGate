@@ -200,6 +200,8 @@ ForgetGate/
 
 Full-data VPT runs reach near-complete recovery in results/logs/vpt_resurrect_*_seed_*.jsonl. To reproduce test-set VPT/PGD metrics, run: `python scripts/4_adv_evaluate.py --suite eval_full_vit_cifar10_forget0`.
 
+**Oracle control (full-data)**: VPT on the oracle baseline also reaches ~100% recovery with full data, indicating the full-data attack is effectively relearning rather than accessing residual knowledge. See `results/logs/oracle_vpt_control_class0_seed_42.jsonl` and `results/logs/oracle_vpt_control_class0_seed_123.jsonl`.
+
 ## Results Provenance
 
 - Seeds: 42, 123 for tables reported below.
@@ -213,6 +215,7 @@ Full-data VPT runs reach near-complete recovery in results/logs/vpt_resurrect_*_
 
 - Tables: `results/analysis/comparison_table_markdown.txt`, `results/analysis/comparison_table_latex.txt`
 - Plots: `results/analysis/kshot_analysis.png`, `results/analysis/learning_curves_kshot.png`
+- Reports: `results/analysis/sample_efficiency_gap.txt`
 - Logs: `results/logs/*_evaluation.json` (test-set metrics), `results/logs/*.jsonl` (training curves)
 
 ---
@@ -237,6 +240,12 @@ Attacker capabilities assumed:
 - Attacker modes: compare max-recovery (lambda_retain=0) vs stealth (lambda_retain>0) prompts.
 - Deterministic validation: evaluate k-shot recovery on a fixed eval-transform split to reduce noise.
 - Broader coverage: more seeds and multiple forget classes to confirm gap consistency.
+
+## Next Steps (Recommended)
+
+1) **Sample-efficiency gap (already computed)**: use `results/analysis/sample_efficiency_gap.txt` to report the smallest k needed to reach 1%/2%/5% recovery for oracle vs unlearned. This reframes the audit as data-efficiency rather than absolute recovery.
+2) **Prompt-capacity ablation (k-shot)**: run prompt lengths 1/2/5/10 and plot the oracle gap across prompt sizes to show the residual gap is not a capacity artifact.
+3) **Class-wise oracle gap**: repeat the k-shot evaluation on forget classes 1/2/5/9 to check if the gap generalizes across classes.
 
 ---
 

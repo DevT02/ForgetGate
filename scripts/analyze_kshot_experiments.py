@@ -184,7 +184,7 @@ def analyze_kshot_sample_efficiency(results_dir, seeds):
         print("\n[OK] CONCLUSION: Oracle and Unlearned recovery are NEARLY IDENTICAL")
         print("  -> VPT 'resurrection' is mostly just fast relearning")
         print("  -> LoRA-unlearning provides MINIMAL security benefit")
-        print("  -> 0% forget accuracy ≠ meaningful security guarantee")
+        print("  -> 0% forget accuracy != meaningful security guarantee")
         print("\n  This VALIDATES the 'audit' framing of your paper!")
     elif avg_gap > 5.0:
         print("\n! CONCLUSION: Unlearned models show HIGHER recovery than Oracle")
@@ -195,6 +195,64 @@ def analyze_kshot_sample_efficiency(results_dir, seeds):
         print("  -> Some residual accessibility, but not dramatic")
 
     return oracle_results, kl_results, salun_results, scrub_results
+
+
+def generate_sample_efficiency_report(results_dir, oracle_kshot, kl_kshot,
+                                      thresholds=(1.0, 2.0, 5.0, 10.0)):
+    """Generate a sample-efficiency report: smallest k reaching each recovery threshold."""
+    results_dir = Path(results_dir)
+
+    def _get_mean(d):
+        if not isinstance(d, dict):
+            return None
+        if 'mean' in d:
+            return float(d['mean'])
+        if 'final_acc' in d:
+            return float(d['final_acc'])
+        return None
+
+    kshots = sorted(set(list(oracle_kshot.keys()) + list(kl_kshot.keys())))
+
+    def _first_k_at_threshold(res_dict, threshold):
+        for k in kshots:
+            mean = _get_mean(res_dict.get(k, {}))
+            if mean is None:
+                continue
+            if mean >= threshold:
+                return k, mean
+        return None, None
+
+    lines = []
+    lines.append("# Sample-Efficiency Thresholds (Recovery@k)")
+    lines.append("")
+    lines.append("Smallest k such that mean Recovery@k >= threshold (percent).")
+    lines.append("")
+    lines.append("| Threshold (%) | Oracle k* | Oracle Recovery@k | Unlearned (KL) k* | Unlearned Recovery@k | k-Advantage (Oracle - Unlearned) |")
+    lines.append("|---|---|---|---|---|---|")
+
+    for t in thresholds:
+        ok, oacc = _first_k_at_threshold(oracle_kshot, t)
+        kk, kacc = _first_k_at_threshold(kl_kshot, t)
+        ok_str = str(ok) if ok is not None else "not reached"
+        kk_str = str(kk) if kk is not None else "not reached"
+        oacc_str = f"{oacc:.2f}%" if oacc is not None else "N/A"
+        kacc_str = f"{kacc:.2f}%" if kacc is not None else "N/A"
+        if ok is not None and kk is not None:
+            adv = ok - kk
+            adv_str = f"{adv:+d}"
+        else:
+            adv_str = "N/A"
+        lines.append(f"| {t:.1f} | {ok_str} | {oacc_str} | {kk_str} | {kacc_str} | {adv_str} |")
+
+    output_file = results_dir.parent / "analysis" / "sample_efficiency_gap.txt"
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    output_file.write_text("\n".join(lines))
+
+    print("\n" + "=" * 80)
+    print("SAMPLE-EFFICIENCY THRESHOLD REPORT")
+    print("=" * 80)
+    print("\n".join(lines))
+    print(f"\n[OK] Saved sample-efficiency report to {output_file}")
 
 
 def analyze_prompt_capacity(results_dir, seeds):
@@ -469,6 +527,7 @@ def main():
     if oracle_kshot and kl_kshot:
         generate_plots(results_dir, oracle_kshot, kl_kshot, salun_kshot, scrub_kshot,
                       oracle_prompt, kl_prompt, curve_seed)
+        generate_sample_efficiency_report(results_dir, oracle_kshot, kl_kshot)
     else:
         print("\n[WARNING] WARNING: Insufficient data for plots")
         print(f"  Oracle k-shot results: {len(oracle_kshot)}")
@@ -483,7 +542,7 @@ def main():
     print("  - results/analysis/learning_curves_kshot.png")
     print("\nUse these plots in your paper to demonstrate:")
     print("  1. Oracle-normalized recovery difficulty")
-    print("  2. 0% forget accuracy ≠ security guarantee")
+    print("  2. 0% forget accuracy != security guarantee")
     print("  3. LoRA-unlearning provides minimal benefit over never training")
     print("="*80)
 

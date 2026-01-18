@@ -784,6 +784,129 @@ vpt_resurrect_kl_forget0_10shot:
     eval_every: 10
   seeds: [42, 123, 456]
 
+# ========================================================================
+# K-SHOT (10-shot) Oracle vs Unlearned for other forget classes
+# ========================================================================
+vpt_oracle_vit_cifar10_forget1_10shot:
+  oracle_model_suite: oracle_vit_cifar10_forget1
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 1
+    k_shot: 10
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_oracle_vit_cifar10_forget2_10shot:
+  oracle_model_suite: oracle_vit_cifar10_forget2
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 2
+    k_shot: 10
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_oracle_vit_cifar10_forget5_10shot:
+  oracle_model_suite: oracle_vit_cifar10_forget5
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 5
+    k_shot: 10
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_oracle_vit_cifar10_forget9_10shot:
+  oracle_model_suite: oracle_vit_cifar10_forget9
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 9
+    k_shot: 10
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_resurrect_kl_forget1_10shot:
+  unlearned_model_suite: unlearn_kl_vit_cifar10_forget1
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 1
+    k_shot: 10
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_resurrect_kl_forget2_10shot:
+  unlearned_model_suite: unlearn_kl_vit_cifar10_forget2
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 2
+    k_shot: 10
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_resurrect_kl_forget5_10shot:
+  unlearned_model_suite: unlearn_kl_vit_cifar10_forget5
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 5
+    k_shot: 10
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_resurrect_kl_forget9_10shot:
+  unlearned_model_suite: unlearn_kl_vit_cifar10_forget9
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 9
+    k_shot: 10
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
 vpt_resurrect_kl_forget0_25shot:
   unlearned_model_suite: unlearn_kl_vit_cifar10_forget0
   vpt_attack:
@@ -861,129 +984,6 @@ eval_adversarial_complete_forget0:
       - retain_acc
       - resurrection_success_rate  # For VPT models
   seeds: [42]
-# ========================================================================
-# FORGETGATE++ EXPERIMENTS: Backdoor Resurrection Attacks
-# ========================================================================
-# Novel contributions:
-# 1. Test if unlearning can remove backdoor triggers
-# 2. Test if VPT can resurrect backdoor functionality
-# 3. Derive theoretical bounds on resurrection success
-
-# Backdoor training experiments
-
-# Train model with patch backdoor
-backdoor_patch_vit_cifar10:
-  model:
-    type: vit
-    name: vit_tiny_patch16_224
-    pretrained: true
-  dataset: cifar10
-  backdoor:
-    dataset: cifar10
-    trigger:
-      type: patch
-      patch_size: 4
-      position: bottom_right
-      pattern: checkerboard
-      target_class: 0  # airplane
-    poison_ratio: 0.1  # 10% of training data poisoned
-  training:
-    epochs: 50
-    batch_size: 128
-    lr: 1e-3
-    weight_decay: 1e-4
-  seeds: [42, 123, 456]
-
-# Train model with blend backdoor
-backdoor_blend_vit_cifar10:
-  model:
-    type: vit
-    name: vit_tiny_patch16_224
-    pretrained: true
-  dataset: cifar10
-  backdoor:
-    dataset: cifar10
-    trigger:
-      type: blend
-      blend_ratio: 0.2
-      pattern_type: sine_wave
-      target_class: 0
-    poison_ratio: 0.1
-  training:
-    epochs: 50
-    batch_size: 128
-    lr: 1e-3
-    weight_decay: 1e-4
-  seeds: [42, 123, 456]
-
-# Backdoor unlearning experiments (remove backdoor via unlearning)
-
-# Unlearn patch backdoor with SalUn
-unlearn_backdoor_patch_salun:
-  base_model_suite: backdoor_patch_vit_cifar10
-  unlearning:
-    method: lora
-    objective: salun
-    forget_class: 0  # Remove class 0 backdoor
-    lora_rank: 8
-    epochs: 30
-    lr: 1e-3
-  seeds: [42, 123, 456]
-
-# Unlearn patch backdoor with SCRUB
-unlearn_backdoor_patch_scrub:
-  base_model_suite: backdoor_patch_vit_cifar10
-  unlearning:
-    method: lora
-    objective: scrub
-    forget_class: 0
-    lora_rank: 8
-    epochs: 30
-    lr: 1e-3
-  seeds: [42, 123, 456]
-
-# VPT resurrection on backdoor-unlearned models
-
-# Resurrect patch backdoor after SalUn unlearning
-vpt_resurrect_backdoor_salun:
-  unlearned_model_suite: unlearn_backdoor_patch_salun
-  vpt_attack:
-    prompt_type: prefix
-    prompt_length: 10
-    init_strategy: random
-    epochs: 50
-    lr: 1e-2
-    target_class: 0  # Resurrect airplane backdoor
-  seeds: [42, 123, 456]
-
-# Resurrect patch backdoor after SCRUB unlearning
-vpt_resurrect_backdoor_scrub:
-  unlearned_model_suite: unlearn_backdoor_patch_scrub
-  vpt_attack:
-    prompt_type: prefix
-    prompt_length: 10
-    init_strategy: random
-    epochs: 50
-    lr: 1e-2
-    target_class: 0
-  seeds: [42, 123, 456]
-
-# Comprehensive backdoor evaluation
-eval_backdoor_resurrection:
-  model_suites:
-    - backdoor_patch_vit_cifar10  # Original backdoored model
-    - unlearn_backdoor_patch_salun  # After unlearning
-    - vpt_resurrect_backdoor_salun  # After VPT resurrection
-  evaluation:
-    attacks:
-      - clean  # Clean test accuracy
-      - backdoor_trigger  # Attack success rate with trigger
-    metrics:
-      - clean_acc  # Main task performance
-      - backdoor_asr  # Attack success rate
-      - resurrection_asr  # Resurrected backdoor success
-  seeds: [42, 123, 456]
-
 
 
 # ========================================================================

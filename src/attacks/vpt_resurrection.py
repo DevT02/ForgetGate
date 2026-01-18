@@ -430,14 +430,16 @@ class VPTResurrectionAttack:
         return output
 
     def save_attack_prompt(self, save_path: str):
-        """Save trained VPT prompt"""
+        """Save trained VPT prompt (all trainable params)"""
         os.makedirs(save_path, exist_ok=True)
 
-        # Save prompt parameters
+        # Save only trainable parameters (covers prefix, patch, and CNN prompts)
         prompt_state = {}
+        prompt_param_names = []
         for name, param in self.vpt_model.named_parameters():
-            if 'prompt' in name.lower():
-                prompt_state[name] = param.cpu()
+            if param.requires_grad:
+                prompt_state[name] = param.detach().cpu()
+                prompt_param_names.append(name)
 
         torch.save(prompt_state, os.path.join(save_path, "vpt_prompt.pt"))
 
@@ -445,7 +447,8 @@ class VPTResurrectionAttack:
         attack_info = {
             'forget_class': self.forget_class,
             'prompt_config': self.prompt_config,
-            'attack_history': self.attack_history
+            'attack_history': self.attack_history,
+            'prompt_param_names': prompt_param_names,
         }
 
         with open(os.path.join(save_path, "attack_info.json"), 'w') as f:
@@ -456,7 +459,7 @@ class VPTResurrectionAttack:
         prompt_path = os.path.join(load_path, "vpt_prompt.pt")
 
         if os.path.exists(prompt_path):
-            prompt_state = torch.load(prompt_path)
+            prompt_state = torch.load(prompt_path, map_location=self.device)
             self.vpt_model.load_state_dict(prompt_state, strict=False)
 
         # Load attack info
@@ -468,10 +471,7 @@ class VPTResurrectionAttack:
 
     def get_prompt_statistics(self) -> Dict[str, float]:
         """Get statistics about the trained prompt"""
-        prompt_params = []
-        for name, param in self.vpt_model.named_parameters():
-            if 'prompt' in name.lower():
-                prompt_params.append(param)
+        prompt_params = [param for _, param in self.vpt_model.named_parameters() if param.requires_grad]
 
         if not prompt_params:
             return {}

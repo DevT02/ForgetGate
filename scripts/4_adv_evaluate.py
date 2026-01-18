@@ -138,7 +138,13 @@ def load_model_for_evaluation(
 
     elif 'unlearn' in model_suite_name:
         # Unlearned model - load base weights + LoRA adapter
-        base_suite = model_suites[0]  # First suite is always base
+        unlearned_suite_config = experiment_suites.get(model_suite_name, {})
+        base_suite = unlearned_suite_config.get("base_model_suite", None)
+        if not base_suite:
+            # Fallback to first suite when base_model_suite is not available
+            base_suite = model_suites[0]
+            print(f"Warning: No base_model_suite in {model_suite_name}; "
+                  f"falling back to first model_suites entry: {base_suite}")
 
         base_checkpoint = f"checkpoints/base/{base_suite}_seed_{seed}_final.pt"
         if not os.path.exists(base_checkpoint):
