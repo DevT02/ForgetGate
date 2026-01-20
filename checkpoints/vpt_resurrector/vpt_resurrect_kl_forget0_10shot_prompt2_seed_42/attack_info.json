@@ -1,3 +1,94 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:4e28b2f87e14a0d5c1496f27fbdcc7c656811a982b66250a0e3a05d174f8903d
-size 2560
+{
+  "forget_class": 0,
+  "prompt_config": {
+    "prompt_type": "prefix",
+    "prompt_length": 2,
+    "init_strategy": "random",
+    "dropout": 0.1
+  },
+  "attack_history": [
+    {
+      "train_loss": 4.183115005493164,
+      "loss_forget": 4.1807451248168945,
+      "loss_retain": 0.002369773108512163,
+      "resurrection_acc": 0.122,
+      "resurrection_loss": 3.125884771347046,
+      "epoch": 0
+    },
+    {
+      "train_loss": 2.9788200855255127,
+      "loss_forget": 2.966478109359741,
+      "loss_retain": 0.012341865338385105,
+      "resurrection_acc": 0.115,
+      "resurrection_loss": 3.123186707496643,
+      "epoch": 10
+    },
+    {
+      "train_loss": 2.860431432723999,
+      "loss_forget": 2.855274200439453,
+      "loss_retain": 0.00515715079382062,
+      "resurrection_acc": 0.124,
+      "resurrection_loss": 3.0688586831092834,
+      "epoch": 20
+    },
+    {
+      "train_loss": 2.900545358657837,
+      "loss_forget": 2.8948323726654053,
+      "loss_retain": 0.0057129100896418095,
+      "resurrection_acc": 0.124,
+      "resurrection_loss": 3.095619261264801,
+      "epoch": 30
+    },
+    {
+      "train_loss": 3.38783860206604,
+      "loss_forget": 3.3808047771453857,
+      "loss_retain": 0.007033912930637598,
+      "resurrection_acc": 0.13,
+      "resurrection_loss": 3.0292834043502808,
+      "epoch": 40
+    },
+    {
+      "train_loss": 2.937288999557495,
+      "loss_forget": 2.9339261054992676,
+      "loss_retain": 0.0033628270030021667,
+      "resurrection_acc": 0.116,
+      "resurrection_loss": 3.085606634616852,
+      "epoch": 50
+    },
+    {
+      "train_loss": 3.171168565750122,
+      "loss_forget": 3.1631851196289062,
+      "loss_retain": 0.007983405143022537,
+      "resurrection_acc": 0.138,
+      "resurrection_loss": 2.963891565799713,
+      "epoch": 60
+    },
+    {
+      "train_loss": 4.705469131469727,
+      "loss_forget": 4.689028263092041,
+      "loss_retain": 0.0164407417178154,
+      "resurrection_acc": 0.126,
+      "resurrection_loss": 2.9803789854049683,
+      "epoch": 70
+    },
+    {
+      "train_loss": 3.414968490600586,
+      "loss_forget": 3.4128551483154297,
+      "loss_retain": 0.002113382564857602,
+      "resurrection_acc": 0.133,
+      "resurrection_loss": 2.9400025010108948,
+      "epoch": 80
+    },
+    {
+      "train_loss": 4.178496837615967,
+      "loss_forget": 4.170386791229248,
+      "loss_retain": 0.008109942078590393,
+      "resurrection_acc": 0.146,
+      "resurrection_loss": 2.850795865058899,
+      "epoch": 90
+    }
+  ],
+  "prompt_param_names": [
+    "prompt_embeddings"
+  ]
+}

@@ -52,6 +52,30 @@ oracle_vit_cifar10_forget2:
     pretrained: true
   seeds: [42, 123, 456]
 
+oracle_vit_cifar10_forget5:
+  model: vit_tiny
+  dataset: cifar10
+  forget_class: 5
+  training:
+    epochs: 100
+    batch_size: 128
+    lr: 1e-3
+    weight_decay: 0.01
+    pretrained: true
+  seeds: [42, 123, 456]
+
+oracle_vit_cifar10_forget9:
+  model: vit_tiny
+  dataset: cifar10
+  forget_class: 9
+  training:
+    epochs: 100
+    batch_size: 128
+    lr: 1e-3
+    weight_decay: 0.01
+    pretrained: true
+  seeds: [42, 123, 456]
+
 # Base model training suites
 base_vit_cifar10:
   model: vit_tiny
@@ -157,6 +181,50 @@ unlearn_kl_vit_cifar10_forget0:
     method: lora
     objective: uniform_kl
     forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+unlearn_kl_vit_cifar10_forget1:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: uniform_kl
+    forget_class: 1
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+unlearn_kl_vit_cifar10_forget2:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: uniform_kl
+    forget_class: 2
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+unlearn_kl_vit_cifar10_forget5:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: uniform_kl
+    forget_class: 5
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+unlearn_kl_vit_cifar10_forget9:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: uniform_kl
+    forget_class: 9
     lora_rank: 8
     epochs: 50
     lr: 1e-3

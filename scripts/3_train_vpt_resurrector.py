@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, ConcatDataset
+from torch.utils.data import DataLoader, ConcatDataset, Dataset
 from typing import Dict
 import yaml
 
@@ -120,6 +120,19 @@ def load_unlearned_model(experiment_suites: Dict, suite_config: Dict, device: to
     return unlearned_model
 
 
+class LabelOverrideDataset(Dataset):
+    def __init__(self, base_dataset, new_labels):
+        self.base_dataset = base_dataset
+        self.new_labels = new_labels
+
+    def __len__(self):
+        return len(self.base_dataset)
+
+    def __getitem__(self, idx):
+        x, _ = self.base_dataset[idx]
+        return x, self.new_labels[idx]
+
+
 def main():
     parser = argparse.ArgumentParser(description="Train VPT resurrector for ForgetGate-V")
     parser.add_argument("--config", type=str, required=True,
@@ -132,6 +145,10 @@ def main():
                        help="Device to use")
     parser.add_argument("--prompt-length", type=int, default=None,
                        help="Override prompt length from config (for ablations)")
+    parser.add_argument("--label-mode", type=str, default=None, choices=["true", "shuffle", "random"],
+                       help="Override label mode for forget data: true, shuffle, or random")
+    parser.add_argument("--k-shot", type=int, default=None,
+                       help="Override k-shot count for forget data (controls)")
 
     args = parser.parse_args()
 
@@ -163,10 +180,14 @@ def main():
     if args.prompt_length is not None:
         prompt_length = args.prompt_length
     init_strategy = vpt_params.get('init_strategy', 'random')
+    label_mode = vpt_params.get('label_mode', 'true')
+    if args.label_mode is not None:
+        label_mode = args.label_mode
 
     print(f"Target class: {forget_class}")
     print(f"Prompt length: {prompt_length}")
     print(f"Init strategy: {init_strategy}")
+    print(f"Label mode: {label_mode}")
 
     # Create VPT configuration
     vpt_config = {
@@ -214,6 +235,8 @@ def main():
 
     # K-shot sampling - limit training data if specified
     k_shot = vpt_params.get('k_shot', None)
+    if args.k_shot is not None:
+        k_shot = args.k_shot
     if k_shot is not None:
         print(f"\nK-shot mode: Using only {k_shot} samples from forget class")
         # Use torch.utils.data.Subset to limit samples
@@ -228,19 +251,66 @@ def main():
         forget_train = Subset(forget_train, k_shot_indices)
         print(f"Forget train samples: {len(forget_train)} (original: {len(indices)})")
 
+    # Optional label controls for forget data
+    if label_mode != "true":
+        def _get_labels(ds):
+            # Fast path for datasets with targets
+            if hasattr(ds, "targets"):
+                return list(ds.targets)
+            if hasattr(ds, "labels"):
+                return list(ds.labels)
+            # Subset support
+            if hasattr(ds, "dataset") and hasattr(ds, "indices"):
+                base = ds.dataset
+                if hasattr(base, "targets"):
+                    return [base.targets[i] for i in ds.indices]
+                if hasattr(base, "labels"):
+                    return [base.labels[i] for i in ds.indices]
+            # Fallback (may be slower)
+            return [ds[i][1] for i in range(len(ds))]
+
+        # Determine num_classes from dataset config
+        num_classes = data_config.get(dataset_name, {}).get('num_classes', None)
+        if num_classes is None:
+            raise ValueError(f"num_classes not found for dataset '{dataset_name}' in configs/data.yaml")
+
+        labels = _get_labels(forget_train)
+        if label_mode == "shuffle":
+            import random
+            random.seed(args.seed)
+            shuffled = labels.copy()
+            random.shuffle(shuffled)
+            # Ensure labels differ from original
+            fixed = [(lbl + 1) % num_classes if lbl == orig else lbl
+                     for orig, lbl in zip(labels, shuffled)]
+            new_labels = fixed
+        elif label_mode == "random":
+            import random
+            random.seed(args.seed)
+            new_labels = [random.randrange(num_classes) for _ in labels]
+            # Ensure labels differ from original
+            new_labels = [(lbl + 1) % num_classes if lbl == orig else lbl
+                          for orig, lbl in zip(labels, new_labels)]
+        else:
+            new_labels = labels
+
+        forget_train = LabelOverrideDataset(forget_train, new_labels)
+        print(f"Applied label mode '{label_mode}' to forget train data")
+
     # Explicit loaders (preferred): avoids CPU caching/subsampling inside the attack
+    num_workers = 0 if label_mode != "true" else 4
     forget_train_loader = DataLoader(
         forget_train,
         batch_size=64,
         shuffle=True,
-        num_workers=4,
+        num_workers=num_workers,
         pin_memory=True
     )
     retain_train_loader = DataLoader(
         retain_train,
         batch_size=64,
         shuffle=True,
-        num_workers=4,
+        num_workers=num_workers,
         pin_memory=True
     )
 
@@ -249,7 +319,7 @@ def main():
         forget_val,
         batch_size=256,  # Large batch for evaluation
         shuffle=False,
-        num_workers=4,
+        num_workers=num_workers,
         pin_memory=True
     )
 
@@ -294,6 +364,10 @@ def main():
     suite_name_for_io = args.suite
     if args.prompt_length is not None:
         suite_name_for_io = f"{args.suite}_prompt{prompt_length}"
+    if args.k_shot is not None:
+        suite_name_for_io = f"{suite_name_for_io}_kshot{args.k_shot}"
+    if label_mode != "true":
+        suite_name_for_io = f"{suite_name_for_io}_{label_mode}labels"
 
     prompt_save_path = f"checkpoints/vpt_resurrector/{suite_name_for_io}_seed_{args.seed}"
     vpt_attack.save_attack_prompt(prompt_save_path)

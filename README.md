@@ -15,9 +15,10 @@ This repo evaluates a **visual prompt tuning (VPT)** "resurrection" attack (e.g.
 Two attacker data regimes are considered:
 
 - **Full-data** (attacker has the full forget-class training set): VPT reaches ~100% recovery on both the unlearned model and the oracle baseline -> the attack is effectively relearning.
-- **K-shot** (attacker has 10-100 forget-class samples): VPT fails on both oracle and unlearned models (<2% recovery). The unlearned model is 0.81pp more recoverable than the oracle on average (i.e., slightly worse than the gold standard).
+- **K-shot, default prompt length (10 tokens)**: recovery stays low (KL ~0.7-1.8% at 10-100 shot; oracle ~0%), with a small oracle gap (~+1.15pp, seed 42).
+- **K-shot, prompt-length controls**: smaller prompts expose higher recovery. At prompt length 5 with k=1/5, KL recovers 13.8-15.0% while oracle stays 0%. With shuffled labels (k=10, prompt length 5), KL still reaches 11.3% while oracle stays 0%.
 
-**Takeaway:** "0% forget accuracy" alone doesn't say much about security. Oracle-normalized evaluation helps separate *relearning capacity* from *residual knowledge access*.
+**Takeaway:** "0% forget accuracy" alone doesn't say much about security. Oracle-normalized evaluation helps separate *relearning capacity* from *residual knowledge access*, and the gap is sensitive to prompt length and low-shot/label controls.
 
 ## Definitions
 
@@ -93,7 +94,7 @@ python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yam
 python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_resurrect_kl_forget0_50shot  --seed 42
 python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_resurrect_kl_forget0_100shot --seed 42
 
-Note: you can also run `run_paper_resume.bat` to skip completed steps and continue from existing checkpoints/logs.
+Note: you can also run `python scripts/run_paper_resume.py` to skip completed steps and continue from existing checkpoints/logs.
 
 # 6) Aggregate results across seeds
 python scripts/analyze_kshot_experiments.py --seeds 42 123
@@ -184,7 +185,7 @@ ForgetGate/
 
 *Seeds: 42, 123. Metrics from eval_paper_baselines_vit_cifar10_forget0 (clean test set).*
 
-### K-shot recovery (oracle-normalized)
+### K-shot recovery (oracle-normalized, default prompt length)
 
 | K-shot | Oracle Baseline | Unlearned (KL) | Residual Recov. |
 |--------|----------------|----------------|-----------------|
@@ -195,6 +196,19 @@ ForgetGate/
 | **Avg** | **0.00%** | **0.81 +/- 0.48%** | **+0.81pp** |
 
 *Seeds: 42, 123. Recovery@k measured on held-out train split (forget_val) using final logged epoch per run.*
+
+### Prompt-length + control runs (seed 42)
+
+**Prompt-length ablation (10-shot):**
+- Prompt length 1/2/5: KL = 14.0/14.6/15.5%, Oracle = 0.0%
+- Prompt length 10 (default): KL = 1.2%, Oracle = 0.0%
+
+**Low-shot controls (prompt length 5):**
+- k=1: KL = 13.8%, Oracle = 0.0%
+- k=5: KL = 15.0%, Oracle = 0.0%
+
+**Shuffled-label control (prompt length 5, k=10):**
+- KL = 11.3%, Oracle = 0.0%
 
 ### Full-data recovery (context)
 
@@ -243,9 +257,9 @@ Attacker capabilities assumed:
 
 ## Next Steps (Recommended)
 
-1) **Sample-efficiency gap (already computed)**: use `results/analysis/sample_efficiency_gap.txt` to report the smallest k needed to reach 1%/2%/5% recovery for oracle vs unlearned. This reframes the audit as data-efficiency rather than absolute recovery.
-2) **Prompt-capacity ablation (k-shot)**: run prompt lengths 1/2/5/10 and plot the oracle gap across prompt sizes to show the residual gap is not a capacity artifact.
-3) **Class-wise oracle gap**: repeat the k-shot evaluation on forget classes 1/2/5/9 to check if the gap generalizes across classes.
+1) **Seed replication for controls**: repeat low-shot and shuffled-label controls for seed 123.
+2) **Random-label control**: run `--label-mode random` to further rule out relearning.
+3) **Class-wise + prompt-length**: repeat prompt-length ablation for forget classes 1/2/5/9.
 
 ---
 

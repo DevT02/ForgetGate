@@ -261,6 +261,7 @@ def analyze_prompt_capacity(results_dir, seeds):
     print("PROMPT CAPACITY ABLATION")
     print("="*80)
 
+    # Explicit prompt-length overrides we ran
     prompt_lengths = [1, 2, 5, 10]
 
     oracle_results = {}
@@ -269,9 +270,11 @@ def analyze_prompt_capacity(results_dir, seeds):
     # Load Oracle prompt ablation (all with 10-shot)
     for pl in prompt_lengths:
         if pl == 10:
+            # Default prompt length (from suite config), no prompt tag in filename
             pattern = "vpt_oracle_vit_cifar10_forget0_10shot_seed_{seed}.jsonl"
         else:
-            pattern = f"vpt_oracle_vit_cifar10_forget0_prompt{pl}_10shot_seed_{{seed}}.jsonl"
+            # Prompt-length override uses "10shot_prompt{pl}" naming
+            pattern = f"vpt_oracle_vit_cifar10_forget0_10shot_prompt{pl}_seed_{{seed}}.jsonl"
 
         data = load_multiseed_results(results_dir, pattern, seeds)
         if data:
@@ -280,9 +283,11 @@ def analyze_prompt_capacity(results_dir, seeds):
     # Load KL prompt ablation (all with 10-shot)
     for pl in prompt_lengths:
         if pl == 10:
+            # Default prompt length (from suite config), no prompt tag in filename
             pattern = "vpt_resurrect_kl_forget0_10shot_seed_{seed}.jsonl"
         else:
-            pattern = f"vpt_resurrect_kl_forget0_prompt{pl}_seed_{{seed}}.jsonl"
+            # Prompt-length override uses "10shot_prompt{pl}" naming
+            pattern = f"vpt_resurrect_kl_forget0_10shot_prompt{pl}_seed_{{seed}}.jsonl"
 
         data = load_multiseed_results(results_dir, pattern, seeds)
         if data:
@@ -319,8 +324,139 @@ def analyze_prompt_capacity(results_dir, seeds):
         if max_kl < 5.0 and max_oracle < 5.0:
             print("\n[OK] Both show VERY LOW recovery even with more prompt capacity")
             print("  -> Confirms that k-shot VPT resurrection is minimal")
+        else:
+            print("\n[NOTE] Recovery increases with prompt capacity or differs by method")
+            print("  -> Interpret k-shot results conditioned on prompt length")
 
     return oracle_results, kl_results
+
+
+def analyze_classwise_gap(results_dir, seeds, forget_classes=(1, 2, 5, 9)):
+    """Analyze class-wise oracle gap for 10-shot runs."""
+    print("\n" + "="*80)
+    print("CLASS-WISE ORACLE GAP (10-shot)")
+    print("="*80)
+
+    results = []
+    for c in forget_classes:
+        oracle_data = load_multiseed_results(
+            results_dir,
+            f"vpt_oracle_vit_cifar10_forget{c}_10shot_seed_{{seed}}.jsonl",
+            seeds
+        )
+        kl_data = load_multiseed_results(
+            results_dir,
+            f"vpt_resurrect_kl_forget{c}_10shot_seed_{{seed}}.jsonl",
+            seeds
+        )
+
+        if not oracle_data and not kl_data:
+            continue
+
+        oracle_acc = oracle_data.get('mean', oracle_data.get('final_acc', 0)) if oracle_data else None
+        kl_acc = kl_data.get('mean', kl_data.get('final_acc', 0)) if kl_data else None
+        gap = (kl_acc - oracle_acc) if (oracle_acc is not None and kl_acc is not None) else None
+
+        results.append((c, oracle_acc, kl_acc, gap))
+
+    if not results:
+        print("No class-wise 10-shot logs found.")
+        return []
+
+    print(f"\n{'Forget Class':<12} {'Oracle':<12} {'KL Unlearned':<15} {'Gap':<12}")
+    print("-" * 55)
+    for c, o, k, g in results:
+        o_str = f"{o:.2f}%" if o is not None else "N/A"
+        k_str = f"{k:.2f}%" if k is not None else "N/A"
+        g_str = f"{g:+.2f}%" if g is not None else "N/A"
+        print(f"{c:<12} {o_str:<12} {k_str:<15} {g_str:<12}")
+
+    return results
+
+
+def analyze_lowshot_controls(results_dir, seeds, prompt_length=5, kshots=(1, 5)):
+    """Analyze low-shot controls with fixed prompt length."""
+    print("\n" + "="*80)
+    print("LOW-SHOT CONTROLS (prompt length %d)" % prompt_length)
+    print("="*80)
+
+    results = []
+    for k in kshots:
+        oracle_data = load_multiseed_results(
+            results_dir,
+            f"vpt_oracle_vit_cifar10_forget0_10shot_prompt{prompt_length}_kshot{k}_seed_{{seed}}.jsonl",
+            seeds
+        )
+        kl_data = load_multiseed_results(
+            results_dir,
+            f"vpt_resurrect_kl_forget0_10shot_prompt{prompt_length}_kshot{k}_seed_{{seed}}.jsonl",
+            seeds
+        )
+        if not oracle_data and not kl_data:
+            continue
+
+        oracle_acc = oracle_data.get('mean', oracle_data.get('final_acc', 0)) if oracle_data else None
+        kl_acc = kl_data.get('mean', kl_data.get('final_acc', 0)) if kl_data else None
+        gap = (kl_acc - oracle_acc) if (oracle_acc is not None and kl_acc is not None) else None
+        results.append((k, oracle_acc, kl_acc, gap))
+
+    if not results:
+        print("No low-shot control logs found.")
+        return []
+
+    print(f"\n{'K-shot':<10} {'Oracle':<12} {'KL Unlearned':<15} {'Gap':<12}")
+    print("-" * 55)
+    for k, o, kacc, g in results:
+        o_str = f"{o:.2f}%" if o is not None else "N/A"
+        k_str = f"{kacc:.2f}%" if kacc is not None else "N/A"
+        g_str = f"{g:+.2f}%" if g is not None else "N/A"
+        print(f"{k:<10} {o_str:<12} {k_str:<15} {g_str:<12}")
+
+    return results
+
+
+def analyze_shuffled_label_control(results_dir, seeds, prompt_length=5):
+    """Analyze shuffled-label controls (k=10) with fixed prompt length."""
+    print("\n" + "="*80)
+    print("SHUFFLED-LABEL CONTROL (prompt length %d, k=10)" % prompt_length)
+    print("="*80)
+
+    # Accept both "shufflelabels" and legacy "shuffledlabels" suffixes
+    oracle_data = load_multiseed_results(
+        results_dir,
+        f"vpt_oracle_vit_cifar10_forget0_10shot_prompt{prompt_length}_shufflelabels_seed_{{seed}}.jsonl",
+        seeds
+    ) or load_multiseed_results(
+        results_dir,
+        f"vpt_oracle_vit_cifar10_forget0_10shot_prompt{prompt_length}_shuffledlabels_seed_{{seed}}.jsonl",
+        seeds
+    )
+    kl_data = load_multiseed_results(
+        results_dir,
+        f"vpt_resurrect_kl_forget0_10shot_prompt{prompt_length}_shufflelabels_seed_{{seed}}.jsonl",
+        seeds
+    ) or load_multiseed_results(
+        results_dir,
+        f"vpt_resurrect_kl_forget0_10shot_prompt{prompt_length}_shuffledlabels_seed_{{seed}}.jsonl",
+        seeds
+    )
+
+    if not oracle_data and not kl_data:
+        print("No shuffled-label control logs found.")
+        return None
+
+    oracle_acc = oracle_data.get('mean', oracle_data.get('final_acc', 0)) if oracle_data else None
+    kl_acc = kl_data.get('mean', kl_data.get('final_acc', 0)) if kl_data else None
+    gap = (kl_acc - oracle_acc) if (oracle_acc is not None and kl_acc is not None) else None
+
+    print(f"\n{'Oracle':<12} {'KL Unlearned':<15} {'Gap':<12}")
+    print("-" * 45)
+    o_str = f"{oracle_acc:.2f}%" if oracle_acc is not None else "N/A"
+    k_str = f"{kl_acc:.2f}%" if kl_acc is not None else "N/A"
+    g_str = f"{gap:+.2f}%" if gap is not None else "N/A"
+    print(f"{o_str:<12} {k_str:<15} {g_str:<12}")
+
+    return (oracle_acc, kl_acc, gap)
 
 
 def generate_plots(results_dir, oracle_kshot, kl_kshot, salun_kshot, scrub_kshot,
@@ -522,6 +658,9 @@ def main():
     # Run analyses
     oracle_kshot, kl_kshot, salun_kshot, scrub_kshot = analyze_kshot_sample_efficiency(results_dir, seeds)
     oracle_prompt, kl_prompt = analyze_prompt_capacity(results_dir, seeds)
+    classwise_results = analyze_classwise_gap(results_dir, seeds)
+    lowshot_results = analyze_lowshot_controls(results_dir, seeds)
+    shuffled_results = analyze_shuffled_label_control(results_dir, seeds)
 
     # Generate plots
     if oracle_kshot and kl_kshot:
