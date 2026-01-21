@@ -16,8 +16,7 @@ Two attacker data regimes are considered:
 
 - **Full-data** (attacker has the full forget-class training set): VPT reaches ~100% recovery on both the unlearned model and the oracle baseline -> the attack is effectively relearning.
 - **K-shot, default prompt length (10 tokens)**: recovery stays low (KL ~0.55-1.50% at 10-100 shot; oracle ~0%), with a small oracle gap (~+0.81pp, seeds 42/123).
-- **K-shot, prompt-length controls (seed 42)**: smaller prompts expose higher recovery. At prompt length 5 with k=1/5, KL recovers 13.8-15.0% while oracle stays 0%. With shuffled labels (k=10, prompt length 5), KL still reaches 11.3% while oracle stays 0%.
-- **Low-shot controls (seeds 42/123, prompt length 5)**: k=1: 6.95%, k=5: 7.55%, shuffled-label (k=10): 5.85% (oracle stays 0%).
+- **Controls (prompt length 5)**: low-shot and shuffled-label controls expose residual access. Seeds 42/123: k=1: 6.95%, k=5: 7.55%, shuffled-label (k=10): 5.85% (oracle stays 0%). Seed 42 prompt-length ablation: 1/2/5 tokens yields 14.0/14.6/15.5% (oracle 0%).
 
 **Takeaway:** "0% forget accuracy" alone doesn't say much about security. Oracle-normalized evaluation helps separate *relearning capacity* from *residual knowledge access*, and the gap is sensitive to prompt length and low-shot/label controls.
 
@@ -204,24 +203,17 @@ ForgetGate/
 - Prompt length 1/2/5: KL = 14.0/14.6/15.5%, Oracle = 0.0%
 - Prompt length 10 (default): KL = 1.2%, Oracle = 0.0%
 
-**Low-shot controls (prompt length 5):**
-- k=1: KL = 13.8%, Oracle = 0.0%
-- k=5: KL = 15.0%, Oracle = 0.0%
-
-**Shuffled-label control (prompt length 5, k=10):**
-- KL = 11.3%, Oracle = 0.0%
-
-### Low-shot controls (seeds 42, 123; prompt length 5)
-
-- k=1: KL = 6.95%, Oracle = 0.0%
-- k=5: KL = 7.55%, Oracle = 0.0%
-- Shuffled-label (k=10): KL = 5.85%, Oracle = 0.0%
+**Low-shot + shuffled-label controls (prompt length 5):**
+- Seed 42: k=1: 13.8%, k=5: 15.0%, shuffled-label (k=10): 11.3% (oracle 0.0%)
+- Seeds 42/123 mean: k=1: 6.95%, k=5: 7.55%, shuffled-label (k=10): 5.85% (oracle 0.0%)
 
 ### Full-data recovery (context)
 
 Full-data VPT runs reach near-complete recovery in results/logs/vpt_resurrect_*_seed_*.jsonl. To reproduce test-set VPT/PGD metrics, run: `python scripts/4_adv_evaluate.py --suite eval_full_vit_cifar10_forget0`.
 
 **Oracle control (full-data)**: VPT on the oracle baseline also reaches ~100% recovery with full data, indicating the full-data attack is effectively relearning rather than accessing residual knowledge. See `results/logs/oracle_vpt_control_class0_seed_42.jsonl` and `results/logs/oracle_vpt_control_class0_seed_123.jsonl`.
+
+**AutoAttack (seed 42)**: full AutoAttack drives both forget and retain accuracy to ~0 on base/unlearned/VPT models (see `results/logs/eval_autoattack_vit_cifar10_forget0_seed_42_evaluation.json`).
 
 ## Results Provenance
 
@@ -264,9 +256,9 @@ Attacker capabilities assumed:
 
 ## Next Steps (Recommended)
 
-1) **Seed replication for controls**: repeat low-shot and shuffled-label controls for seed 123.
-2) **Random-label control**: run `--label-mode random` to further rule out relearning.
-3) **Class-wise + prompt-length**: repeat prompt-length ablation for forget classes 1/2/5/9.
+1) **Random-label control**: run `--label-mode random` to further rule out relearning.
+2) **Class-wise + prompt-length**: repeat prompt-length ablation for forget classes 1/2/5/9.
+3) **AutoAttack across seeds**: run eval_autoattack for seed 123 (and optionally others).
 
 ---
 
