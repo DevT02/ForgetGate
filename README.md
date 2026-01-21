@@ -15,7 +15,7 @@ This repo evaluates a **visual prompt tuning (VPT)** "resurrection" attack (e.g.
 Two attacker data regimes are considered:
 
 - **Full-data** (attacker has the full forget-class training set): VPT reaches ~100% recovery on both the unlearned model and the oracle baseline -> the attack is effectively relearning.
-- **K-shot, default prompt length (10 tokens)**: recovery stays low (KL ~0.55-1.50% at 10-100 shot; oracle ~0%), with a small oracle gap (~+0.81pp, seeds 42/123).
+- **K-shot, default prompt length (10 tokens)**: recovery stays low (KL approx 0.55-1.50% at 10-100 shot; oracle approx 0%), with a small oracle gap (about +0.81pp, seeds 42/123).
 - **Controls (prompt length 5)**: low-shot and shuffled-label controls expose residual access. Seeds 42/123: k=1: 6.95%, k=5: 7.55%, shuffled-label (k=10): 5.85% (oracle stays 0%). Seed 42 prompt-length ablation: 1/2/5 tokens yields 14.0/14.6/15.5% (oracle 0%).
 
 **Takeaway:** "0% forget accuracy" alone doesn't say much about security. Oracle-normalized evaluation helps separate *relearning capacity* from *residual knowledge access*, and the gap is sensitive to prompt length and low-shot/label controls.
