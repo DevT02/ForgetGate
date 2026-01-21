@@ -26,7 +26,7 @@ This is the experiment that verifies resurrection vs relearning.
 """
 
 import sys
-sys.path.append('.')
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import torch
 import torch.nn as nn

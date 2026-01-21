@@ -39,7 +39,7 @@ pgd_very_strong:
 
 # AutoAttack configurations
 autoattack:
-  version: "standard"
+  version: "custom"
   norm: "Linf"  # Linf, L2
   epsilons: [0.015686275, 0.031372549, 0.062745098]  # 4/255, 8/255, 16/255
   attacks_to_run: ["apgd-ce", "apgd-t", "fab-t", "square"]
@@ -77,6 +77,6 @@ output:
 
 # GPU/memory settings
 compute:
-  eval_batch_size: 256
+  eval_batch_size: 64
   mixed_precision: true
-  num_workers: 4
+  num_workers: 2

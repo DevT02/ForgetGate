@@ -15,8 +15,9 @@ This repo evaluates a **visual prompt tuning (VPT)** "resurrection" attack (e.g.
 Two attacker data regimes are considered:
 
 - **Full-data** (attacker has the full forget-class training set): VPT reaches ~100% recovery on both the unlearned model and the oracle baseline -> the attack is effectively relearning.
-- **K-shot, default prompt length (10 tokens)**: recovery stays low (KL ~0.7-1.8% at 10-100 shot; oracle ~0%), with a small oracle gap (~+1.15pp, seed 42).
-- **K-shot, prompt-length controls**: smaller prompts expose higher recovery. At prompt length 5 with k=1/5, KL recovers 13.8-15.0% while oracle stays 0%. With shuffled labels (k=10, prompt length 5), KL still reaches 11.3% while oracle stays 0%.
+- **K-shot, default prompt length (10 tokens)**: recovery stays low (KL ~0.55-1.50% at 10-100 shot; oracle ~0%), with a small oracle gap (~+0.81pp, seeds 42/123).
+- **K-shot, prompt-length controls (seed 42)**: smaller prompts expose higher recovery. At prompt length 5 with k=1/5, KL recovers 13.8-15.0% while oracle stays 0%. With shuffled labels (k=10, prompt length 5), KL still reaches 11.3% while oracle stays 0%.
+- **Low-shot controls (seeds 42/123, prompt length 5)**: k=1: 6.95%, k=5: 7.55%, shuffled-label (k=10): 5.85% (oracle stays 0%).
 
 **Takeaway:** "0% forget accuracy" alone doesn't say much about security. Oracle-normalized evaluation helps separate *relearning capacity* from *residual knowledge access*, and the gap is sensitive to prompt length and low-shot/label controls.
 
@@ -166,7 +167,7 @@ ForgetGate/
 ### Attacks / Evaluation
 - VPT resurrection (prompt-only, frozen backbone)
 - PGD
-- `vpt_plus_pgd` (adaptive variant: perturbations optimized to help forget-class predictions)
+- `vpt_plus_pgd` (targeted PGD toward the forget class, optionally on VPT-wrapped model)
 - AutoAttack integration
 
 ---
@@ -209,6 +210,12 @@ ForgetGate/
 
 **Shuffled-label control (prompt length 5, k=10):**
 - KL = 11.3%, Oracle = 0.0%
+
+### Low-shot controls (seeds 42, 123; prompt length 5)
+
+- k=1: KL = 6.95%, Oracle = 0.0%
+- k=5: KL = 7.55%, Oracle = 0.0%
+- Shuffled-label (k=10): KL = 5.85%, Oracle = 0.0%
 
 ### Full-data recovery (context)
 
@@ -300,6 +307,7 @@ unlearn_salun_vit_cifar10_forget0:
 - **OOM**: reduce batch size in configs or use `--device cpu`
 - **CIFAR-10 download issues**: use torchvision dataset docs / mirror
 - **LoRA/PEFT mismatch**: use `peft==0.18.0` (see requirements.txt)
+- **AutoAttack**: optional dependency; if not installed, evaluation falls back to PGD
 
 ---
 

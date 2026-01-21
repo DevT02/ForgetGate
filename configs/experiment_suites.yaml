@@ -572,6 +572,24 @@ eval_v2_vit_cifar10_forget0:
       - resurrection_success_rate
   seeds: [42, 123, 456, 789, 101112]
 
+# AutoAttack evaluation (custom attacks_to_run)
+eval_autoattack_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_lora_vit_cifar10_forget0
+    - vpt_resurrect_vit_cifar10_forget0
+  evaluation:
+    attacks:
+      - clean
+      - autoattack_linf_8
+      - vpt_only
+      - vpt_plus_pgd
+    metrics:
+      - forget_acc
+      - retain_acc
+      - resurrection_success_rate
+  seeds: [42]
+
 # Evaluation suite for length-20 VPT prompts
 eval_full_vit_cifar10_forget0_vptlen20:
   model_suites:
