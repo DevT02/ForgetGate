@@ -459,6 +459,41 @@ def analyze_shuffled_label_control(results_dir, seeds, prompt_length=5):
     return (oracle_acc, kl_acc, gap)
 
 
+def analyze_random_label_control(results_dir, seeds, prompt_length=5):
+    """Analyze random-label controls (k=10) with fixed prompt length."""
+    print("\n" + "="*80)
+    print("RANDOM-LABEL CONTROL (prompt length %d, k=10)" % prompt_length)
+    print("="*80)
+
+    oracle_data = load_multiseed_results(
+        results_dir,
+        f"vpt_oracle_vit_cifar10_forget0_10shot_prompt{prompt_length}_randomlabels_seed_{{seed}}.jsonl",
+        seeds
+    )
+    kl_data = load_multiseed_results(
+        results_dir,
+        f"vpt_resurrect_kl_forget0_10shot_prompt{prompt_length}_randomlabels_seed_{{seed}}.jsonl",
+        seeds
+    )
+
+    if not oracle_data and not kl_data:
+        print("No random-label control logs found.")
+        return None
+
+    oracle_acc = oracle_data.get('mean', oracle_data.get('final_acc', 0)) if oracle_data else None
+    kl_acc = kl_data.get('mean', kl_data.get('final_acc', 0)) if kl_data else None
+    gap = (kl_acc - oracle_acc) if (oracle_acc is not None and kl_acc is not None) else None
+
+    print(f"\n{'Oracle':<12} {'KL Unlearned':<15} {'Gap':<12}")
+    print("-" * 45)
+    o_str = f"{oracle_acc:.2f}%" if oracle_acc is not None else "N/A"
+    k_str = f"{kl_acc:.2f}%" if kl_acc is not None else "N/A"
+    g_str = f"{gap:+.2f}%" if gap is not None else "N/A"
+    print(f"{o_str:<12} {k_str:<15} {g_str:<12}")
+
+    return (oracle_acc, kl_acc, gap)
+
+
 def generate_plots(results_dir, oracle_kshot, kl_kshot, salun_kshot, scrub_kshot,
                    oracle_prompt, kl_prompt, curve_seed):
     """Generate publication-quality plots"""
@@ -661,6 +696,7 @@ def main():
     classwise_results = analyze_classwise_gap(results_dir, seeds)
     lowshot_results = analyze_lowshot_controls(results_dir, seeds)
     shuffled_results = analyze_shuffled_label_control(results_dir, seeds)
+    random_results = analyze_random_label_control(results_dir, seeds)
 
     # Generate plots
     if oracle_kshot and kl_kshot:

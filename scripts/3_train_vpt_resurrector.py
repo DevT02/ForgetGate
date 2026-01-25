@@ -299,28 +299,40 @@ def main():
 
     # Explicit loaders (preferred): avoids CPU caching/subsampling inside the attack
     num_workers = 0 if label_mode != "true" else 4
+    persistent_workers = num_workers > 0
+    prefetch_factor = 4 if num_workers > 0 else None
+    training_params = vpt_params
+    train_batch_size = training_params.get("train_batch_size", 64)
+    retain_batch_size = training_params.get("retain_batch_size", 64)
+    eval_batch_size = training_params.get("eval_batch_size", 256)
     forget_train_loader = DataLoader(
         forget_train,
-        batch_size=64,
+        batch_size=train_batch_size,
         shuffle=True,
         num_workers=num_workers,
-        pin_memory=True
+        pin_memory=True,
+        persistent_workers=persistent_workers,
+        prefetch_factor=prefetch_factor,
     )
     retain_train_loader = DataLoader(
         retain_train,
-        batch_size=64,
+        batch_size=retain_batch_size,
         shuffle=True,
         num_workers=num_workers,
-        pin_memory=True
+        pin_memory=True,
+        persistent_workers=persistent_workers,
+        prefetch_factor=prefetch_factor,
     )
 
     # Use held-out TRAIN split for validation (no test set leakage)
     forget_val_loader = DataLoader(
         forget_val,
-        batch_size=256,  # Large batch for evaluation
+        batch_size=eval_batch_size,  # Large batch for evaluation
         shuffle=False,
         num_workers=num_workers,
-        pin_memory=True
+        pin_memory=True,
+        persistent_workers=persistent_workers,
+        prefetch_factor=prefetch_factor,
     )
 
     # Create VPT resurrection attack
@@ -332,7 +344,6 @@ def main():
     )
 
     # Train resurrection prompt
-    training_params = vpt_params
     epochs = training_params.get('epochs', 100)
     lr = training_params.get('lr', 1e-2)
 

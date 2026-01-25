@@ -794,6 +794,36 @@ vpt_resurrect_scrub_forget0:
 # K-SHOT VPT EXPERIMENTS: Oracle vs Unlearned Comparison
 # ========================================================================
 # Oracle baseline - test if VPT can learn from scratch with limited data
+vpt_oracle_vit_cifar10_forget0_1shot:
+  oracle_model_suite: oracle_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+    k_shot: 1
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_oracle_vit_cifar10_forget0_5shot:
+  oracle_model_suite: oracle_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+    k_shot: 5
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
 vpt_oracle_vit_cifar10_forget0_10shot:
   oracle_model_suite: oracle_vit_cifar10_forget0
   vpt_attack:
@@ -855,6 +885,36 @@ vpt_oracle_vit_cifar10_forget0_100shot:
   seeds: [42, 123, 456]
 
 # Unlearned KL k-shot experiments - test resurrection with limited data
+vpt_resurrect_kl_forget0_1shot:
+  unlearned_model_suite: unlearn_kl_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+    k_shot: 1
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_resurrect_kl_forget0_5shot:
+  unlearned_model_suite: unlearn_kl_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+    k_shot: 5
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
 vpt_resurrect_kl_forget0_10shot:
   unlearned_model_suite: unlearn_kl_vit_cifar10_forget0
   vpt_attack:
@@ -865,6 +925,111 @@ vpt_resurrect_kl_forget0_10shot:
     lr: 1e-2
     target_class: 0
     k_shot: 10
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_resurrect_kl_forget0_25shot:
+  unlearned_model_suite: unlearn_kl_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+    k_shot: 25
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_resurrect_kl_forget0_50shot:
+  unlearned_model_suite: unlearn_kl_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+    k_shot: 50
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_resurrect_kl_forget0_100shot:
+  unlearned_model_suite: unlearn_kl_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+    k_shot: 100
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_resurrect_salun_forget0_50shot:
+  unlearned_model_suite: unlearn_salun_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+    k_shot: 50
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_resurrect_salun_forget0_100shot:
+  unlearned_model_suite: unlearn_salun_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+    k_shot: 100
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_resurrect_scrub_forget0_50shot:
+  unlearned_model_suite: unlearn_scrub_distill_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+    k_shot: 50
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+vpt_resurrect_scrub_forget0_100shot:
+  unlearned_model_suite: unlearn_scrub_distill_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+    k_shot: 100
     lambda_retain: 1.0
     T: 1.0
     eval_every: 10
@@ -988,51 +1153,6 @@ vpt_resurrect_kl_forget9_10shot:
     lr: 1e-2
     target_class: 9
     k_shot: 10
-    lambda_retain: 1.0
-    T: 1.0
-    eval_every: 10
-  seeds: [42, 123, 456]
-
-vpt_resurrect_kl_forget0_25shot:
-  unlearned_model_suite: unlearn_kl_vit_cifar10_forget0
-  vpt_attack:
-    prompt_type: prefix
-    prompt_length: 10
-    init_strategy: random
-    epochs: 100
-    lr: 1e-2
-    target_class: 0
-    k_shot: 25
-    lambda_retain: 1.0
-    T: 1.0
-    eval_every: 10
-  seeds: [42, 123, 456]
-
-vpt_resurrect_kl_forget0_50shot:
-  unlearned_model_suite: unlearn_kl_vit_cifar10_forget0
-  vpt_attack:
-    prompt_type: prefix
-    prompt_length: 10
-    init_strategy: random
-    epochs: 100
-    lr: 1e-2
-    target_class: 0
-    k_shot: 50
-    lambda_retain: 1.0
-    T: 1.0
-    eval_every: 10
-  seeds: [42, 123, 456]
-
-vpt_resurrect_kl_forget0_100shot:
-  unlearned_model_suite: unlearn_kl_vit_cifar10_forget0
-  vpt_attack:
-    prompt_type: prefix
-    prompt_length: 10
-    init_strategy: random
-    epochs: 100
-    lr: 1e-2
-    target_class: 0
-    k_shot: 100
     lambda_retain: 1.0
     T: 1.0
     eval_every: 10

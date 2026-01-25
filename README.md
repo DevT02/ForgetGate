@@ -15,8 +15,8 @@ This repo evaluates a **visual prompt tuning (VPT)** "resurrection" attack (e.g.
 Two attacker data regimes are considered:
 
 - **Full-data** (attacker has the full forget-class training set): VPT reaches ~100% recovery on both the unlearned model and the oracle baseline -> the attack is effectively relearning.
-- **K-shot, default prompt length (10 tokens)**: recovery stays low (KL approx 0.55-1.50% at 10-100 shot; oracle approx 0%), with a small oracle gap (about +0.81pp, seeds 42/123).
-- **Controls (prompt length 5)**: low-shot and shuffled-label controls expose residual access. Seeds 42/123: k=1: 6.95%, k=5: 7.55%, shuffled-label (k=10): 5.85% (oracle stays 0%). Seed 42 prompt-length ablation: 1/2/5 tokens yields 14.0/14.6/15.5% (oracle 0%).
+- **K-shot, default prompt length (10 tokens)**: recovery stays low at k=10-100 (KL approx 0.55-1.50%; oracle 0%), while low-shot controls (k=1/5 with prompt length 5) show larger gaps. Average gap across k=1/5/10/25/50/100 is +3.15pp (seeds 42/123).
+- **Controls (prompt length 5)**: low-shot + label controls expose residual access. Seeds 42/123: k=1: 6.95%, k=5: 7.55%, shuffled-label (k=10): 5.85%, random-label (k=10): 6.00% (oracle stays 0%). Seed 42 prompt-length ablation: 1/2/5 tokens yields 14.0/14.6/15.5% (oracle 0%). Class-wise 10-shot gaps are mostly small (0.5-1.7%), with class 9 higher at 9.75%.
 
 **Takeaway:** "0% forget accuracy" alone doesn't say much about security. Oracle-normalized evaluation helps separate *relearning capacity* from *residual knowledge access*, and the gap is sensitive to prompt length and low-shot/label controls.
 
@@ -185,15 +185,28 @@ ForgetGate/
 
 *Seeds: 42, 123. Metrics from eval_paper_baselines_vit_cifar10_forget0 (clean test set).*
 
-### K-shot recovery (oracle-normalized, default prompt length)
+### K-shot recovery (oracle-normalized)
 
 | K-shot | Oracle Baseline | Unlearned (KL) | Residual Recov. |
 |--------|----------------|----------------|-----------------|
+| 1 | 0.00 +/- 0.00% | 7.45 +/- 10.39% | +7.45pp |
+| 5 | 0.00 +/- 0.00% | 8.20 +/- 11.17% | +8.20pp |
 | 10 | 0.00 +/- 0.00% | 0.65 +/- 0.78% | +0.65pp |
 | 25 | 0.00 +/- 0.00% | 0.55 +/- 0.49% | +0.55pp |
 | 50 | 0.00 +/- 0.00% | 0.55 +/- 0.21% | +0.55pp |
 | 100 | 0.00 +/- 0.00% | 1.50 +/- 0.42% | +1.50pp |
-| **Avg** | **0.00%** | **0.81 +/- 0.48%** | **+0.81pp** |
+| **Avg** | **0.00%** | **3.15 +/- 4.09%** | **+3.15pp** |
+
+*Seeds: 42, 123. Recovery@k measured on held-out train split (forget_val) using final logged epoch per run.*
+
+### Class-wise oracle gap (10-shot, default prompt length)
+
+| Forget Class | Oracle Baseline | Unlearned (KL) | Residual Recov. |
+|-------------|----------------|----------------|-----------------|
+| 1 | 0.00% | 1.00% | +1.00pp |
+| 2 | 0.00% | 0.50% | +0.50pp |
+| 5 | 0.00% | 1.70% | +1.70pp |
+| 9 | 0.00% | 9.75% | +9.75pp |
 
 *Seeds: 42, 123. Recovery@k measured on held-out train split (forget_val) using final logged epoch per run.*
 
@@ -203,9 +216,8 @@ ForgetGate/
 - Prompt length 1/2/5: KL = 14.0/14.6/15.5%, Oracle = 0.0%
 - Prompt length 10 (default): KL = 1.2%, Oracle = 0.0%
 
-**Low-shot + shuffled-label controls (prompt length 5):**
-- Seed 42: k=1: 13.8%, k=5: 15.0%, shuffled-label (k=10): 11.3% (oracle 0.0%)
-- Seeds 42/123 mean: k=1: 6.95%, k=5: 7.55%, shuffled-label (k=10): 5.85% (oracle 0.0%)
+**Low-shot + label controls (prompt length 5):**
+- Seeds 42/123 mean: k=1: 6.95%, k=5: 7.55%, shuffled-label (k=10): 5.85%, random-label (k=10): 6.00% (oracle 0.0%)
 
 ### Full-data recovery (context)
 
@@ -221,14 +233,14 @@ Full-data VPT runs reach near-complete recovery in results/logs/vpt_resurrect_*_
 - K-shot recovery uses a held-out train split (forget_val) and reports the final logged epoch.
 - Clean baselines come from test-set eval: `eval_paper_baselines_vit_cifar10_forget0`.
 - Reported standard deviations use sample std across seeds (ddof=1).
-- Avg row in the k-shot table is computed by averaging per-seed Recovery@k across k=10,25,50,100, then taking mean and sample std across seeds.
+- Avg row in the k-shot table is computed by averaging per-seed Recovery@k across k=1,5,10,25,50,100, then taking mean and sample std across seeds. Note: k=1/5 values use prompt length 5 controls; k=10+ use default prompt length 10.
 - Full-data recovery values are from VPT training logs; test-set VPT/PGD numbers require `eval_full_vit_cifar10_forget0`.
 
 ## Artifacts
 
 - Tables: `results/analysis/comparison_table_markdown.txt`, `results/analysis/comparison_table_latex.txt`
 - Plots: `results/analysis/kshot_analysis.png`, `results/analysis/learning_curves_kshot.png`
-- Reports: `results/analysis/sample_efficiency_gap.txt`
+- Reports: `results/analysis/sample_efficiency_gap.txt`, `results/analysis/kshot_summary.md`
 - Logs: `results/logs/*_evaluation.json` (test-set metrics), `results/logs/*.jsonl` (training curves)
 
 ---
