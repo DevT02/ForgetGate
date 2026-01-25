@@ -10,6 +10,10 @@ ForgetGate audits LoRA-based machine unlearning under a simple question:
 
 This repo evaluates a **visual prompt tuning (VPT)** "resurrection" attack (e.g., 10 tokens x 192 dims = **1,920 params** for ViT-Tiny) against LoRA unlearning methods, and compares against an **oracle baseline** trained from scratch *without* the forget class.
 
+## Project Overview
+
+ForgetGate is a small, focused audit: we train a model, unlearn one class with LoRA, then test whether a tiny visual prompt can bring that class back. By comparing against an oracle model (trained without the class), we separate **relearning capacity** from **residual knowledge**. The result is a practical checklist and set of plots that show when "unlearning" looks secure and when it doesn't.
+
 ## TL;DR
 
 Two attacker data regimes are considered:
@@ -271,6 +275,12 @@ Attacker capabilities assumed:
 1) **Random-label control**: run `--label-mode random` to further rule out relearning.
 2) **Class-wise + prompt-length**: repeat prompt-length ablation for forget classes 1/2/5/9.
 3) **AutoAttack across seeds**: run eval_autoattack for seed 123 (and optionally others).
+
+## Follow-ups (If You Want More Rigor)
+
+- Add a third seed (e.g., 456) for k-shot and class-wise tables.
+- Run AutoAttack for seed 123 to reduce variance in robustness claims.
+- Report k-shot recovery on a fixed, deterministic split for even tighter comparisons.
 
 ---
 
