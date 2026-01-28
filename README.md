@@ -19,8 +19,8 @@ ForgetGate is a small, focused audit: we train a model, unlearn one class with L
 Two attacker data regimes are considered:
 
 - **Full-data** (attacker has the full forget-class training set): VPT reaches ~100% recovery on both the unlearned model and the oracle baseline -> the attack is effectively relearning.
-- **K-shot, default prompt length (10 tokens)**: recovery stays low at k=10-100 (KL approx 0.55-1.50%; oracle 0%), while low-shot controls (k=1/5 with prompt length 5) show larger gaps. Average gap across k=1/5/10/25/50/100 is +3.15pp (seeds 42/123).
-- **Controls (prompt length 5)**: low-shot + label controls expose residual access. Seeds 42/123: k=1: 6.95%, k=5: 7.55%, shuffled-label (k=10): 5.85%, random-label (k=10): 6.00% (oracle stays 0%). Seed 42 prompt-length ablation: 1/2/5 tokens yields 14.0/14.6/15.5% (oracle 0%). Class-wise 10-shot gaps are mostly small (0.5-1.7%), with class 9 higher at 9.75%.
+- **K-shot, default prompt length (10 tokens)**: recovery stays low at k=10-100 (KL 0.43-1.90%; oracle 0.00%). Average gap across k=1/5/10/25/50/100 is +3.15pp (seeds 42/123/456); k=1/5 use prompt length 5 controls.
+- **Controls (prompt length 5)**: low-shot + label controls expose residual access. Seeds 42/123/456: k=1: 4.27%, k=5: 4.53%, shuffled-label (k=10): 3.90%, random-label (k=10): 4.03% (oracle stays 0.00%). Prompt-length ablation (seeds 42/123, k=10): KL 1/2/5 tokens = 7.05/7.35/7.80% (oracle 0.00%). Class-wise 10-shot gaps are mostly small (0.70-1.13%), with class 9 higher at 6.77%.
 
 **Takeaway:** "0% forget accuracy" alone doesn't say much about security. Oracle-normalized evaluation helps separate *relearning capacity* from *residual knowledge access*, and the gap is sensitive to prompt length and low-shot/label controls.
 
@@ -101,7 +101,7 @@ python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yam
 Note: you can also run `python scripts/run_paper_resume.py` to skip completed steps and continue from existing checkpoints/logs.
 
 # 6) Aggregate results across seeds
-python scripts/analyze_kshot_experiments.py --seeds 42 123
+python scripts/analyze_kshot_experiments.py --seeds 42 123 456
 ```
 
 Note: `scripts/1_train_base.py` uses a train/val split from the training set. The test set is reserved for final evaluation via `scripts/4_adv_evaluate.py`.
@@ -189,39 +189,38 @@ ForgetGate/
 
 *Seeds: 42, 123. Metrics from eval_paper_baselines_vit_cifar10_forget0 (clean test set).*
 
-### K-shot recovery (oracle-normalized)
+### K-shot recovery (oracle-normalized, default prompt length)
 
 | K-shot | Oracle Baseline | Unlearned (KL) | Residual Recov. |
 |--------|----------------|----------------|-----------------|
-| 1 | 0.00 +/- 0.00% | 7.45 +/- 10.39% | +7.45pp |
-| 5 | 0.00 +/- 0.00% | 8.20 +/- 11.17% | +8.20pp |
-| 10 | 0.00 +/- 0.00% | 0.65 +/- 0.78% | +0.65pp |
-| 25 | 0.00 +/- 0.00% | 0.55 +/- 0.49% | +0.55pp |
-| 50 | 0.00 +/- 0.00% | 0.55 +/- 0.21% | +0.55pp |
-| 100 | 0.00 +/- 0.00% | 1.50 +/- 0.42% | +1.50pp |
-| **Avg** | **0.00%** | **3.15 +/- 4.09%** | **+3.15pp** |
+| 10 | 0.00 +/- 0.00% | 0.47 +/- 0.64% | +0.47pp |
+| 25 | 0.00 +/- 0.00% | 0.43 +/- 0.40% | +0.43pp |
+| 50 | 0.00 +/- 0.00% | 0.43 +/- 0.25% | +0.43pp |
+| 100 | 0.00 +/- 0.00% | 1.90 +/- 0.75% | +1.90pp |
 
-*Seeds: 42, 123. Recovery@k measured on held-out train split (forget_val) using final logged epoch per run.*
+*Seeds: 42, 123, 456. Recovery@k measured on held-out train split (forget_val) using final logged epoch per run.*
+
+Average Oracle->VPT gap across k=1/5/10/25/50/100 (k=1/5 use prompt length 5 controls) is +3.15pp (seeds 42/123/456).
 
 ### Class-wise oracle gap (10-shot, default prompt length)
 
 | Forget Class | Oracle Baseline | Unlearned (KL) | Residual Recov. |
 |-------------|----------------|----------------|-----------------|
-| 1 | 0.00% | 1.00% | +1.00pp |
-| 2 | 0.00% | 0.50% | +0.50pp |
-| 5 | 0.00% | 1.70% | +1.70pp |
-| 9 | 0.00% | 9.75% | +9.75pp |
+| 1 | 0.00% | 0.73% | +0.73pp |
+| 2 | 0.00% | 0.70% | +0.70pp |
+| 5 | 0.00% | 1.13% | +1.13pp |
+| 9 | 0.00% | 6.77% | +6.77pp |
 
-*Seeds: 42, 123. Recovery@k measured on held-out train split (forget_val) using final logged epoch per run.*
+*Seeds: 42, 123, 456. Recovery@k measured on held-out train split (forget_val) using final logged epoch per run.*
 
-### Prompt-length + control runs (seed 42)
+### Prompt-length + control runs
 
-**Prompt-length ablation (10-shot):**
-- Prompt length 1/2/5: KL = 14.0/14.6/15.5%, Oracle = 0.0%
-- Prompt length 10 (default): KL = 1.2%, Oracle = 0.0%
+**Prompt-length ablation (10-shot, seeds 42/123):**
+- Prompt length 1/2/5: KL = 7.05/7.35/7.80%, Oracle = 0.00%
+- Prompt length 10 (default): KL = 0.47%, Oracle = 0.00%
 
 **Low-shot + label controls (prompt length 5):**
-- Seeds 42/123 mean: k=1: 6.95%, k=5: 7.55%, shuffled-label (k=10): 5.85%, random-label (k=10): 6.00% (oracle 0.0%)
+- Seeds 42/123/456 mean: k=1: 4.27%, k=5: 4.53%, shuffled-label (k=10): 3.90%, random-label (k=10): 4.03% (oracle 0.00%)
 
 ### Full-data recovery (context)
 
@@ -233,11 +232,12 @@ Full-data VPT runs reach near-complete recovery in results/logs/vpt_resurrect_*_
 
 ## Results Provenance
 
-- Seeds: 42, 123 for tables reported below.
+- Seeds: 42, 123, 456 for tables reported below (unless noted).
 - K-shot recovery uses a held-out train split (forget_val) and reports the final logged epoch.
 - Clean baselines come from test-set eval: `eval_paper_baselines_vit_cifar10_forget0`.
 - Reported standard deviations use sample std across seeds (ddof=1).
-- Avg row in the k-shot table is computed by averaging per-seed Recovery@k across k=1,5,10,25,50,100, then taking mean and sample std across seeds. Note: k=1/5 values use prompt length 5 controls; k=10+ use default prompt length 10.
+- Low-shot controls (k=1/5) use prompt length 5; k=10+ uses default prompt length 10.
+- Prompt-length ablation (1/2/5 tokens) aggregates seeds 42/123.
 - Full-data recovery values are from VPT training logs; test-set VPT/PGD numbers require `eval_full_vit_cifar10_forget0`.
 
 ## Artifacts
@@ -272,14 +272,14 @@ Attacker capabilities assumed:
 
 ## Next Steps (Recommended)
 
-1) **Random-label control**: run `--label-mode random` to further rule out relearning.
+1) **Random-label control**: run `--label-mode random` to further rule out relearning (if missing for new seeds).
 2) **Class-wise + prompt-length**: repeat prompt-length ablation for forget classes 1/2/5/9.
-3) **AutoAttack across seeds**: run eval_autoattack for seed 123 (and optionally others).
+3) **AutoAttack across seeds**: run eval_autoattack for seed 123/456 to reduce variance in robustness claims.
 
 ## Follow-ups (If You Want More Rigor)
 
-- Add a third seed (e.g., 456) for k-shot and class-wise tables.
-- Run AutoAttack for seed 123 to reduce variance in robustness claims.
+- Add additional seeds beyond 456 for tighter confidence intervals.
+- Run AutoAttack for seed 123/456 to reduce variance in robustness claims.
 - Report k-shot recovery on a fixed, deterministic split for even tighter comparisons.
 
 ---
