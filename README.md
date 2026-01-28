@@ -19,7 +19,7 @@ ForgetGate is a small, focused audit: we train a model, unlearn one class with L
 Two attacker data regimes are considered:
 
 - **Full-data** (attacker has the full forget-class training set): VPT reaches ~100% recovery on both the unlearned model and the oracle baseline -> the attack is effectively relearning.
-- **K-shot, default prompt length (10 tokens)**: recovery stays low at k=10-100 (KL 0.43-1.90%; oracle 0.00%). Average gap across k=1/5/10/25/50/100 is +3.15pp (seeds 42/123/456); k=1/5 use prompt length 5 controls.
+- **K-shot, default prompt length (10 tokens)**: recovery stays low at k=10-100 (KL 0.43-1.90%; oracle 0.00%). Mean gap across k=10/25/50/100 is +0.81pp (seeds 42/123/456).
 - **Controls (prompt length 5)**: low-shot + label controls expose residual access. Seeds 42/123/456: k=1: 4.27%, k=5: 4.53%, shuffled-label (k=10): 3.90%, random-label (k=10): 4.03% (oracle stays 0.00%). Prompt-length ablation (seeds 42/123, k=10): KL 1/2/5 tokens = 7.05/7.35/7.80% (oracle 0.00%). Class-wise 10-shot gaps are mostly small (0.70-1.13%), with class 9 higher at 6.77%.
 
 **Takeaway:** "0% forget accuracy" alone doesn't say much about security. Oracle-normalized evaluation helps separate *relearning capacity* from *residual knowledge access*, and the gap is sensitive to prompt length and low-shot/label controls.
@@ -200,7 +200,7 @@ ForgetGate/
 
 *Seeds: 42, 123, 456. Recovery@k measured on held-out train split (forget_val) using final logged epoch per run.*
 
-Average Oracle->VPT gap across k=1/5/10/25/50/100 (k=1/5 use prompt length 5 controls) is +3.15pp (seeds 42/123/456).
+Average Oracle->VPT gap across k=10/25/50/100 (default prompt length) is +0.81pp (seeds 42/123/456).
 
 ### Class-wise oracle gap (10-shot, default prompt length)
 
@@ -232,7 +232,11 @@ Full-data VPT runs reach near-complete recovery in results/logs/vpt_resurrect_*_
 
 ## Results Provenance
 
-- Seeds: 42, 123, 456 for tables reported below (unless noted).
+- Seeds by table:
+  - Clean baselines: 42, 123
+  - K-shot recovery + class-wise gap: 42, 123, 456
+  - Prompt-length ablation: 42, 123
+  - Low-shot + label controls: 42, 123, 456
 - K-shot recovery uses a held-out train split (forget_val) and reports the final logged epoch.
 - Clean baselines come from test-set eval: `eval_paper_baselines_vit_cifar10_forget0`.
 - Reported standard deviations use sample std across seeds (ddof=1).
