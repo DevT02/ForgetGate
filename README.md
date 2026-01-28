@@ -110,7 +110,7 @@ Outputs:
 - Models: `checkpoints/`
 - Logs: `results/logs/`
 - Tables/analysis: `results/analysis/`
-Note: results/logs and results/analysis are kept in-repo as proof-of-run artifacts.
+Note: the main branch omits checkpoints/logs to keep clones lightweight. Full artifacts live on `prompt-ablation-classgap`.
 
 Common artifacts:
 - `results/logs/*_evaluation.json`: test-set metrics per suite/seed (clean/pgd/autoattack/vpt).
@@ -325,7 +325,7 @@ unlearn_salun_vit_cifar10_forget0:
 - **OOM**: reduce batch size in configs or use `--device cpu`
 - **CIFAR-10 download issues**: use torchvision dataset docs / mirror
 - **LoRA/PEFT mismatch**: use `peft==0.18.0` (see requirements.txt)
-- **AutoAttack**: optional dependency; if not installed, evaluation falls back to PGD
+- **AutoAttack**: included via requirements; remove the auto-attack line if you want a lighter install
 
 ---
 
