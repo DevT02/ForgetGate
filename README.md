@@ -181,13 +181,13 @@ ForgetGate/
 
 | Method | Forget Acc (%) [lower] | Retain Acc (%) [higher] | Delta Utility |
 |--------|------------------------|-------------------------|---------------|
-| Base Model (No Unlearning) | 92.45 +/- 2.90 | 92.29 +/- 2.19 |  |
-| Uniform KL | 45.10 +/- 63.50 | 92.37 +/- 2.64 | +0.07pp |
-| CE Ascent | **37.55 +/- 53.10** | **92.53 +/- 1.81** | +0.24pp |
-| SalUn (Fan et al. 2024) | 46.50 +/- 65.76 | 92.25 +/- 2.80 | -0.04pp |
-| SCRUB (Kurmanji et al. 2023) | 38.55 +/- 54.52 | 92.47 +/- 1.75 | +0.18pp |
+| Base Model (No Unlearning) | 90.63 +/- 3.76 | 90.67 +/- 3.21 |  |
+| Uniform KL | 58.90 +/- 50.87 | 90.76 +/- 3.36 | +0.09pp |
+| CE Ascent | **53.37 +/- 46.48** | **90.89 +/- 3.12** | +0.22pp |
+| SalUn (Fan et al. 2024) | 59.70 +/- 51.82 | 90.61 +/- 3.46 | -0.06pp |
+| SCRUB (Kurmanji et al. 2023) | 54.03 +/- 46.96 | 90.83 +/- 3.10 | +0.16pp |
 
-*Seeds: 42, 123. Metrics from eval_paper_baselines_vit_cifar10_forget0 (clean test set).*
+*Seeds: 42, 123, 456. Metrics from eval_paper_baselines_vit_cifar10_forget0 (clean test set).*
 
 ### K-shot recovery (oracle-normalized, default prompt length)
 
@@ -233,7 +233,7 @@ Full-data VPT runs reach near-complete recovery in results/logs/vpt_resurrect_*_
 ## Results Provenance
 
 - Seeds by table:
-  - Clean baselines: 42, 123
+  - Clean baselines: 42, 123, 456
   - K-shot recovery + class-wise gap: 42, 123, 456
   - Prompt-length ablation: 42, 123
   - Low-shot + label controls: 42, 123, 456
@@ -242,6 +242,7 @@ Full-data VPT runs reach near-complete recovery in results/logs/vpt_resurrect_*_
 - Reported standard deviations use sample std across seeds (ddof=1).
 - Low-shot controls (k=1/5) use prompt length 5; k=10+ uses default prompt length 10.
 - Prompt-length ablation (1/2/5 tokens) aggregates seeds 42/123.
+- Legacy default-prompt k=1/5 logs are archived in `results/logs/legacy_prompt10` to avoid confusion with the prompt-length-5 controls.
 - Full-data recovery values are from VPT training logs; test-set VPT/PGD numbers require `eval_full_vit_cifar10_forget0`.
 
 ## Artifacts
