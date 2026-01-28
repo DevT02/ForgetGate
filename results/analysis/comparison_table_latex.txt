@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\caption{Comparison of machine unlearning methods on CIFAR-10. Forget Acc measures accuracy on forgotten class (lower is better). Retain Acc measures accuracy on remaining classes (higher is better).}
+\label{tab:unlearning_results}
+\begin{tabular}{lccc}
+\toprule
+Method & Forget Acc (\%) $\downarrow$ & Retain Acc (\%) $\uparrow$ & $\Delta$ Utility \\
+\midrule
+Base Model (No Unlearning) & 92.45 $\pm$ 2.90 & 92.29 $\pm$ 2.19 & — \\
+Uniform KL & 45.10 $\pm$ 63.50 & 92.37 $\pm$ 2.64 & +0.07\% \\
+CE Ascent & \textbf{37.55 $\pm$ 53.10} & \textbf{92.53 $\pm$ 1.81} & +0.24\% \\
+SalUn (Fan et al. 2024) & 46.50 $\pm$ 65.76 & 92.25 $\pm$ 2.80 & -0.04\% \\
+SCRUB (Kurmanji et al. 2023) & 38.55 $\pm$ 54.52 & 92.47 $\pm$ 1.75 & +0.18\% \\
+\bottomrule
+\end{tabular}
+\end{table}
