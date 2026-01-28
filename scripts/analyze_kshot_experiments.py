@@ -66,8 +66,8 @@ def analyze_kshot_sample_efficiency(results_dir, seeds):
     print("K-SHOT SAMPLE EFFICIENCY ANALYSIS")
     print("="*80)
 
-    # K-shot configurations to analyze
-    kshots = [1, 5, 10, 25, 50, 100]
+    # K-shot configurations to analyze (default prompt length runs)
+    kshots = [10, 25, 50, 100]
 
     # Collect results
     oracle_results = {}
