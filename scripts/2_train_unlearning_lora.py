@@ -29,9 +29,15 @@ def load_base_model(experiment_suites: Dict, suite_config: Dict, device: torch.d
     base_suite = suite_config.get('base_model_suite', '')
 
     checkpoint_path = f"checkpoints/base/{base_suite}_seed_{seed}_final.pt"
+    fallback_path = f"checkpoints/base/{base_suite}_seed_{seed}_best.pt"
 
     if not os.path.exists(checkpoint_path):
-        raise FileNotFoundError(f"Base model checkpoint not found: {checkpoint_path}")
+        if os.path.exists(fallback_path):
+            checkpoint_path = fallback_path
+        else:
+            raise FileNotFoundError(
+                f"Base model checkpoint not found: {checkpoint_path} (or fallback {fallback_path})"
+            )
 
     # Load checkpoint
     checkpoint = torch.load(checkpoint_path, map_location=device)

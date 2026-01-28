@@ -221,6 +221,12 @@ def main():
     training_config = suite_config.get('training', {})
     batch_size = training_config.get('batch_size', 128)
     num_workers = training_config.get('num_workers', 4)
+    env_workers = os.getenv("FG_NUM_WORKERS")
+    if env_workers is not None:
+        try:
+            num_workers = int(env_workers)
+        except ValueError:
+            raise ValueError(f"Invalid FG_NUM_WORKERS='{env_workers}', must be int")
     val_ratio = training_config.get('val_ratio', 0.1)
 
     # Check if adversarial training is enabled

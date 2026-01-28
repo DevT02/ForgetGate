@@ -76,9 +76,15 @@ def load_unlearned_model(experiment_suites: Dict, suite_config: Dict, device: to
         raise ValueError("No base_model_suite found in unlearned suite")
 
     base_checkpoint = f"checkpoints/base/{base_suite_name}_seed_{seed}_final.pt"
+    base_fallback = f"checkpoints/base/{base_suite_name}_seed_{seed}_best.pt"
 
     if not os.path.exists(base_checkpoint):
-        raise FileNotFoundError(f"Base model checkpoint not found: {base_checkpoint}")
+        if os.path.exists(base_fallback):
+            base_checkpoint = base_fallback
+        else:
+            raise FileNotFoundError(
+                f"Base model checkpoint not found: {base_checkpoint} (or fallback {base_fallback})"
+            )
 
     checkpoint = torch.load(base_checkpoint, map_location=device)
 
