@@ -80,6 +80,9 @@ def main():
                 vals.append(runs[key])
         return vals, missing
 
+    def get_val(suite, seed):
+        return runs.get((suite, seed))
+
     lines = []
     lines.append("# K-shot Summary\n")
     lines.append(f"Seeds: {', '.join(map(str, seeds))}\n")
@@ -103,13 +106,25 @@ def main():
     lines.append("| K-shot | Oracle | KL | Missing (Oracle/KL) |")
     lines.append("|---|---|---|---|")
     for k in kshots_controls:
-        oracle_vals, oracle_missing = collect(f"vpt_oracle_vit_cifar10_forget0_{k}shot_prompt5")
-        kl_vals, kl_missing = collect(f"vpt_resurrect_kl_forget0_{k}shot_prompt5")
+        oracle_vals, oracle_missing = collect(f"vpt_oracle_vit_cifar10_forget0_10shot_prompt5_kshot{k}")
+        kl_vals, kl_missing = collect(f"vpt_resurrect_kl_forget0_10shot_prompt5_kshot{k}")
         o_mean, o_std = mean_std(oracle_vals)
         k_mean, k_std = mean_std(kl_vals)
         missing = f"{oracle_missing}/{kl_missing}"
         lines.append(
             f"| {k} | {fmt_pct(o_mean)} +/- {fmt_pct(o_std)} | {fmt_pct(k_mean)} +/- {fmt_pct(k_std)} | {missing} |"
+        )
+
+    lines.append("\n### Low-shot controls (prompt length 5) per-seed\n")
+    lines.append("| Seed | Oracle k=1 | KL k=1 | Oracle k=5 | KL k=5 |")
+    lines.append("|---|---|---|---|---|")
+    for seed in seeds:
+        o1 = get_val("vpt_oracle_vit_cifar10_forget0_10shot_prompt5_kshot1", seed)
+        k1 = get_val("vpt_resurrect_kl_forget0_10shot_prompt5_kshot1", seed)
+        o5 = get_val("vpt_oracle_vit_cifar10_forget0_10shot_prompt5_kshot5", seed)
+        k5 = get_val("vpt_resurrect_kl_forget0_10shot_prompt5_kshot5", seed)
+        lines.append(
+            f"| {seed} | {fmt_pct(o1)} | {fmt_pct(k1)} | {fmt_pct(o5)} | {fmt_pct(k5)} |"
         )
 
     # Label controls (prompt length 5, k=10)
@@ -124,6 +139,18 @@ def main():
         missing = f"{oracle_missing}/{kl_missing}"
         lines.append(
             f"| {mode} | {fmt_pct(o_mean)} +/- {fmt_pct(o_std)} | {fmt_pct(k_mean)} +/- {fmt_pct(k_std)} | {missing} |"
+        )
+
+    lines.append("\n### Label controls per-seed (prompt length 5, k=10)\n")
+    lines.append("| Seed | Oracle shuffle | KL shuffle | Oracle random | KL random |")
+    lines.append("|---|---|---|---|---|")
+    for seed in seeds:
+        os_val = get_val("vpt_oracle_vit_cifar10_forget0_10shot_prompt5_shufflelabels", seed)
+        ks_val = get_val("vpt_resurrect_kl_forget0_10shot_prompt5_shufflelabels", seed)
+        or_val = get_val("vpt_oracle_vit_cifar10_forget0_10shot_prompt5_randomlabels", seed)
+        kr_val = get_val("vpt_resurrect_kl_forget0_10shot_prompt5_randomlabels", seed)
+        lines.append(
+            f"| {seed} | {fmt_pct(os_val)} | {fmt_pct(ks_val)} | {fmt_pct(or_val)} | {fmt_pct(kr_val)} |"
         )
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)

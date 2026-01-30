@@ -19,6 +19,11 @@ objectives:
     target_class_weight: 1.0
     retain_class_weight: 0.1
 
+  # Retain-only CE with optional gradient noise (certified-style proxy)
+  noisy_retain:
+    name: "noisy_retain"
+    loss_type: "retain_only"
+
   # Gradient ascent on features (scrubbing)
   feature_scrub:
     name: "feature_scrub"
@@ -60,11 +65,21 @@ lora_unlearn:
   # Regularization
   lora_reg_lambda: 0.01  # Regularization on LoRA parameters
   retain_lambda: 5.0     # Weight for retain loss vs forget loss
+  grad_noise_std: 0.0    # Optional Gaussian grad noise (certified-style proxy)
 
   # Optimizer
   optimizer: adamw
   scheduler: cosine
   min_lr: 1e-6
+
+# Optional pruning before unlearning
+pruning:
+  enabled: false
+  amount: 0.2
+  strategy: global_unstructured
+  module_types: ["Linear"]
+  make_permanent: true
+  apply_to_teacher: true
 
 # Data filtering for unlearning
 data_filter:

@@ -122,6 +122,22 @@ class UniformKL(UnlearningObjective):
         return weighted_loss.mean()
 
 
+class RetainOnlyCE(UnlearningObjective):
+    """Cross-entropy on retain classes only (forget class ignored)."""
+
+    def __init__(self, forget_class: int, num_classes: int = 10):
+        super().__init__(forget_class, num_classes)
+
+    def forward(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        ce_loss = F.cross_entropy(logits, labels, reduction='none')
+        forget_mask = (labels == self.forget_class)
+        retain_mask = ~forget_mask
+        retain_loss = torch.where(retain_mask, ce_loss, torch.zeros_like(ce_loss))
+        # Avoid divide-by-zero if batch is all forget-class.
+        denom = retain_mask.sum().clamp_min(1)
+        return retain_loss.sum() / denom
+
+
 class FeatureScrub(UnlearningObjective):
     """Feature scrubbing objective (gradient ascent on features)"""
 
@@ -467,6 +483,9 @@ def create_unlearning_objective(objective_name: str, forget_class: int,
 
     elif objective_name == "uniform_kl":
         return UniformKL(forget_class, num_classes, **kwargs)
+
+    elif objective_name in ("retain_only", "noisy_retain"):
+        return RetainOnlyCE(forget_class, num_classes)
 
     elif objective_name == "feature_scrub":
         return FeatureScrub(forget_class, num_classes, **kwargs)

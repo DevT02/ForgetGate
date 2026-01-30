@@ -4,13 +4,14 @@
 \label{tab:unlearning_results}
 \begin{tabular}{lccc}
 \toprule
-Method & Forget Acc (\%) $\downarrow$ & Retain Acc (\%) $\uparrow$ & $\Delta$ Utility \\
+Method & Forget Acc (\%) $\downarrow$ & Retain Acc (\%) $\uparrow$ & $\Delta$ Utility \
 \midrule
-Base Model (No Unlearning) & 92.45 $\pm$ 2.90 & 92.29 $\pm$ 2.19 & — \\
-Uniform KL & 45.10 $\pm$ 63.50 & 92.37 $\pm$ 2.64 & +0.07\% \\
-CE Ascent & \textbf{37.55 $\pm$ 53.10} & \textbf{92.53 $\pm$ 1.81} & +0.24\% \\
-SalUn (Fan et al. 2024) & 46.50 $\pm$ 65.76 & 92.25 $\pm$ 2.80 & -0.04\% \\
-SCRUB (Kurmanji et al. 2023) & 38.55 $\pm$ 54.52 & 92.47 $\pm$ 1.75 & +0.18\% \\
+Base Model (No Unlearning) & 91.90 $\pm$ 4.25 & 91.79 $\pm$ 3.78 & +0.00pp \
+Uniform KL & 33.70 $\pm$ 46.27 & 92.04 $\pm$ 3.90 & +0.25pp \
+CE Ascent & 53.43 $\pm$ 46.53 & 91.85 $\pm$ 3.67 & +0.06pp \
+SalUn (Fan et al. 2024) & 58.23 $\pm$ 50.45 & 91.97 $\pm$ 4.01 & +0.18pp \
+SCRUB (Kurmanji et al. 2023) & 53.77 $\pm$ 46.77 & 91.84 $\pm$ 3.72 & +0.06pp \
+Noisy Retain-Only (Proxy) & 68.80 $\pm$ 0.00 & 94.61 $\pm$ 0.00 & +0.51pp \
 \bottomrule
 \end{tabular}
 \end{table}

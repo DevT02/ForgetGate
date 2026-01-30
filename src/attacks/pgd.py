@@ -132,7 +132,7 @@ class PGDAttack:
                 print("\n--- PGD Debug (first batch only) ---")
                 print(f"Input range: [{input_min:.3f}, {input_max:.3f}] (should be ~[0,1] for PGD)")
                 print(f"PGD Config: eps={self.eps:.6f}, alpha={self.alpha:.6f}, steps={self.steps}, norm={self.norm}")
-                print(f"Perturbation: max|δ|={max_delta:.6f}, ||δ||₂_avg={l2_delta:.6f}")
+                print(f"Perturbation: max|delta|={max_delta:.6f}, ||delta||_2_avg={l2_delta:.6f}")
                 print(f"Accuracy: clean={clean_acc:.4f}, adv={adv_acc:.4f}")
                 print("--- End PGD Debug ---\n")
 

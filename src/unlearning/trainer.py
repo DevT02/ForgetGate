@@ -30,7 +30,8 @@ class UnlearningTrainer:
                  robust_retain: bool = False,
                  robust_retain_eps: float = 8/255,
                  robust_retain_alpha: float = 2/255,
-                 robust_retain_steps: int = 5):
+                 robust_retain_steps: int = 5,
+                 grad_noise_std: float = 0.0):
         """
         Args:
             model: Model with LoRA applied
@@ -56,6 +57,7 @@ class UnlearningTrainer:
         self.robust_retain_eps = robust_retain_eps
         self.robust_retain_alpha = robust_retain_alpha
         self.robust_retain_steps = robust_retain_steps
+        self.grad_noise_std = grad_noise_std
 
         # Create PGD attack for robust retain if enabled
         if self.robust_retain:
@@ -192,6 +194,16 @@ class UnlearningTrainer:
                 continue
             param.grad.mul_(mask.to(device=param.grad.device, dtype=param.grad.dtype))
 
+    def _apply_grad_noise(self):
+        """Optional Gaussian gradient noise for certified-style baselines."""
+        if not self.grad_noise_std or self.grad_noise_std <= 0:
+            return
+        for param in self.model.parameters():
+            if param.grad is None:
+                continue
+            noise = torch.randn_like(param.grad) * self.grad_noise_std
+            param.grad.add_(noise)
+
     def train_epoch(self) -> Dict[str, float]:
         """Train for one epoch"""
         self.model.train()
@@ -256,6 +268,7 @@ class UnlearningTrainer:
             self.optimizer.zero_grad()
             loss.backward()
             self._apply_saliency_mask()
+            self._apply_grad_noise()
             self.optimizer.step()
 
             # Update statistics
@@ -482,7 +495,8 @@ def create_unlearning_trainer(model: nn.Module,
                              robust_retain: bool = False,
                              robust_retain_eps: float = 8/255,
                              robust_retain_alpha: float = 2/255,
-                             robust_retain_steps: int = 5) -> UnlearningTrainer:
+                             robust_retain_steps: int = 5,
+                             grad_noise_std: float = 0.0) -> UnlearningTrainer:
     """
     Factory function to create unlearning trainer
 
@@ -513,7 +527,8 @@ def create_unlearning_trainer(model: nn.Module,
         robust_retain=robust_retain,
         robust_retain_eps=robust_retain_eps,
         robust_retain_alpha=robust_retain_alpha,
-        robust_retain_steps=robust_retain_steps
+        robust_retain_steps=robust_retain_steps,
+        grad_noise_std=grad_noise_std
     )
 
     return trainer

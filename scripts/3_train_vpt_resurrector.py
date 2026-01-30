@@ -155,6 +155,10 @@ def main():
                        help="Override label mode for forget data: true, shuffle, or random")
     parser.add_argument("--k-shot", type=int, default=None,
                        help="Override k-shot count for forget data (controls)")
+    parser.add_argument("--stratify", type=str, default=None, choices=["high_conf", "low_conf"],
+                       help="Stratify forget data by model confidence before k-shot selection")
+    parser.add_argument("--stratify-fraction", type=float, default=None,
+                       help="Optional fraction of forget data to keep after stratification")
 
     args = parser.parse_args()
 
@@ -238,6 +242,43 @@ def main():
     forget_train, retain_train, forget_val, retain_val = create_forget_retain_splits(
         train_dataset, forget_class, train_ratio=0.8
     )
+
+    # Optional stratification by model confidence on forget samples
+    stratify_mode = args.stratify or vpt_params.get('stratify', None)
+    stratify_fraction = args.stratify_fraction if args.stratify_fraction is not None else vpt_params.get('stratify_fraction', None)
+    if stratify_mode:
+        print(f"\nStratifying forget samples by confidence: {stratify_mode}")
+        target_model.eval()
+        conf_loader = DataLoader(
+            forget_train,
+            batch_size=256,
+            shuffle=False,
+            num_workers=0,
+            pin_memory=True
+        )
+        conf_scores = []
+        with torch.no_grad():
+            for inputs, labels in conf_loader:
+                inputs, labels = inputs.to(device), labels.to(device)
+                outputs = target_model(inputs)
+                probs = torch.softmax(outputs, dim=-1)
+                conf = probs.gather(1, labels.view(-1, 1)).squeeze(1)
+                conf_scores.extend(conf.detach().cpu().tolist())
+
+        # Rank indices by confidence
+        idx_conf = list(enumerate(conf_scores))
+        idx_conf.sort(key=lambda x: x[1], reverse=(stratify_mode == "high_conf"))
+        ranked_indices = [i for i, _ in idx_conf]
+
+        if stratify_fraction is not None:
+            if not (0 < stratify_fraction <= 1.0):
+                raise ValueError("stratify_fraction must be in (0,1]")
+            keep_n = max(1, int(len(ranked_indices) * stratify_fraction))
+            ranked_indices = ranked_indices[:keep_n]
+            print(f"Keeping top {keep_n}/{len(conf_scores)} forget samples after stratification")
+
+        from torch.utils.data import Subset
+        forget_train = Subset(forget_train, ranked_indices)
 
     # K-shot sampling - limit training data if specified
     k_shot = vpt_params.get('k_shot', None)
@@ -383,6 +424,9 @@ def main():
         suite_name_for_io = f"{args.suite}_prompt{prompt_length}"
     if args.k_shot is not None:
         suite_name_for_io = f"{suite_name_for_io}_kshot{args.k_shot}"
+    if stratify_mode:
+        suffix = "highconf" if stratify_mode == "high_conf" else "lowconf"
+        suite_name_for_io = f"{suite_name_for_io}_{suffix}"
     if label_mode != "true":
         suite_name_for_io = f"{suite_name_for_io}_{label_mode}labels"
 

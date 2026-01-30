@@ -19,6 +19,7 @@ from src.data import DataManager
 from src.models.vit import create_vit_model
 from src.models.cnn import create_cnn_model
 from src.models.peft_lora import create_lora_config, apply_lora_to_model, save_lora_adapter
+from src.models.pruning import apply_global_pruning
 from src.unlearning.trainer import create_unlearning_trainer
 from src.utils import set_seed, ensure_dir, load_config, print_model_info, get_device
 from src.utils import log_experiment, create_experiment_log
@@ -129,12 +130,35 @@ def main():
     # Load base model
     base_model = load_base_model(experiment_suites, suite_config, device, args.seed)
 
+    # Optional pruning before unlearning
+    pruning_defaults = unlearning_config.get('pruning', {})
+    pruning_cfg = dict(pruning_defaults)
+    pruning_cfg.update(unlearning_params.get('pruning', {}) or {})
+    if pruning_cfg.get('enabled', False):
+        pruned = apply_global_pruning(
+            base_model,
+            amount=pruning_cfg.get('amount', 0.2),
+            module_types=pruning_cfg.get('module_types', ["Linear"]),
+            make_permanent=pruning_cfg.get('make_permanent', True),
+            strategy=pruning_cfg.get('strategy', "global_unstructured"),
+        )
+        print(f"Applied pruning before unlearning: pruned_params={pruned}")
+
     # For SCRUB, we need a separate teacher model (frozen copy of base)
     # Load it BEFORE applying LoRA to avoid reference issues
     teacher_model = None
     if objective_name == "scrub":
         print("\nLoading separate teacher model for SCRUB...")
         teacher_model = load_base_model(experiment_suites, suite_config, device, args.seed)
+        if pruning_cfg.get('enabled', False) and pruning_cfg.get('apply_to_teacher', True):
+            pruned_t = apply_global_pruning(
+                teacher_model,
+                amount=pruning_cfg.get('amount', 0.2),
+                module_types=pruning_cfg.get('module_types', ["Linear"]),
+                make_permanent=pruning_cfg.get('make_permanent', True),
+                strategy=pruning_cfg.get('strategy', "global_unstructured"),
+            )
+            print(f"Applied pruning to teacher model: pruned_params={pruned_t}")
         teacher_model.eval()
         for param in teacher_model.parameters():
             param.requires_grad = False
@@ -213,6 +237,10 @@ def main():
 
     # Create unlearning trainer
     retain_lambda = unlearning_config['lora_unlearn'].get('retain_lambda', 1.0)
+    grad_noise_std = unlearning_params.get(
+        'grad_noise_std',
+        unlearning_config['lora_unlearn'].get('grad_noise_std', 0.0)
+    )
     trainer = create_unlearning_trainer(
         model=lora_model,
         objective_name=objective_name,
@@ -222,7 +250,8 @@ def main():
         num_classes=data_config[dataset_name]['num_classes'],
         device=device,
         retain_lambda=retain_lambda,
-        objective_kwargs=objective_kwargs
+        objective_kwargs=objective_kwargs,
+        grad_noise_std=grad_noise_std
     )
 
     # Set teacher model for SCRUB (distillation-based unlearning)

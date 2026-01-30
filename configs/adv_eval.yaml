@@ -80,3 +80,9 @@ compute:
   eval_batch_size: 64
   mixed_precision: true
   num_workers: 2
+
+# Dependency-aware evaluation (retain images + forget cue patch)
+dependency_patch:
+  patch_size: 8
+  alpha: 0.7
+  position: "bottom_right"

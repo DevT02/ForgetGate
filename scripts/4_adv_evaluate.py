@@ -12,8 +12,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
-from typing import Dict, Tuple
+from torch.utils.data import DataLoader, Dataset
+from typing import Dict, Tuple, Optional
 import yaml
 
 from src.data import DataManager
@@ -103,6 +103,63 @@ def build_model_from_eval_config(eval_config: Dict, device: torch.device) -> nn.
         )
 
     return model.to(device)
+
+
+class ForgetCuePatchDataset(Dataset):
+    """Overlay a small forget-class patch onto retain images (dependency-aware eval)."""
+
+    def __init__(self, retain_dataset: Dataset, forget_dataset: Dataset,
+                 patch_size: int = 8, alpha: float = 0.7,
+                 position: str = "bottom_right", seed: int = 0):
+        self.retain_dataset = retain_dataset
+        self.forget_dataset = forget_dataset
+        self.patch_size = patch_size
+        self.alpha = alpha
+        self.position = position
+        self.seed = seed
+
+    def __len__(self):
+        return len(self.retain_dataset)
+
+    def _sample_forget_index(self, idx: int) -> int:
+        # Deterministic sampling per index for reproducibility
+        import random
+        rng = random.Random(self.seed + idx * 9973)
+        return rng.randrange(len(self.forget_dataset))
+
+    def _get_patch_slice(self, h: int, w: int) -> Tuple[slice, slice]:
+        ps = self.patch_size
+        if self.position == "top_left":
+            return slice(0, ps), slice(0, ps)
+        if self.position == "top_right":
+            return slice(0, ps), slice(w - ps, w)
+        if self.position == "bottom_left":
+            return slice(h - ps, h), slice(0, ps)
+        # default: bottom_right
+        return slice(h - ps, h), slice(w - ps, w)
+
+    def __getitem__(self, idx):
+        x_retain, y_retain = self.retain_dataset[idx]
+        fidx = self._sample_forget_index(idx)
+        x_forget, _ = self.forget_dataset[fidx]
+
+        # Ensure tensor shape is [C,H,W]
+        if not torch.is_tensor(x_retain):
+            x_retain = torch.tensor(x_retain)
+        if not torch.is_tensor(x_forget):
+            x_forget = torch.tensor(x_forget)
+
+        c, h, w = x_retain.shape
+        ps = min(self.patch_size, h, w)
+        hs, ws = self._get_patch_slice(h, w)
+        # Use a patch from the forget image (top-left crop)
+        patch = x_forget[:, :ps, :ps]
+
+        x = x_retain.clone()
+        x[:, hs, ws] = (1 - self.alpha) * x[:, hs, ws] + self.alpha * patch
+        x = torch.clamp(x, 0.0, 1.0)
+
+        return x, y_retain
 
 
 def load_model_for_evaluation(
@@ -216,7 +273,8 @@ def load_model_for_evaluation(
 
 def run_evaluation(suite_config: Dict, model: nn.Module, model_name: str,
                   data_loader: DataLoader, evaluator: 'ForgetGateEvaluator',
-                  attack_configs: Dict, device: torch.device) -> Dict[str, Dict]:
+                  attack_configs: Dict, device: torch.device,
+                  dependency_loader: Optional[DataLoader] = None) -> Dict[str, Dict]:
     """Run evaluation for a model under different attacks"""
     results = {}
 
@@ -239,6 +297,8 @@ def run_evaluation(suite_config: Dict, model: nn.Module, model_name: str,
                 attack_type_for_evaluator = "clean"
             elif attack_type == "vpt_plus_pgd":
                 attack_type_for_evaluator = "pgd"
+            elif attack_type == "dependency_forget_patch":
+                attack_type_for_evaluator = "clean"
             else:
                 attack_type_for_evaluator = "clean"
 
@@ -247,9 +307,15 @@ def run_evaluation(suite_config: Dict, model: nn.Module, model_name: str,
                 attack_type_for_evaluator, attack_type
             )
 
+            eval_loader = data_loader
+            if attack_type == "dependency_forget_patch":
+                if dependency_loader is None:
+                    raise ValueError("dependency_loader is required for dependency_forget_patch")
+                eval_loader = dependency_loader
+
             metrics = evaluator.evaluate_model(
                 model=model,
-                data_loader=data_loader,
+                data_loader=eval_loader,
                 attack_type=attack_type_for_evaluator,
                 attack_config=attack_config if attack_type_for_evaluator != "clean" else None
             )
@@ -486,9 +552,49 @@ def main():
                 apply_to="forget",
             )
             LOGGER.debug("Built attack_config for %s: %s", attack, attack_configs[attack])
+        elif attack == "dependency_forget_patch":
+            dep_cfg = adv_eval_config.get("dependency_patch", {})
+            attack_configs[attack] = {
+                "patch_size": int(dep_cfg.get("patch_size", 8)),
+                "alpha": float(dep_cfg.get("alpha", 0.7)),
+                "position": str(dep_cfg.get("position", "bottom_right")),
+            }
+            LOGGER.debug("Built attack_config for %s: %s", attack, attack_configs[attack])
 
     if args.dump_configs:
         LOGGER.info("Final derived attack_configs: %s", attack_configs)
+
+    # Optional dependency-aware loader (retain-only with forget cue patch)
+    dependency_loader = None
+    if "dependency_forget_patch" in attacks_to_run:
+        dep_cfg = adv_eval_config.get("dependency_patch", {})
+        retain_dataset = data_manager.load_dataset(
+            dataset_name, "test",
+            exclude_classes=[forget_class],
+            use_pretrained=True,
+            apply_imagenet_norm=False
+        )
+        forget_dataset = data_manager.load_dataset(
+            dataset_name, "test",
+            include_classes=[forget_class],
+            use_pretrained=True,
+            apply_imagenet_norm=False
+        )
+        dep_dataset = ForgetCuePatchDataset(
+            retain_dataset,
+            forget_dataset,
+            patch_size=int(dep_cfg.get("patch_size", 8)),
+            alpha=float(dep_cfg.get("alpha", 0.7)),
+            position=str(dep_cfg.get("position", "bottom_right")),
+            seed=args.seed,
+        )
+        dependency_loader = DataLoader(
+            dep_dataset,
+            batch_size=adv_eval_config['compute'].get('eval_batch_size', 256),
+            shuffle=False,
+            num_workers=0,
+            pin_memory=True,
+        )
 
     # Evaluate each model
     model_suites = suite_config.get('model_suites', [])
@@ -545,7 +651,8 @@ def main():
                 data_loader=test_loader,
                 evaluator=evaluator,
                 attack_configs=relevant_attacks,
-                device=device
+                device=device,
+                dependency_loader=dependency_loader
             )
 
             # Save results with actual suite name to distinguish between methods
