@@ -1,0 +1,60 @@
+{
+  "generated_at": "2026-01-30T21:47:38Z",
+  "seeds": [
+    42,
+    123,
+    456
+  ],
+  "std_threshold_pp": 5.0,
+  "rows": [
+    {
+      "method": "base_vit_cifar10",
+      "forget_mean": 91.83333333333333,
+      "forget_std": 4.361574639202374,
+      "retain_mean": 91.79629629629629,
+      "retain_std": 3.7709797222795554
+    },
+    {
+      "method": "unlearn_lora_vit_cifar10_forget0",
+      "forget_mean": 53.46666666666666,
+      "forget_std": 46.56203746973851,
+      "retain_mean": 91.82962962962964,
+      "retain_std": 3.7052071022794255
+    },
+    {
+      "method": "unlearn_kl_vit_cifar10_forget0",
+      "forget_mean": 33.733333333333334,
+      "forget_std": 46.33112704579216,
+      "retain_mean": 92.04444444444445,
+      "retain_std": 3.897593432863567
+    },
+    {
+      "method": "unlearn_salun_vit_cifar10_forget0",
+      "forget_mean": 58.266666666666666,
+      "forget_std": 50.474680121159096,
+      "retain_mean": 91.97037037037038,
+      "retain_std": 4.006481374487498
+    },
+    {
+      "method": "unlearn_scrub_distill_vit_cifar10_forget0",
+      "forget_mean": 53.86666666666667,
+      "forget_std": 46.86644144090026,
+      "retain_mean": 91.85555555555555,
+      "retain_std": 3.7054680982516217
+    },
+    {
+      "method": "unlearn_noisy_retain_vit_cifar10_forget0",
+      "forget_mean": 52.86666666666667,
+      "forget_std": 33.74971604818822,
+      "retain_mean": 92.31111111111112,
+      "retain_std": 3.5871684902967393
+    }
+  ],
+  "flags": [
+    "unlearn_lora_vit_cifar10_forget0: forget std 46.56pp",
+    "unlearn_kl_vit_cifar10_forget0: forget std 46.33pp",
+    "unlearn_salun_vit_cifar10_forget0: forget std 50.47pp",
+    "unlearn_scrub_distill_vit_cifar10_forget0: forget std 46.87pp",
+    "unlearn_noisy_retain_vit_cifar10_forget0: forget std 33.75pp"
+  ]
+}

@@ -18,7 +18,7 @@ ForgetGate is a small, focused audit: we train a model, unlearn one class with L
 
 Two attacker data regimes are considered:
 
-- **Full-data** (attacker has the full forget-class training set): VPT reaches ~100% recovery on both the unlearned model and the oracle baseline -> the attack is effectively relearning.
+- **Full-data** (attacker has the full forget-class training set): VPT reaches about 100% recovery on both the unlearned model and the oracle baseline -> the attack is effectively relearning.
 - **K-shot, default prompt length (10 tokens)**: recovery stays low at k=10-100 (KL 0.43-1.90%; oracle 0.00%). Mean gap across k=10/25/50/100 is +0.81pp (seeds 42/123/456).
 - **Controls (prompt length 5)**: low-shot + label controls expose residual access and variance. Seeds 42/123/456: k=1: 34.17%, k=5: 35.47%, shuffled-label (k=10): 3.90%, random-label (k=10): 4.03% (oracle stays 0.00%). Prompt-length ablation (seeds 42/123, k=10): KL 1/2/5 tokens = 7.05/7.35/7.80% (oracle 0.00%). Class-wise 10-shot gaps are mostly small (0.70-1.13%), with class 9 higher at 6.77%.
 
@@ -38,7 +38,7 @@ Two attacker data regimes are considered:
 Requirements:
 - Python 3.10+
 - CUDA GPU recommended (8GB+ VRAM for ViT runs)
-- ~20GB free disk
+- At least 20GB free disk
 
 ```bash
 git clone https://github.com/DevT02/ForgetGate.git
@@ -192,6 +192,7 @@ ForgetGate/
 - `vpt_plus_pgd` (targeted PGD toward the forget class, optionally on VPT-wrapped model)
 - AutoAttack integration
 - Dependency-aware eval (retain images patched with forget cues)
+- Backdoor patch eval (poisoning-style, attack success rate)
 
 ---
 
@@ -199,22 +200,26 @@ ForgetGate/
 
 Recent work highlights evaluation pitfalls and stronger baselines:
 
-- **Dependency-aware evaluation**: CMU’s 2025 critique shows that independent forget/retain splits can be misleading; dependency-style tests often reveal failures. We implemented patch-based dependency eval to address this. [R1]
-- **Multi-criteria evaluation**: MUSE (ICLR 2025) argues unlearning must be assessed across privacy, utility, sustainability, and sequential requests, not just forget/retain. We treat this as a caution on narrow metrics. [R2]
-- **Certified unlearning via noisy retain finetune**: ICML 2025 proposes guarantees using noisy finetuning on retain data. We added a noisy retain-only baseline (`objective: noisy_retain` + `grad_noise_std`). [R3]
-- **System-aware unlearning**: ICML 2025 formalizes weaker but realistic attacker models; our oracle baseline and dependency eval are closer to “system-aware” stress tests than worst-case retraining guarantees. [R4]
-- **Poisoning removal remains hard**: ICLR 2025 shows many practical unlearning methods fail to remove poisoning effects, reinforcing the need for attack-driven audits like ours. [R5]
-- **Distillation can robustify unlearning**: ArXiv 2025 (UNDO) reports distillation improves robustness of unlearning against finetuning reversal. This motivates future student-distillation baselines. [R6]
+- **Dependency-aware evaluation**: CMU's 2025 critique shows that independent forget/retain splits can be misleading; dependency-style tests often reveal failures. We implemented patch-based dependency eval to address this.
+- **Multi-criteria evaluation**: MUSE (ICLR 2025) proposes a six-way evaluation of unlearning (privacy, utility, sustainability, etc.). We treat this as a caution on narrow metrics.
+- **Certified unlearning via noisy retain finetune**: ICML 2025 proposes guarantees using noisy fine-tuning on retain data. We added a noisy retain-only proxy baseline (`objective: noisy_retain` + `grad_noise_std`).
+- **System-aware unlearning**: ICML 2025 formalizes weaker but realistic attacker models; our oracle baseline and dependency eval are closer to "system-aware" stress tests than worst-case retraining guarantees.
+- **Poisoning removal remains hard**: ICLR 2025 shows practical unlearning methods fail to remove poisoning effects, motivating backdoor/trigger evaluations.
+- **Distillation can robustify unlearning**: 2025 work shows distillation can improve robustness to finetuning reversal (UNDO). This motivates future student-distillation baselines.
+- **Self-distillation for robustness**: NAACL 2025 (UnDIAL) reports a self-distillation variant that stabilizes unlearning; we treat this as a future baseline for the LLM setting.
+- **Adversarial mixup unlearning**: ICLR 2025 proposes generator-assisted mixup to avoid catastrophic unlearning; we list it as a future baseline.
 
 We focus on vision but treat these as general design signals for unlearning evaluation and baselines.
 
-**References**
-- [R1] CMU ML Blog (2025): LLM unlearning benchmarks are weak measures of progress
-- [R2] MUSE (ICLR 2025): Machine unlearning at scale
-- [R3] Certified Unlearning via Noisy Finetuning (ICML 2025)
-- [R4] System-Aware Unlearning (ICML 2025)
-- [R5] Machine Unlearning Fails to Remove Data Poisoning (ICLR 2025)
-- [R6] UNDO: Distillation Robustifies Unlearning Against Finetuning (arXiv 2025)
+**References (external)**
+- CMU ML Blog (2025): LLM unlearning benchmarks are weak measures of progress (https://blog.ml.cmu.edu/2025/04/18/llm-unlearning-benchmarks-are-weak-measures-of-progress/)
+- MUSE (ICLR 2025): Machine Unlearning Six-Way Evaluation for Language Models (https://proceedings.iclr.cc/paper_files/paper/2025/hash/4556f5398bd2c61bd7500e306b4e560a-Abstract-Conference.html)
+- Certified Unlearning for Neural Networks (ICML 2025) (https://icml.cc/virtual/2025/poster/46518)
+- System-Aware Unlearning Algorithms: Use Lesser, Forget Faster (ICML 2025) (https://icml.cc/virtual/2025/poster/45985)
+- Machine Unlearning Fails to Remove Data Poisoning Attacks (ICLR 2025) (https://proceedings.iclr.cc/paper_files/paper/2025/hash/7e810b2c75d69be186cadd2fe3febeab-Abstract-Conference.html)
+- Distillation Robustifies Unlearning (2025) (https://deeplearn.org/arxiv/616100/distillation-robustifies-unlearning)
+- UnDIAL: Self-Distillation with Adjusted Logits for Robust Unlearning (NAACL 2025) (https://aclanthology.org/2025.naacl-long.444/)
+- Adversarial Mixup Unlearning (ICLR 2025) (https://proceedings.iclr.cc/paper_files/paper/2025/hash/bd5508e429849637d177603c32169aba-Abstract-Conference.html)
 
 ---
 
@@ -224,13 +229,35 @@ We focus on vision but treat these as general design signals for unlearning eval
 
 | Method | Forget Acc (%) [lower] | Retain Acc (%) [higher] | Delta Utility |
 |--------|------------------------|-------------------------|---------------|
-| Base Model (No Unlearning) | 90.63 +/- 3.76 | 90.67 +/- 3.21 | 0.00pp |
-| Uniform KL | 58.90 +/- 50.87 | 90.76 +/- 3.36 | +0.09pp |
-| CE Ascent | **53.37 +/- 46.48** | **90.89 +/- 3.12** | +0.22pp |
-| SalUn (Fan et al. 2024) | 59.70 +/- 51.82 | 90.61 +/- 3.46 | -0.06pp |
-| SCRUB (Kurmanji et al. 2023) | 54.03 +/- 46.96 | 90.83 +/- 3.10 | +0.16pp |
+| Base Model (No Unlearning) | 91.83 +/- 4.36 | 91.80 +/- 3.77 | 0.00pp |
+| Uniform KL | 33.73 +/- 46.33 | 92.04 +/- 3.90 | +0.25pp |
+| CE Ascent | 53.47 +/- 46.56 | 91.83 +/- 3.71 | +0.03pp |
+| SalUn (Fan et al. 2024) | 58.27 +/- 50.47 | 91.97 +/- 4.01 | +0.17pp |
+| SCRUB (Kurmanji et al. 2023) | 53.87 +/- 46.87 | 91.86 +/- 3.71 | +0.06pp |
+| Noisy Retain-Only (Proxy) | 52.87 +/- 33.75 | 92.31 +/- 3.59 | +0.51pp |
 
 *Seeds: 42, 123, 456. Metrics from eval_paper_baselines_vit_cifar10_forget0 (clean test set).*
+Delta utility is defined as retain accuracy minus the base retain accuracy for the same seed group, so the base row is 0.00pp by definition.
+
+### Prune-then-unlearn baseline (seed 42)
+
+| Method | Forget Acc (%) | Retain Acc (%) |
+|--------|----------------|----------------|
+| Prune + KL (seed 42) | 17.00 | 94.44 |
+
+*From `results/logs/eval_prune_kl_vit_cifar10_forget0_seed_42_evaluation.json` (clean test set).*
+
+### Backdoor patch eval (seed 42)
+
+Backdoor eval reports attack success rate (ASR) as `forget_acc`. Retain accuracy is not meaningful here because labels are forced to the target class during the trigger test.
+
+| Method | Backdoor ASR (Forget Acc) | Retain Acc |
+|--------|---------------------------|------------|
+| Base | 9.99 | 0.00 |
+| Unlearn LoRA | 7.57 | 0.00 |
+| Unlearn KL | 1.31 | 0.00 |
+
+*From `results/logs/eval_backdoor_vit_cifar10_forget0_seed_42_evaluation.json`.*
 
 ### K-shot recovery (oracle-normalized, default prompt length)
 
@@ -270,16 +297,16 @@ Average Oracle->VPT gap across k=10/25/50/100 (default prompt length) is +0.81pp
 - Low-confidence subset: 13.60% (KL, k=10)
 
 **Dependency-aware eval (retain images patched with forget cue):**
-- Base + unlearned retain stays ~0.91-0.94 across seeds 42/123/456; forget stays 0.00.
-- VPT retain drops sharply on seed 123 (0.361) but stays 0.929 on seed 42. VPT dependency eval is not available for seed 456 (no full-data VPT checkpoint).
+- Base + unlearned retain stays about 0.87-0.94 across seeds 42/123/456; forget stays 0.00.
+- VPT retain drops sharply on seed 123 (0.361) but stays 0.929 on seed 42. VPT dependency eval is not available for seed 456 (no VPT checkpoint).
 
 ### Full-data recovery (context)
 
 Full-data VPT runs reach near-complete recovery in results/logs/vpt_resurrect_*_seed_*.jsonl. To reproduce test-set VPT/PGD metrics, run: `python scripts/4_adv_evaluate.py --suite eval_full_vit_cifar10_forget0`.
 
-**Oracle control (full-data)**: VPT on the oracle baseline also reaches ~100% recovery with full data, indicating the full-data attack is effectively relearning rather than accessing residual knowledge. See `results/logs/oracle_vpt_control_class0_seed_42.jsonl` and `results/logs/oracle_vpt_control_class0_seed_123.jsonl`.
+**Oracle control (full-data)**: VPT on the oracle baseline also reaches about 100% recovery with full data, indicating the full-data attack is effectively relearning rather than accessing residual knowledge. See `results/logs/oracle_vpt_control_class0_seed_42.jsonl` and `results/logs/oracle_vpt_control_class0_seed_123.jsonl`.
 
-**AutoAttack (seeds 42/123/456)**: full AutoAttack drives both forget and retain accuracy to ~0 on base/unlearned/VPT models (see `results/logs/eval_autoattack_vit_cifar10_forget0_seed_{42,123,456}_evaluation.json`).
+**AutoAttack (seeds 42/123/456)**: full AutoAttack drives both forget and retain accuracy to about 0 on base/unlearned models for all seeds. VPT AutoAttack is available for seeds 42 and 123 (see `results/logs/eval_autoattack_vit_cifar10_forget0_seed_{42,123,456}_evaluation.json`).
 
 ## Results Provenance
 
@@ -330,7 +357,7 @@ Attacker capabilities assumed:
 
 **Oracle baseline details:** The oracle is a 10-class classifier trained on retain data only (class 0 excluded from training). Class 0 predictions come from the untrained logit, so the oracle represents what happens if you retrain from scratch without the forget class.
 
-**VPT evaluation:** Prompts are applied to all inputs (both forget and retain classes) at evaluation time. This means VPT can hurt retain accuracy while recovering forget accuracy. For example, in full-data runs, retain accuracy drops from ~94% to ~52% under VPT. This models an attacker who wraps the model with a fixed input transformation.
+**VPT evaluation:** Prompts are applied to all inputs (both forget and retain classes) at evaluation time. This means VPT can hurt retain accuracy while recovering forget accuracy. For example, in full-data runs, retain accuracy drops from about 94% to about 52% under VPT. This models an attacker who wraps the model with a fixed input transformation.
 
 ---
 

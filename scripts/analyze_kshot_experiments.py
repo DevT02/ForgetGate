@@ -62,9 +62,7 @@ def load_multiseed_results(results_dir, pattern, seeds):
 
 def analyze_kshot_sample_efficiency(results_dir, seeds):
     """Analyze sample efficiency across different k-shot settings"""
-    print("\n" + "="*80)
     print("K-SHOT SAMPLE EFFICIENCY ANALYSIS")
-    print("="*80)
 
     # K-shot configurations to analyze (default prompt length runs)
     kshots = [10, 25, 50, 100]
@@ -168,9 +166,7 @@ def analyze_kshot_sample_efficiency(results_dir, seeds):
         print(f"{k:<10} {oracle_str:<20} {kl_str:<20} {salun_str:<15} {scrub_str:<15} {gap_str:<20}")
 
     # Analysis
-    print("\n" + "="*80)
     print("KEY FINDINGS")
-    print("="*80)
 
     avg_gap = np.mean([
         kl_results.get(k, {}).get('mean', kl_results.get(k, {}).get('final_acc', 0)) -
@@ -226,6 +222,7 @@ def generate_sample_efficiency_report(results_dir, oracle_kshot, kl_kshot,
     lines.append("# Sample-Efficiency Thresholds (Recovery@k)")
     lines.append("")
     lines.append("Smallest k such that mean Recovery@k >= threshold (percent).")
+    lines.append("If a threshold is not reached within the tested k-shot values, it is reported as \"not reached\".")
     lines.append("")
     lines.append("| Threshold (%) | Oracle k* | Oracle Recovery@k | Unlearned (KL) k* | Unlearned Recovery@k | k-Advantage (Oracle - Unlearned) |")
     lines.append("|---|---|---|---|---|---|")
@@ -235,13 +232,13 @@ def generate_sample_efficiency_report(results_dir, oracle_kshot, kl_kshot,
         kk, kacc = _first_k_at_threshold(kl_kshot, t)
         ok_str = str(ok) if ok is not None else "not reached"
         kk_str = str(kk) if kk is not None else "not reached"
-        oacc_str = f"{oacc:.2f}%" if oacc is not None else "N/A"
-        kacc_str = f"{kacc:.2f}%" if kacc is not None else "N/A"
+        oacc_str = f"{oacc:.2f}%" if oacc is not None else "not reached"
+        kacc_str = f"{kacc:.2f}%" if kacc is not None else "not reached"
         if ok is not None and kk is not None:
             adv = ok - kk
             adv_str = f"{adv:+d}"
         else:
-            adv_str = "N/A"
+            adv_str = "not reached"
         lines.append(f"| {t:.1f} | {ok_str} | {oacc_str} | {kk_str} | {kacc_str} | {adv_str} |")
 
     output_file = results_dir.parent / "analysis" / "sample_efficiency_gap.txt"
@@ -257,9 +254,7 @@ def generate_sample_efficiency_report(results_dir, oracle_kshot, kl_kshot,
 
 def analyze_prompt_capacity(results_dir, seeds):
     """Analyze VPT capacity with different prompt lengths"""
-    print("\n" + "="*80)
     print("PROMPT CAPACITY ABLATION")
-    print("="*80)
 
     # Explicit prompt-length overrides we ran
     prompt_lengths = [1, 2, 5, 10]
@@ -310,9 +305,7 @@ def analyze_prompt_capacity(results_dir, seeds):
 
         print(f"{pl:<15} {params:<12,} {oracle_str:<12} {kl_str:<15} {gap_str:<12}")
 
-    print("\n" + "="*70)
     print("INTERPRETATION")
-    print("="*70)
 
     if kl_results and oracle_results:
         max_kl = max([kl_results[pl].get('mean', kl_results[pl].get('final_acc', 0)) for pl in kl_results.keys()])
@@ -333,9 +326,7 @@ def analyze_prompt_capacity(results_dir, seeds):
 
 def analyze_classwise_gap(results_dir, seeds, forget_classes=(1, 2, 5, 9)):
     """Analyze class-wise oracle gap for 10-shot runs."""
-    print("\n" + "="*80)
     print("CLASS-WISE ORACLE GAP (10-shot)")
-    print("="*80)
 
     results = []
     for c in forget_classes:
@@ -376,9 +367,7 @@ def analyze_classwise_gap(results_dir, seeds, forget_classes=(1, 2, 5, 9)):
 
 def analyze_lowshot_controls(results_dir, seeds, prompt_length=5, kshots=(1, 5)):
     """Analyze low-shot controls with fixed prompt length."""
-    print("\n" + "="*80)
     print("LOW-SHOT CONTROLS (prompt length %d)" % prompt_length)
-    print("="*80)
 
     results = []
     for k in kshots:
@@ -417,9 +406,7 @@ def analyze_lowshot_controls(results_dir, seeds, prompt_length=5, kshots=(1, 5))
 
 def analyze_shuffled_label_control(results_dir, seeds, prompt_length=5):
     """Analyze shuffled-label controls (k=10) with fixed prompt length."""
-    print("\n" + "="*80)
     print("SHUFFLED-LABEL CONTROL (prompt length %d, k=10)" % prompt_length)
-    print("="*80)
 
     # Accept both "shufflelabels" and legacy "shuffledlabels" suffixes
     oracle_data = load_multiseed_results(
@@ -461,9 +448,7 @@ def analyze_shuffled_label_control(results_dir, seeds, prompt_length=5):
 
 def analyze_random_label_control(results_dir, seeds, prompt_length=5):
     """Analyze random-label controls (k=10) with fixed prompt length."""
-    print("\n" + "="*80)
     print("RANDOM-LABEL CONTROL (prompt length %d, k=10)" % prompt_length)
-    print("="*80)
 
     oracle_data = load_multiseed_results(
         results_dir,
@@ -497,9 +482,7 @@ def analyze_random_label_control(results_dir, seeds, prompt_length=5):
 def generate_plots(results_dir, oracle_kshot, kl_kshot, salun_kshot, scrub_kshot,
                    oracle_prompt, kl_prompt, curve_seed):
     """Generate publication-quality plots"""
-    print("\n" + "="*80)
     print("GENERATING PLOTS")
-    print("="*80)
 
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
 
@@ -681,9 +664,7 @@ def main():
         print(f"Error: Results directory not found: {results_dir}")
         return
 
-    print("="*80)
     print("FORGETGATE K-SHOT ANALYSIS")
-    print("="*80)
     seeds = args.seeds
     curve_seed = args.curve_seed if args.curve_seed is not None else seeds[0]
 
@@ -709,9 +690,7 @@ def main():
         print(f"  KL k-shot results: {len(kl_kshot)}")
 
     # Final summary
-    print("\n" + "="*80)
     print("ANALYSIS COMPLETE")
-    print("="*80)
     print("\nKey files generated:")
     print("  - results/analysis/kshot_analysis.png")
     print("  - results/analysis/learning_curves_kshot.png")
@@ -719,7 +698,6 @@ def main():
     print("  1. Oracle-normalized recovery difficulty")
     print("  2. 0% forget accuracy != security guarantee")
     print("  3. LoRA-unlearning provides minimal benefit over never training")
-    print("="*80)
 
 
 if __name__ == "__main__":

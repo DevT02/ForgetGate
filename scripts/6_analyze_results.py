@@ -27,7 +27,7 @@ def load_evaluation_results(results_dir: str, suite_name: str, seeds: List[int])
 
 
 def aggregate_metrics(all_results: Dict) -> Dict:
-    """Aggregate metrics across seeds (mean ± std)"""
+    """Aggregate metrics across seeds (mean +/- std)"""
     # Collect metrics per model
     model_metrics = {}
 
@@ -45,7 +45,7 @@ def aggregate_metrics(all_results: Dict) -> Dict:
                 model_metrics[model_name]['forget_acc'].append(clean_data['forget_acc'])
                 model_metrics[model_name]['retain_acc'].append(clean_data['retain_acc'])
 
-    # Compute mean ± std
+    # Compute mean +/- std
     aggregated = {}
     for model_name, metrics in model_metrics.items():
         aggregated[model_name] = {}
@@ -63,8 +63,8 @@ def aggregate_metrics(all_results: Dict) -> Dict:
 
 
 def format_result(mean: float, std: float, bold_best: bool = False) -> str:
-    """Format result as mean ± std with optional bold for best"""
-    formatted = f"{mean:.2f} ± {std:.2f}"
+    """Format result as mean +/- std with optional bold for best"""
+    formatted = f"{mean:.2f} +/- {std:.2f}"
     if bold_best:
         formatted = f"**{formatted}**"
     return formatted
@@ -134,7 +134,7 @@ def generate_comparison_table(aggregated: Dict, output_path: str = None):
         # Compute utility delta (positive = gained utility, negative = lost utility)
         if 'base' in model:
             base_retain = retain_mean
-            utility_str = "—"
+            utility_str = "n/a"
         else:
             if base_retain is not None:
                 utility_delta = retain_mean - base_retain
@@ -184,7 +184,7 @@ def generate_comparison_table(aggregated: Dict, output_path: str = None):
 
         # Utility delta
         if 'base' in model:
-            utility_str = "—"
+            utility_str = "n/a"
         else:
             if base_retain is not None:
                 utility_delta = retain_mean - base_retain
@@ -200,7 +200,6 @@ def generate_comparison_table(aggregated: Dict, output_path: str = None):
 
     # Print to console
     print(markdown)
-    print("\n" + "="*80 + "\n")
     print("LaTeX Table:")
     print(latex)
 
@@ -223,9 +222,7 @@ def generate_comparison_table(aggregated: Dict, output_path: str = None):
 
 def print_detailed_analysis(aggregated: Dict):
     """Print detailed analysis for each method"""
-    print("\n" + "="*80)
     print("DETAILED ANALYSIS")
-    print("="*80 + "\n")
 
     for model_name, data in sorted(aggregated.items()):
         print(f"\n{model_name}:")
@@ -255,9 +252,7 @@ def main():
 
     args = parser.parse_args()
 
-    print("="*80)
     print("ForgetGate-V: Unlearning Results Analysis")
-    print("="*80)
     print(f"Suite: {args.suite}")
     print(f"Seeds: {args.seeds}")
     print(f"Results directory: {args.results_dir}")
@@ -281,9 +276,7 @@ def main():
     # Print detailed analysis
     print_detailed_analysis(aggregated)
 
-    print("\n" + "="*80)
     print("Analysis complete!")
-    print("="*80)
 
 
 if __name__ == "__main__":

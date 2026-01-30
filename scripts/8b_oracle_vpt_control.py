@@ -79,9 +79,7 @@ def main():
     set_seed(args.seed)
     device = get_device(args.device)
 
-    print(f"\n{'='*80}")
     print(f"ORACLE VPT CONTROL EXPERIMENT - THE CRITICAL BASELINE")
-    print(f"{'='*80}")
     print(f"\nThis experiment proves whether resurrection is REAL or just relearning.")
     print(f"\nSetup:")
     print(f"  - Oracle model: NEVER trained on class {args.target_class}")
@@ -89,7 +87,6 @@ def main():
     print(f"\nExpected:")
     print(f"  - If Oracle->VPT goes 0%->100% quickly: VPT is just relearning (BAD)")
     print(f"  - If Oracle->VPT stays low or learns slowly: Resurrection is REAL (GOOD)")
-    print(f"{'='*80}\n")
 
     # Load configs
     with open(args.config, 'r') as f:
@@ -284,18 +281,14 @@ def main():
     final_vpt_acc = evaluate_on_target_class(vpt_model, target_test_loader, device)
     final_delta = final_vpt_acc - oracle_target_acc
 
-    print(f"\n{'='*80}")
     print("FINAL RESULTS")
-    print(f"{'='*80}")
     print(f"\nTarget Class {args.target_class} Accuracy:")
     print(f"  Oracle (never saw it):  {oracle_target_acc:.2f}%")
     print(f"  VPT-adapted:            {final_vpt_acc:.2f}%")
     print(f"  Delta:                  {final_delta:+.2f}%")
 
     # Interpretation
-    print(f"\n{'='*80}")
     print("INTERPRETATION - CRITICAL FOR YOUR PAPER")
-    print(f"{'='*80}\n")
 
     # Load unlearned->VPT results for comparison (if available)
     unlearned_vpt_files = list(Path("results/logs").glob(f"vpt_resurrect_*_forget{args.target_class}_seed_{args.seed}.jsonl"))
@@ -396,7 +389,6 @@ def main():
         json.dump(final_report, f, indent=2)
 
     print(f"\n[OK] Saved results to {results_dir}")
-    print(f"\n{'='*80}")
 
     return verdict in ["VALID", "LIKELY_VALID"]
 

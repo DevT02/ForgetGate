@@ -635,6 +635,31 @@ eval_dependency_vit_cifar10_forget0:
       - retain_acc
   seeds: [42, 123, 456]
 
+eval_prune_kl_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_prune_kl_vit_cifar10_forget0
+  evaluation:
+    attacks:
+      - clean
+    metrics:
+      - forget_acc
+      - retain_acc
+  seeds: [42, 123, 456]
+
+# Backdoor / poisoning robustness eval (triggered inputs)
+eval_backdoor_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_lora_vit_cifar10_forget0
+    - unlearn_kl_vit_cifar10_forget0
+  evaluation:
+    attacks:
+      - backdoor_patch
+    metrics:
+      - backdoor_asr
+  seeds: [42, 123, 456]
+
 # Evaluation suite for length-20 VPT prompts
 eval_full_vit_cifar10_forget0_vptlen20:
   model_suites:

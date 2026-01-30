@@ -61,7 +61,7 @@ vpt_training:
 # Attack constraints
 constraints:
   # Maximum perturbation budgets
-  l_inf_budget: 0.1  # Maximum L∞ perturbation (normalized)
+  l_inf_budget: 0.1  # Maximum L_inf perturbation (normalized)
   l2_budget: 1.0     # Maximum L2 perturbation
 
   # Prompt size limits

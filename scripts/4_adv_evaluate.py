@@ -299,6 +299,8 @@ def run_evaluation(suite_config: Dict, model: nn.Module, model_name: str,
                 attack_type_for_evaluator = "pgd"
             elif attack_type == "dependency_forget_patch":
                 attack_type_for_evaluator = "clean"
+            elif attack_type == "backdoor_patch":
+                attack_type_for_evaluator = "backdoor_patch"
             else:
                 attack_type_for_evaluator = "clean"
 
@@ -560,6 +562,20 @@ def main():
                 "position": str(dep_cfg.get("position", "bottom_right")),
             }
             LOGGER.debug("Built attack_config for %s: %s", attack, attack_configs[attack])
+        elif attack == "backdoor_patch":
+            bd_cfg = adv_eval_config.get("backdoor_patch", {})
+            bd_target = bd_cfg.get("target_class", forget_class)
+            if bd_target is None:
+                bd_target = forget_class
+            attack_configs[attack] = {
+                "type": str(bd_cfg.get("type", "patch")),
+                "patch_size": int(bd_cfg.get("patch_size", 4)),
+                "position": str(bd_cfg.get("position", "bottom_right")),
+                "pattern": str(bd_cfg.get("pattern", "checkerboard")),
+                "intensity": float(bd_cfg.get("intensity", 1.0)),
+                "target_class": int(bd_target),
+            }
+            LOGGER.debug("Built attack_config for %s: %s", attack, attack_configs[attack])
 
     if args.dump_configs:
         LOGGER.info("Final derived attack_configs: %s", attack_configs)
@@ -659,7 +675,7 @@ def main():
             all_results[model_suite] = model_results
 
     except KeyboardInterrupt:
-        print("\nInterrupted — saving partial results...")
+        print("\nInterrupted - saving partial results...")
 
     finally:
         # Derived README metrics. Used for analysis.

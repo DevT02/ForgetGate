@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-29T06:29:29Z",
+  "generated_at": "2026-01-30T21:47:38Z",
   "results_dir": "results/logs",
   "seeds": [
     42,
@@ -10,7 +10,7 @@
     42,
     123
   ],
-  "log_count": 185,
+  "log_count": 189,
   "logs": [
     "results/logs/base_cnn_cifar10_seed_42.jsonl",
     "results/logs/base_vit_cifar10_seed_123.jsonl",
@@ -22,6 +22,8 @@
     "results/logs/eval_autoattack_vit_cifar10_forget0_seed_42_evaluation.json",
     "results/logs/eval_autoattack_vit_cifar10_forget0_seed_456.jsonl",
     "results/logs/eval_autoattack_vit_cifar10_forget0_seed_456_evaluation.json",
+    "results/logs/eval_backdoor_vit_cifar10_forget0_seed_42.jsonl",
+    "results/logs/eval_backdoor_vit_cifar10_forget0_seed_42_evaluation.json",
     "results/logs/eval_baselines_vit_cifar10_forget0_seed_42_evaluation.json",
     "results/logs/eval_dependency_vit_cifar10_forget0_seed_123.jsonl",
     "results/logs/eval_dependency_vit_cifar10_forget0_seed_123_evaluation.json",
@@ -40,6 +42,8 @@
     "results/logs/eval_paper_baselines_vit_cifar10_forget0_seed_42_evaluation.json",
     "results/logs/eval_paper_baselines_vit_cifar10_forget0_seed_456.jsonl",
     "results/logs/eval_paper_baselines_vit_cifar10_forget0_seed_456_evaluation.json",
+    "results/logs/eval_prune_kl_vit_cifar10_forget0_seed_42.jsonl",
+    "results/logs/eval_prune_kl_vit_cifar10_forget0_seed_42_evaluation.json",
     "results/logs/eval_quick_baselines_vit_cifar10_forget0_seed_42.jsonl",
     "results/logs/eval_quick_baselines_vit_cifar10_forget0_seed_42_evaluation.json",
     "results/logs/eval_quick_cnn_baselines_forget0_seed_42.jsonl",
@@ -205,6 +209,14 @@
     "classwise_10shot": [],
     "autoattack_eval": [],
     "dependency_eval": [],
-    "clean_baselines_eval": []
+    "backdoor_eval": [
+      "eval_backdoor_vit_cifar10_forget0_seed_123_evaluation.json",
+      "eval_backdoor_vit_cifar10_forget0_seed_456_evaluation.json"
+    ],
+    "clean_baselines_eval": [],
+    "prune_baseline_eval": [
+      "eval_prune_kl_vit_cifar10_forget0_seed_123_evaluation.json",
+      "eval_prune_kl_vit_cifar10_forget0_seed_456_evaluation.json"
+    ]
   }
 }

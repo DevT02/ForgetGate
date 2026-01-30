@@ -43,9 +43,19 @@ PATTERNS = {
             "eval_dependency_vit_cifar10_forget0_seed_{seed}_evaluation.json",
         ],
     },
+    "backdoor_eval": {
+        "templates": [
+            "eval_backdoor_vit_cifar10_forget0_seed_{seed}_evaluation.json",
+        ],
+    },
     "clean_baselines_eval": {
         "templates": [
             "eval_paper_baselines_vit_cifar10_forget0_seed_{seed}_evaluation.json",
+        ],
+    },
+    "prune_baseline_eval": {
+        "templates": [
+            "eval_prune_kl_vit_cifar10_forget0_seed_{seed}_evaluation.json",
         ],
     },
 }
@@ -127,7 +137,9 @@ def main():
         "classwise_10shot": find_missing(args.results_dir, args.seeds, "classwise_10shot"),
         "autoattack_eval": find_missing(args.results_dir, args.seeds, "autoattack_eval"),
         "dependency_eval": find_missing(args.results_dir, args.seeds, "dependency_eval"),
+        "backdoor_eval": find_missing(args.results_dir, args.seeds, "backdoor_eval"),
         "clean_baselines_eval": find_missing(args.results_dir, args.seeds, "clean_baselines_eval"),
+        "prune_baseline_eval": find_missing(args.results_dir, args.seeds, "prune_baseline_eval"),
     }
 
     manifest = {

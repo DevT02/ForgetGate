@@ -72,9 +72,9 @@ class ResurrectionBounds:
         """
         Derive lower bound on resurrection success rate
 
-        Theorem: With probability ≥ 1-δ, VPT resurrection achieves accuracy:
-            RSR ≥ I_retained * (1 - exp(-β * epochs))
-        where β depends on VPT capacity and frozen parameter information.
+        Theorem: With probability >= 1-delta, VPT resurrection achieves accuracy:
+            RSR >= I_retained * (1 - exp(-beta * epochs))
+        where beta depends on VPT capacity and frozen parameter information.
 
         Args:
             delta: Confidence parameter
@@ -88,13 +88,13 @@ class ResurrectionBounds:
         vpt_params = self.vpt_cfg.prompt_length * self.vpt_cfg.embedding_dim
         capacity_ratio = vpt_params / (self.unlearn_cfg.forget_samples * 10)  # heuristic
 
-        # Learning rate factor (higher LR → faster convergence but lower final acc)
+        # Learning rate factor (higher LR -> faster convergence but lower final acc)
         lr_factor = np.clip(self.vpt_cfg.learning_rate / 0.01, 0.5, 2.0)
 
-        # Convergence rate β (depends on capacity and LR)
+        # Convergence rate beta (depends on capacity and LR)
         beta = 0.05 * capacity_ratio * lr_factor
 
-        # Lower bound with confidence δ
+        # Lower bound with confidence delta
         convergence_term = 1 - np.exp(-beta * self.vpt_cfg.num_epochs)
         rsr_lower_bound = I_retained * convergence_term * (1 - delta)
 
@@ -105,8 +105,8 @@ class ResurrectionBounds:
         Compute sample complexity: minimum forget samples needed for VPT resurrection
 
         Based on PAC learning framework:
-            n ≥ (1/ε²) * (d * log(1/δ) + log(1/ε))
-        where d is VPT parameter dimension, ε is error tolerance
+            n >= (1/eps^2) * (d * log(1/delta) + log(1/eps))
+        where d is VPT parameter dimension, eps is error tolerance
 
         Args:
             target_rsr: Target resurrection success rate
@@ -130,8 +130,8 @@ class ResurrectionBounds:
         Upper bound on VPT parameters needed to achieve target RSR
 
         If information I_retained exists in frozen params, VPT needs capacity:
-            p * d ≥ K * n_forget * log(1/ε)
-        where K is problem-dependent constant, ε = 1 - target_rsr
+            p * d >= K * n_forget * log(1/eps)
+        where K is problem-dependent constant, eps = 1 - target_rsr
 
         Args:
             target_rsr: Target resurrection success rate
@@ -157,7 +157,7 @@ class ResurrectionBounds:
         KL divergence between original and unlearned distributions
 
         D_KL(p_orig || p_unlearned) bounds the distinguishability.
-        Lower KL → easier resurrection (more information retained)
+        Lower KL -> easier resurrection (more information retained)
 
         Args:
             p_orig: Original model predictions (distribution)
@@ -179,11 +179,11 @@ class ResurrectionBounds:
 
     def certified_unlearning_violation(self, epsilon: float = 0.1, delta: float = 0.05) -> bool:
         """
-        Check if resurrection attack violates (ε,δ)-certified unlearning
+        Check if resurrection attack violates (eps, delta)-certified unlearning
 
         Certified unlearning requires:
-            P[f_unlearned(x) ≠ f_retrained(x)] ≤ ε
-        with probability ≥ 1-δ
+            P[f_unlearned(x) != f_retrained(x)] <= eps
+        with probability >= 1-delta
 
         If RSR is high, this bound is violated.
 
@@ -279,8 +279,8 @@ class ResurrectionBounds:
         print(f"  Current VPT params: {report['vpt_config']['vpt_params']:,}")
 
         print("\n[Certified Unlearning Violations]")
-        print(f"  Violates (ε=0.1, δ=0.05): {report['certified_unlearning']['violates_01_005']}")
-        print(f"  Violates (ε=0.05, δ=0.01): {report['certified_unlearning']['violates_005_001']}")
+        print(f"  Violates (eps=0.1, delta=0.05): {report['certified_unlearning']['violates_01_005']}")
+        print(f"  Violates (eps=0.05, delta=0.01): {report['certified_unlearning']['violates_005_001']}")
 
         print("\n" + "="*80)
 

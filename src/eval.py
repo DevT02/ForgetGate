@@ -91,6 +91,12 @@ class ForgetGateEvaluator:
                 version=attack_config.get("version", "standard"),
                 attacks_to_run=attack_config.get("attacks_to_run", None),
             )
+        elif attack_type == "backdoor_patch":
+            from .backdoor.triggers import create_trigger
+            target_class = int(attack_config.get("target_class", self.forget_class))
+            trigger_cfg = dict(attack_config)
+            trigger_cfg["target_class"] = target_class
+            trigger = create_trigger(trigger_cfg)
 
         # Initialize counters
         total_correct = 0
@@ -144,6 +150,14 @@ class ForgetGateEvaluator:
                     batch_size=int(attack_config.get("batch_size", 128))
                 )
                 inputs = adv_inputs
+            elif attack_type == "backdoor_patch":
+                poisoned = []
+                for i in range(batch_size):
+                    img, _ = trigger.apply(inputs[i], labels[i].item())
+                    poisoned.append(img)
+                inputs = torch.stack(poisoned, dim=0).to(self.device)
+                target_class = int(attack_config.get("target_class", self.forget_class))
+                labels = torch.full_like(labels, target_class)
             elif attack_type != "clean":
                 inputs = self._apply_attack(inputs, labels, attack_type, attack_config, model)
 
@@ -165,15 +179,20 @@ class ForgetGateEvaluator:
                 total_correct += predicted.eq(labels).sum().item()
                 total_samples += batch_size
 
-                # Forget class accuracy
-                forget_mask = (labels == self.forget_class)
-                forget_correct += (predicted[forget_mask] == labels[forget_mask]).sum().item()
-                forget_samples += forget_mask.sum().item()
+                if attack_type == "backdoor_patch":
+                    # Treat backdoor ASR as forget_acc for reporting
+                    forget_correct += predicted.eq(labels).sum().item()
+                    forget_samples += batch_size
+                else:
+                    # Forget class accuracy
+                    forget_mask = (labels == self.forget_class)
+                    forget_correct += (predicted[forget_mask] == labels[forget_mask]).sum().item()
+                    forget_samples += forget_mask.sum().item()
 
-                # Retain class accuracy
-                retain_mask = ~forget_mask
-                retain_correct += (predicted[retain_mask] == labels[retain_mask]).sum().item()
-                retain_samples += retain_mask.sum().item()
+                    # Retain class accuracy
+                    retain_mask = ~forget_mask
+                    retain_correct += (predicted[retain_mask] == labels[retain_mask]).sum().item()
+                    retain_samples += retain_mask.sum().item()
 
         # Calculate metrics
         overall_acc = total_correct / total_samples if total_samples > 0 else 0.0
@@ -194,6 +213,9 @@ class ForgetGateEvaluator:
             'total_samples': total_samples,
             'attack_type': attack_type
         }
+        if attack_type == "backdoor_patch":
+            metrics['backdoor_asr'] = forget_acc
+            metrics['target_class'] = int(attack_config.get("target_class", self.forget_class))
 
         # Confidence metrics
         confidence_metrics = self._compute_confidence_metrics(all_logits, all_labels)

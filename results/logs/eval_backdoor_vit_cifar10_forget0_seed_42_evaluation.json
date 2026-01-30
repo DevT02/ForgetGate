@@ -1,0 +1,65 @@
+{
+  "base_vit_cifar10": {
+    "backdoor_patch": {
+      "overall_acc": 0.0999,
+      "forget_acc": 0.0999,
+      "retain_acc": 0.0,
+      "forget_samples": 10000,
+      "retain_samples": 0,
+      "total_samples": 10000,
+      "attack_type": "backdoor_patch",
+      "backdoor_asr": 0.0999,
+      "target_class": 0,
+      "mean_confidence": 0.9845331311225891,
+      "correct_confidence": 0.9819560647010803,
+      "incorrect_confidence": 0.9848191738128662,
+      "forget_confidence": 0.9845331311225891,
+      "forget_correct_confidence": 0.9819560647010803,
+      "mean_entropy": 0.03940209001302719,
+      "max_entropy": 1.4405121803283691,
+      "min_entropy": 7.800876643867388e-14
+    }
+  },
+  "unlearn_lora_vit_cifar10_forget0": {
+    "backdoor_patch": {
+      "overall_acc": 0.0757,
+      "forget_acc": 0.0757,
+      "retain_acc": 0.0,
+      "forget_samples": 10000,
+      "retain_samples": 0,
+      "total_samples": 10000,
+      "attack_type": "backdoor_patch",
+      "backdoor_asr": 0.0757,
+      "target_class": 0,
+      "mean_confidence": 0.9823716878890991,
+      "correct_confidence": 0.977531373500824,
+      "incorrect_confidence": 0.9827681183815002,
+      "forget_confidence": 0.9823716878890991,
+      "forget_correct_confidence": 0.977531373500824,
+      "mean_entropy": 0.04498427361249924,
+      "max_entropy": 1.4746626615524292,
+      "min_entropy": 9.385487585679073e-14
+    }
+  },
+  "unlearn_kl_vit_cifar10_forget0": {
+    "backdoor_patch": {
+      "overall_acc": 0.0131,
+      "forget_acc": 0.0131,
+      "retain_acc": 0.0,
+      "forget_samples": 10000,
+      "retain_samples": 0,
+      "total_samples": 10000,
+      "attack_type": "backdoor_patch",
+      "backdoor_asr": 0.0131,
+      "target_class": 0,
+      "mean_confidence": 0.9374825954437256,
+      "correct_confidence": 0.6093233823776245,
+      "incorrect_confidence": 0.9418385624885559,
+      "forget_confidence": 0.9374825954437256,
+      "forget_correct_confidence": 0.6093233823776245,
+      "mean_entropy": 0.17493119835853577,
+      "max_entropy": 2.1272997856140137,
+      "min_entropy": 5.074413111927356e-12
+    }
+  }
+}

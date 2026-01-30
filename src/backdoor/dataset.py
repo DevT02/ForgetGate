@@ -45,7 +45,7 @@ class BackdoorDataset(Dataset):
 
         print(f"[BackdoorDataset] Poisoning {len(self.poison_indices)} samples "
               f"({len(self.poison_indices)/len(clean_dataset)*100:.1f}%) "
-              f"with {self.trigger.trigger_type} trigger → class {self.trigger.target_class}")
+              f"with {self.trigger.trigger_type} trigger -> class {self.trigger.target_class}")
 
     def __len__(self):
         return len(self.clean_dataset)

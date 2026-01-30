@@ -1,10 +1,11 @@
 # Sample-Efficiency Thresholds (Recovery@k)
 
 Smallest k such that mean Recovery@k >= threshold (percent).
+If a threshold is not reached within the tested k-shot values, it is reported as "not reached".
 
 | Threshold (%) | Oracle k* | Oracle Recovery@k | Unlearned (KL) k* | Unlearned Recovery@k | k-Advantage (Oracle - Unlearned) |
 |---|---|---|---|---|---|
-| 1.0 | not reached | N/A | 100 | 1.90% | N/A |
-| 2.0 | not reached | N/A | not reached | N/A | N/A |
-| 5.0 | not reached | N/A | not reached | N/A | N/A |
-| 10.0 | not reached | N/A | not reached | N/A | N/A |
+| 1.0 | not reached | not reached | 100 | 1.90% | not reached |
+| 2.0 | not reached | not reached | not reached | not reached | not reached |
+| 5.0 | not reached | not reached | not reached | not reached | not reached |
+| 10.0 | not reached | not reached | not reached | not reached | not reached |

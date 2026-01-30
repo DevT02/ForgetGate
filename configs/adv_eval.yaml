@@ -86,3 +86,12 @@ dependency_patch:
   patch_size: 8
   alpha: 0.7
   position: "bottom_right"
+
+# Backdoor patch evaluation (poisoning-style)
+backdoor_patch:
+  type: "patch"
+  patch_size: 4
+  position: "bottom_right"
+  pattern: "checkerboard"
+  intensity: 1.0
+  target_class: null

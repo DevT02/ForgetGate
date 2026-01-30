@@ -1,0 +1,92 @@
+{
+  "generated_at": "2026-01-30T21:47:38Z",
+  "eval": {
+    "unknown_suite_files": [],
+    "missing_models": [
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_456_evaluation.json :: vpt_resurrect_vit_cifar10_forget0",
+      "results\\logs\\eval_baselines_vit_cifar10_forget0_seed_42_evaluation.json :: base_vit_cifar10",
+      "results\\logs\\eval_baselines_vit_cifar10_forget0_seed_42_evaluation.json :: unlearn_lora_vit_cifar10_forget0",
+      "results\\logs\\eval_baselines_vit_cifar10_forget0_seed_42_evaluation.json :: unlearn_kl_vit_cifar10_forget0",
+      "results\\logs\\eval_baselines_vit_cifar10_forget0_seed_42_evaluation.json :: unlearn_salun_vit_cifar10_forget0",
+      "results\\logs\\eval_baselines_vit_cifar10_forget0_seed_42_evaluation.json :: unlearn_scrub_distill_vit_cifar10_forget0",
+      "results\\logs\\eval_dependency_vit_cifar10_forget0_seed_456_evaluation.json :: vpt_resurrect_vit_cifar10_forget0",
+      "results\\logs\\eval_full_vit_cifar10_forget0_seed_123_evaluation.json :: base_vit_cifar10",
+      "results\\logs\\eval_full_vit_cifar10_forget0_seed_123_evaluation.json :: unlearn_lora_vit_cifar10_forget0",
+      "results\\logs\\eval_full_vit_cifar10_forget0_seed_123_evaluation.json :: vpt_resurrect_vit_cifar10_forget0",
+      "results\\logs\\eval_full_vit_cifar10_forget0_seed_42_evaluation.json :: base_vit_cifar10",
+      "results\\logs\\eval_full_vit_cifar10_forget0_seed_42_evaluation.json :: unlearn_lora_vit_cifar10_forget0",
+      "results\\logs\\eval_full_vit_cifar10_forget0_seed_42_evaluation.json :: vpt_resurrect_vit_cifar10_forget0",
+      "results\\logs\\eval_full_vit_cifar10_forget0_vptlen20_seed_42_evaluation.json :: base_vit_cifar10",
+      "results\\logs\\eval_full_vit_cifar10_forget0_vptlen20_seed_42_evaluation.json :: unlearn_lora_vit_cifar10_forget0",
+      "results\\logs\\eval_full_vit_cifar10_forget0_vptlen20_seed_42_evaluation.json :: vpt_length20_vit_cifar10_forget0",
+      "results\\logs\\eval_quick_cnn_baselines_forget0_seed_42_evaluation.json :: unlearn_lora_cnn_forget0",
+      "results\\logs\\eval_quick_cnn_baselines_forget0_seed_42_evaluation.json :: unlearn_kl_cnn_forget0",
+      "results\\logs\\eval_quick_cnn_baselines_forget0_seed_42_evaluation.json :: unlearn_salun_cnn_forget0",
+      "results\\logs\\eval_quick_cnn_baselines_forget0_seed_42_evaluation.json :: unlearn_scrub_cnn_forget0",
+      "results\\logs\\eval_v2_vit_cifar10_forget0_seed_42_evaluation.json :: base_vit_cifar10",
+      "results\\logs\\eval_v2_vit_cifar10_forget0_seed_42_evaluation.json :: unlearn_lora_vit_cifar10_forget0",
+      "results\\logs\\eval_v2_vit_cifar10_forget0_seed_42_evaluation.json :: vpt_resurrect_vit_cifar10_forget0"
+    ],
+    "missing_attacks": [
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_123_evaluation.json :: base_vit_cifar10 :: vpt_only",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_123_evaluation.json :: base_vit_cifar10 :: vpt_plus_pgd",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_123_evaluation.json :: unlearn_lora_vit_cifar10_forget0 :: vpt_only",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_123_evaluation.json :: unlearn_lora_vit_cifar10_forget0 :: vpt_plus_pgd",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_123_evaluation.json :: vpt_resurrect_vit_cifar10_forget0 :: clean",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_42_evaluation.json :: base_vit_cifar10 :: vpt_only",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_42_evaluation.json :: base_vit_cifar10 :: vpt_plus_pgd",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_42_evaluation.json :: unlearn_lora_vit_cifar10_forget0 :: vpt_only",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_42_evaluation.json :: unlearn_lora_vit_cifar10_forget0 :: vpt_plus_pgd",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_42_evaluation.json :: vpt_resurrect_vit_cifar10_forget0 :: clean",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_456_evaluation.json :: base_vit_cifar10 :: vpt_only",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_456_evaluation.json :: base_vit_cifar10 :: vpt_plus_pgd",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_456_evaluation.json :: unlearn_lora_vit_cifar10_forget0 :: vpt_only",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_456_evaluation.json :: unlearn_lora_vit_cifar10_forget0 :: vpt_plus_pgd"
+    ],
+    "missing_metrics": [
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_123_evaluation.json :: base_vit_cifar10 :: clean :: resurrection_success_rate",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_123_evaluation.json :: base_vit_cifar10 :: autoattack_linf_8 :: resurrection_success_rate",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_123_evaluation.json :: unlearn_lora_vit_cifar10_forget0 :: clean :: resurrection_success_rate",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_123_evaluation.json :: unlearn_lora_vit_cifar10_forget0 :: autoattack_linf_8 :: resurrection_success_rate",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_123_evaluation.json :: vpt_resurrect_vit_cifar10_forget0 :: autoattack_linf_8 :: resurrection_success_rate",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_42_evaluation.json :: base_vit_cifar10 :: clean :: resurrection_success_rate",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_42_evaluation.json :: base_vit_cifar10 :: autoattack_linf_8 :: resurrection_success_rate",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_42_evaluation.json :: unlearn_lora_vit_cifar10_forget0 :: clean :: resurrection_success_rate",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_42_evaluation.json :: unlearn_lora_vit_cifar10_forget0 :: autoattack_linf_8 :: resurrection_success_rate",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_42_evaluation.json :: vpt_resurrect_vit_cifar10_forget0 :: autoattack_linf_8 :: resurrection_success_rate",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_456_evaluation.json :: base_vit_cifar10 :: clean :: resurrection_success_rate",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_456_evaluation.json :: base_vit_cifar10 :: autoattack_linf_8 :: resurrection_success_rate",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_456_evaluation.json :: unlearn_lora_vit_cifar10_forget0 :: clean :: resurrection_success_rate",
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_456_evaluation.json :: unlearn_lora_vit_cifar10_forget0 :: autoattack_linf_8 :: resurrection_success_rate"
+    ],
+    "non_finite_metrics": [],
+    "out_of_range_metrics": [],
+    "error_fields": [],
+    "json_decode_errors": []
+  },
+  "jsonl": {
+    "json_decode_errors": [],
+    "missing_keys": [
+      "results\\logs\\oracle_vpt_control_class0_seed_123.jsonl :: train_loss",
+      "results\\logs\\oracle_vpt_control_class0_seed_123.jsonl :: loss_forget",
+      "results\\logs\\oracle_vpt_control_class0_seed_123.jsonl :: loss_retain",
+      "results\\logs\\oracle_vpt_control_class0_seed_123.jsonl :: resurrection_acc",
+      "results\\logs\\oracle_vpt_control_class0_seed_42.jsonl :: train_loss",
+      "results\\logs\\oracle_vpt_control_class0_seed_42.jsonl :: loss_forget",
+      "results\\logs\\oracle_vpt_control_class0_seed_42.jsonl :: loss_retain",
+      "results\\logs\\oracle_vpt_control_class0_seed_42.jsonl :: resurrection_acc"
+    ],
+    "non_finite_metrics": [],
+    "empty_files": []
+  },
+  "checkpoints": {
+    "missing_checkpoints": [],
+    "missing_adapters": [
+      "results\\logs\\eval_autoattack_vit_cifar10_forget0_seed_456_evaluation.json :: vpt_resurrect_vit_cifar10_forget0 (seed 456)",
+      "results\\logs\\eval_dependency_vit_cifar10_forget0_seed_456_evaluation.json :: vpt_resurrect_vit_cifar10_forget0 (seed 456)",
+      "results\\logs\\eval_quick_cnn_baselines_forget0_seed_42_evaluation.json :: unlearn_lora_cnn_forget0 (seed 42)",
+      "results\\logs\\eval_quick_cnn_baselines_forget0_seed_42_evaluation.json :: unlearn_kl_cnn_forget0 (seed 42)",
+      "results\\logs\\eval_quick_cnn_baselines_forget0_seed_42_evaluation.json :: unlearn_scrub_cnn_forget0 (seed 42)"
+    ]
+  }
+}
