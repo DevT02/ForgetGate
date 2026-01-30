@@ -225,6 +225,12 @@ We focus on vision but treat these as general design signals for unlearning eval
 
 ## Results (CIFAR-10, forgetting airplane)
 
+### Results at a glance
+
+- Oracle-normalized k-shot recovery is small for k=10/25/50/100 (KL 0.43–1.90%, oracle 0.00%).
+- Low-shot controls (prompt length 5) show large recovery and high variance, so they are treated as stress tests.
+- Class-wise gaps are mostly small, with class 9 higher than the rest.
+
 ### Clean unlearning baselines (test set)
 
 | Method | Forget Acc (%) [lower] | Retain Acc (%) [higher] | Delta Utility |
@@ -238,6 +244,8 @@ We focus on vision but treat these as general design signals for unlearning eval
 
 *Seeds: 42, 123, 456. Metrics from eval_paper_baselines_vit_cifar10_forget0 (clean test set).*
 Delta utility is defined as retain accuracy minus the base retain accuracy for the same seed group, so the base row is 0.00pp by definition.
+
+Interpretation: clean baselines show that forgetting on the target class is possible (low forget accuracy) while retain remains high, but the variance is large across seeds.
 
 ### Prune-then-unlearn baseline (seed 42)
 
@@ -259,7 +267,7 @@ Backdoor eval reports attack success rate (ASR) as `forget_acc`. Retain accuracy
 
 *From `results/logs/eval_backdoor_vit_cifar10_forget0_seed_42_evaluation.json`.*
 
-### K-shot recovery (oracle-normalized, default prompt length)
+### Oracle-normalized k-shot recovery (default prompt length)
 
 | K-shot | Oracle Baseline | Unlearned (KL) | Residual Recov. |
 |--------|----------------|----------------|-----------------|
@@ -283,14 +291,15 @@ Average Oracle->VPT gap across k=10/25/50/100 (default prompt length) is +0.81pp
 
 *Seeds: 42, 123, 456. Recovery@k measured on held-out train split (forget_val) using final logged epoch per run.*
 
-### Prompt-length + control runs
+### Stress tests (controls and ablations)
 
 **Prompt-length ablation (10-shot, seeds 42/123):**
 - Prompt length 1/2/5: KL = 7.05/7.35/7.80%, Oracle = 0.00%
 - Prompt length 10 (default): KL = 0.47%, Oracle = 0.00%
 
 **Low-shot + label controls (prompt length 5):**
-- Seeds 42/123/456 mean: k=1: 34.17%, k=5: 35.47%, shuffled-label (k=10): 3.90%, random-label (k=10): 4.03% (oracle 0.00%). These have high variance across seeds; see `results/analysis/kshot_summary.md` for per-seed values.
+- Seeds 42/123/456 mean: k=1: 34.17%, k=5: 35.47%, shuffled-label (k=10): 3.90%, random-label (k=10): 4.03% (oracle 0.00%).
+- These have high variance across seeds; see `results/analysis/kshot_summary.md` for per-seed values.
 
 **Stratified forget set (pilot, seed 42):**
 - High-confidence subset: 12.70% (KL, k=10)
