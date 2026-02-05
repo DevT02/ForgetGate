@@ -68,52 +68,56 @@ class CrossEntropyAscent(UnlearningObjective):
 
 
 class SmoothedGradientAscent(UnlearningObjective):
-    """Gradient ascent with label smoothing for stability (SGA)."""
+    """SGA (Pang et al. 2025): smooth GA by mixing forget loss with normal data losses."""
 
     def __init__(self, forget_class: int, num_classes: int = 10,
-                 smoothing: float = 0.1, retain_weight: float = 0.1, target_weight: float = 1.0):
+                 smoothing_rate: float = 0.5, num_normal_samples: int = 1,
+                 retain_weight: float = 0.1, target_weight: float = 1.0):
         super().__init__(forget_class, num_classes)
-        self.smoothing = smoothing
+        self.smoothing_rate = smoothing_rate
+        self.num_normal_samples = max(int(num_normal_samples), 1)
         self.retain_weight = retain_weight
         self.target_weight = target_weight
 
+    def compute_forget_loss(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        ce_loss = F.cross_entropy(logits, labels, reduction='mean')
+        return ce_loss
+
+    def compute_normal_loss(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        ce_loss = F.cross_entropy(logits, labels, reduction='mean')
+        return ce_loss
+
+    def combine_losses(self, forget_loss: torch.Tensor, normal_loss: torch.Tensor) -> torch.Tensor:
+        # L_SGA = (1 - r + r/K) * L_f + (r/K) * sum_k L_p^k
+        r = self.smoothing_rate
+        k = self.num_normal_samples
+        forget_term = (1.0 - r + r / k) * (-self.target_weight * forget_loss)
+        normal_term = (r / k) * (self.retain_weight * normal_loss)
+        return forget_term + normal_term
+
     def forward(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
-        """
-        Smoothed CE ascent on forget class, smoothed CE descent on retain classes.
-        """
-        ce_loss = F.cross_entropy(
-            logits, labels, reduction='none', label_smoothing=self.smoothing
-        )
-
-        forget_mask = (labels == self.forget_class)
-        retain_mask = ~forget_mask
-
-        modified_loss = torch.where(
-            forget_mask,
-            -self.target_weight * ce_loss,
-            self.retain_weight * ce_loss
-        )
-
-        return modified_loss.mean()
+        # Default to forget loss only (trainer combines with normal loss).
+        return -self.target_weight * F.cross_entropy(logits, labels, reduction='mean')
 
 
 class BalDROUnlearning(UnlearningObjective):
-    """Loss-reweighted unlearning for hard forget samples (BalDRO-style)."""
+    """BalDRO (Shao et al. 2026): log-sum-exp reweighting over hard forget samples."""
 
     def __init__(self, forget_class: int, num_classes: int = 10,
                  retain_weight: float = 0.1, target_weight: float = 1.0,
-                 temperature: float = 1.0, min_weight: float = 0.1):
+                 beta: float = 1.0, top_fraction: float = 1.0):
         super().__init__(forget_class, num_classes)
         self.retain_weight = retain_weight
         self.target_weight = target_weight
-        self.temperature = max(temperature, 1e-6)
-        self.min_weight = min_weight
+        self.beta = max(beta, 1e-6)
+        self.top_fraction = float(top_fraction)
+
+    def _log_mean_exp(self, losses: torch.Tensor) -> torch.Tensor:
+        # beta * log( (1/N) * sum exp(loss / beta) )
+        scaled = losses / self.beta
+        return self.beta * (torch.logsumexp(scaled, dim=0) - torch.log(torch.tensor(losses.numel(), device=losses.device)))
 
     def forward(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
-        """
-        For forget samples, weight CE loss by softmax over per-sample losses.
-        Retain samples use standard CE (scaled by retain_weight).
-        """
         ce_loss = F.cross_entropy(logits, labels, reduction='none')
         forget_mask = (labels == self.forget_class)
         retain_mask = ~forget_mask
@@ -123,10 +127,10 @@ class BalDROUnlearning(UnlearningObjective):
 
         if forget_mask.any():
             forget_losses = ce_loss[forget_mask]
-            weights = F.softmax((forget_losses / self.temperature).detach(), dim=0)
-            weights = torch.clamp(weights, min=self.min_weight / weights.numel())
-            weights = weights / weights.sum()
-            forget_term = (weights * forget_losses).sum()
+            if self.top_fraction < 1.0:
+                k = max(1, int(forget_losses.numel() * self.top_fraction))
+                forget_losses = torch.topk(forget_losses, k=k, largest=True).values
+            forget_term = self._log_mean_exp(forget_losses)
             total += -self.target_weight * forget_term
             parts += 1
 
@@ -142,33 +146,54 @@ class BalDROUnlearning(UnlearningObjective):
 
 
 class FaLWUnlearning(UnlearningObjective):
-    """Long-tailed aware unlearning via class-balanced weighting (FaLW-style)."""
+    """FaLW (Yu et al. 2026): forgetting-aware loss reweighting for long-tailed data."""
 
     def __init__(self, forget_class: int, num_classes: int = 10,
                  retain_weight: float = 0.1, target_weight: float = 1.0,
                  class_counts: Optional[Dict[int, int]] = None,
                  total_samples: Optional[int] = None,
-                 gamma: float = 1.0):
+                 tau: float = 1.0,
+                 eta: float = 1.0):
         super().__init__(forget_class, num_classes)
         self.retain_weight = retain_weight
         self.target_weight = target_weight
         self.class_counts = class_counts or {}
         self.total_samples = total_samples
-        self.gamma = gamma
+        self.tau = tau
+        self.eta = eta
+        self.class_mu = {}
+        self.class_sigma = {}
 
-    def _class_weight(self, label: torch.Tensor) -> torch.Tensor:
+    def set_class_stats(self, class_mu: Dict[int, float], class_sigma: Dict[int, float]):
+        self.class_mu = class_mu
+        self.class_sigma = class_sigma
+
+    def _balance_factor(self, label: torch.Tensor) -> torch.Tensor:
         if not self.class_counts or self.total_samples is None:
             return torch.ones_like(label, dtype=torch.float32)
         counts = torch.tensor([self.class_counts.get(int(y), 1) for y in label],
                               device=label.device, dtype=torch.float32)
         num_classes = max(len(self.class_counts), 1)
-        weights = self.total_samples / (num_classes * counts)
-        weights = weights.pow(self.gamma)
-        return weights
+        nf = float(sum(self.class_counts.values()))
+        b = (nf / (num_classes * counts)).pow(self.tau)
+        return b
+
+    def _falw_weight(self, probs: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        mu = torch.tensor([self.class_mu.get(int(y), 0.0) for y in labels],
+                          device=labels.device, dtype=torch.float32)
+        sigma = torch.tensor([self.class_sigma.get(int(y), 1.0) for y in labels],
+                             device=labels.device, dtype=torch.float32)
+        z = (probs - mu) / (sigma + 1e-8)
+        w = 1.0 + torch.sign(z) * torch.tanh(torch.abs(z)).pow(1.0 / max(self.eta, 1e-6))
+        b = self._balance_factor(labels)
+        w = w.pow(1.0 / (b + 1e-8))
+        return w
 
     def forward(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        probs = F.softmax(logits, dim=-1)
+        p_true = probs.gather(1, labels.view(-1, 1)).squeeze(1)
         ce_loss = F.cross_entropy(logits, labels, reduction='none')
-        weights = self._class_weight(labels)
+        weights = self._falw_weight(p_true, labels)
 
         forget_mask = (labels == self.forget_class)
         retain_mask = ~forget_mask

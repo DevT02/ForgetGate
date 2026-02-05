@@ -99,18 +99,36 @@ class UnlearningTrainer:
         )
         return list(grads)
 
+    def _get_h_diag(self, param: nn.Parameter) -> Optional[torch.Tensor]:
+        if not hasattr(self, "optimizer"):
+            return None
+        state = self.optimizer.state.get(param, {})
+        exp_avg_sq = state.get("exp_avg_sq")
+        if exp_avg_sq is None:
+            return None
+        eps = getattr(self.optimizer, "eps", 1e-8)
+        if isinstance(self.optimizer, torch.optim.AdamW) or isinstance(self.optimizer, torch.optim.Adam):
+            return 1.0 / (torch.sqrt(exp_avg_sq) + eps)
+        return None
+
     def _project_forget_grads(self,
                               forget_grads: List[Optional[torch.Tensor]],
                               retain_grads: List[Optional[torch.Tensor]],
+                              params: List[nn.Parameter],
                               mode: str,
                               scale_override: Optional[float] = None) -> List[Optional[torch.Tensor]]:
         dot = 0.0
         denom = 0.0
-        for g_f, g_r in zip(forget_grads, retain_grads):
+        for g_f, g_r, param in zip(forget_grads, retain_grads, params):
             if g_f is None or g_r is None:
                 continue
-            dot += torch.sum(g_f * g_r)
-            denom += torch.sum(g_r * g_r)
+            h = self._get_h_diag(param)
+            if h is None:
+                dot += torch.sum(g_f * g_r)
+                denom += torch.sum(g_r * g_r)
+            else:
+                dot += torch.sum(g_f * h * g_r)
+                denom += torch.sum(g_r * h * g_r)
 
         denom_val = float(denom)
         if denom_val <= self.projection_eps:
@@ -133,6 +151,30 @@ class UnlearningTrainer:
                 continue
             projected.append(g_f - scale * g_r)
         return projected
+
+    def _compute_unseen_stats(self) -> Optional[Dict[int, Tuple[float, float]]]:
+        if self.val_loader is None:
+            return None
+        self.model.eval()
+        per_class = {}
+        with torch.no_grad():
+            for inputs, labels in self.val_loader:
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
+                logits = self.model(inputs)
+                probs = torch.softmax(logits, dim=-1)
+                p_true = probs.gather(1, labels.view(-1, 1)).squeeze(1)
+                for p, y in zip(p_true, labels):
+                    y_int = int(y)
+                    if y_int not in per_class:
+                        per_class[y_int] = []
+                    per_class[y_int].append(float(p))
+        stats = {}
+        for k, vals in per_class.items():
+            if len(vals) == 0:
+                continue
+            arr = torch.tensor(vals, dtype=torch.float32)
+            stats[k] = (float(arr.mean()), float(arr.std(unbiased=False) + 1e-8))
+        return stats
 
     def set_teacher_model(self, teacher_model: nn.Module):
         """
@@ -288,7 +330,8 @@ class UnlearningTrainer:
                 else:
                     retain_outputs = self.model(retain_inputs)
 
-                retain_loss = nn.functional.cross_entropy(retain_outputs, retain_labels) * self.retain_lambda
+                retain_loss_raw = nn.functional.cross_entropy(retain_outputs, retain_labels)
+                retain_loss = retain_loss_raw * self.retain_lambda
 
                 if forget_part is not None:
                     forget_inputs, forget_labels = forget_part
@@ -304,7 +347,18 @@ class UnlearningTrainer:
                         # Objective doesn't accept inputs, call without it
                         forget_loss = self.objective(forget_outputs, forget_labels)
 
-                    loss = forget_loss + retain_loss
+                    if hasattr(self.objective, "combine_losses"):
+                        if hasattr(self.objective, "compute_forget_loss"):
+                            forget_loss_raw = self.objective.compute_forget_loss(forget_outputs, forget_labels)
+                        else:
+                            forget_loss_raw = nn.functional.cross_entropy(forget_outputs, forget_labels)
+                        if hasattr(self.objective, "compute_normal_loss"):
+                            normal_loss_raw = self.objective.compute_normal_loss(retain_outputs, retain_labels)
+                        else:
+                            normal_loss_raw = retain_loss_raw
+                        loss = self.objective.combine_losses(forget_loss_raw, normal_loss_raw)
+                    else:
+                        loss = forget_loss + retain_loss
                 else:
                     loss = retain_loss
             else:
@@ -330,12 +384,12 @@ class UnlearningTrainer:
                 forget_grads = self._compute_grads(forget_loss, params)
 
                 if self.gu_projection:
-                    forget_grads = self._project_forget_grads(forget_grads, retain_grads, mode="gu")
+                    forget_grads = self._project_forget_grads(forget_grads, retain_grads, params, mode="gu")
                 if self.grad_surgery:
-                    forget_grads = self._project_forget_grads(forget_grads, retain_grads, mode="grad_surgery")
+                    forget_grads = self._project_forget_grads(forget_grads, retain_grads, params, mode="grad_surgery")
                 if self.orthogonal_reg > 0:
                     forget_grads = self._project_forget_grads(
-                        forget_grads, retain_grads, mode="orthogonal_reg", scale_override=self.orthogonal_reg
+                        forget_grads, retain_grads, params, mode="orthogonal_reg", scale_override=self.orthogonal_reg
                     )
 
                 for param, g_f, g_r in zip(params, forget_grads, retain_grads):
@@ -457,6 +511,13 @@ class UnlearningTrainer:
 
         for epoch in range(max_epochs):
             self.current_epoch = epoch
+
+            if hasattr(self.objective, "set_class_stats"):
+                stats = self._compute_unseen_stats()
+                if stats:
+                    class_mu = {k: v[0] for k, v in stats.items()}
+                    class_sigma = {k: v[1] for k, v in stats.items()}
+                    self.objective.set_class_stats(class_mu, class_sigma)
 
             # Train epoch
             train_metrics = self.train_epoch()
