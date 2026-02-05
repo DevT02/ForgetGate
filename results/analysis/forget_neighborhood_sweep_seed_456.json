@@ -1,0 +1,249 @@
+{
+  "suite": "eval_forget_neighborhood_vit_cifar10_forget0",
+  "seed": 456,
+  "noise_stds": [
+    0.0,
+    0.01,
+    0.02,
+    0.05
+  ],
+  "generated_utc": "2026-02-02T04:53:29.725140Z",
+  "results": {
+    "0.0": {
+      "base_vit_cifar10": {
+        "forget_neighborhood": {
+          "overall_acc": 0.868,
+          "forget_acc": 0.868,
+          "retain_acc": 0.0,
+          "forget_samples": 1000,
+          "retain_samples": 0,
+          "total_samples": 1000,
+          "attack_type": "clean",
+          "mean_confidence": 0.9597994089126587,
+          "correct_confidence": 0.9813071489334106,
+          "incorrect_confidence": 0.8183708786964417,
+          "forget_confidence": 0.9597994089126587,
+          "forget_correct_confidence": 0.9813071489334106,
+          "mean_entropy": 0.0983009934425354,
+          "max_entropy": 1.5138112306594849,
+          "min_entropy": 4.287871707003843e-12
+        }
+      },
+      "unlearn_lora_vit_cifar10_forget0": {
+        "forget_neighborhood": {
+          "overall_acc": 0.851,
+          "forget_acc": 0.851,
+          "retain_acc": 0.0,
+          "forget_samples": 1000,
+          "retain_samples": 0,
+          "total_samples": 1000,
+          "attack_type": "clean",
+          "mean_confidence": 0.9577717781066895,
+          "correct_confidence": 0.9826825857162476,
+          "incorrect_confidence": 0.8154963254928589,
+          "forget_confidence": 0.9577717781066895,
+          "forget_correct_confidence": 0.9826825857162476,
+          "mean_entropy": 0.10284813493490219,
+          "max_entropy": 1.6827718019485474,
+          "min_entropy": 3.743117794885453e-12
+        }
+      },
+      "vpt_resurrect_vit_cifar10_forget0": {
+        "forget_neighborhood": {
+          "overall_acc": 0.991,
+          "forget_acc": 0.991,
+          "retain_acc": 0.0,
+          "forget_samples": 1000,
+          "retain_samples": 0,
+          "total_samples": 1000,
+          "attack_type": "clean",
+          "mean_confidence": 0.9979200959205627,
+          "correct_confidence": 0.9993447065353394,
+          "incorrect_confidence": 0.8410620093345642,
+          "forget_confidence": 0.9979200959205627,
+          "forget_correct_confidence": 0.9993447065353394,
+          "mean_entropy": 0.005074722226709127,
+          "max_entropy": 0.9974510073661804,
+          "min_entropy": 7.222234895093264e-15
+        }
+      }
+    },
+    "0.01": {
+      "base_vit_cifar10": {
+        "forget_neighborhood": {
+          "overall_acc": 0.868,
+          "forget_acc": 0.868,
+          "retain_acc": 0.0,
+          "forget_samples": 1000,
+          "retain_samples": 0,
+          "total_samples": 1000,
+          "attack_type": "clean",
+          "mean_confidence": 0.9594144821166992,
+          "correct_confidence": 0.9802861213684082,
+          "incorrect_confidence": 0.8221678137779236,
+          "forget_confidence": 0.9594144821166992,
+          "forget_correct_confidence": 0.9802861213684082,
+          "mean_entropy": 0.10024143010377884,
+          "max_entropy": 1.4360750913619995,
+          "min_entropy": 4.390146666338746e-12
+        }
+      },
+      "unlearn_lora_vit_cifar10_forget0": {
+        "forget_neighborhood": {
+          "overall_acc": 0.85,
+          "forget_acc": 0.85,
+          "retain_acc": 0.0,
+          "forget_samples": 1000,
+          "retain_samples": 0,
+          "total_samples": 1000,
+          "attack_type": "clean",
+          "mean_confidence": 0.9594421982765198,
+          "correct_confidence": 0.982937753200531,
+          "incorrect_confidence": 0.8263007402420044,
+          "forget_confidence": 0.9594421982765198,
+          "forget_correct_confidence": 0.982937753200531,
+          "mean_entropy": 0.10101167857646942,
+          "max_entropy": 1.636497974395752,
+          "min_entropy": 3.810808873322413e-12
+        }
+      },
+      "vpt_resurrect_vit_cifar10_forget0": {
+        "forget_neighborhood": {
+          "overall_acc": 0.991,
+          "forget_acc": 0.991,
+          "retain_acc": 0.0,
+          "forget_samples": 1000,
+          "retain_samples": 0,
+          "total_samples": 1000,
+          "attack_type": "clean",
+          "mean_confidence": 0.9981041550636292,
+          "correct_confidence": 0.9995887279510498,
+          "incorrect_confidence": 0.8346335887908936,
+          "forget_confidence": 0.9981041550636292,
+          "forget_correct_confidence": 0.9995887279510498,
+          "mean_entropy": 0.004929426591843367,
+          "max_entropy": 0.7590823173522949,
+          "min_entropy": 7.376363551274499e-15
+        }
+      }
+    },
+    "0.02": {
+      "base_vit_cifar10": {
+        "forget_neighborhood": {
+          "overall_acc": 0.872,
+          "forget_acc": 0.872,
+          "retain_acc": 0.0,
+          "forget_samples": 1000,
+          "retain_samples": 0,
+          "total_samples": 1000,
+          "attack_type": "clean",
+          "mean_confidence": 0.9571152329444885,
+          "correct_confidence": 0.9749925136566162,
+          "incorrect_confidence": 0.835326611995697,
+          "forget_confidence": 0.9571152329444885,
+          "forget_correct_confidence": 0.9749925136566162,
+          "mean_entropy": 0.10439011454582214,
+          "max_entropy": 1.4386615753173828,
+          "min_entropy": 5.170541512306004e-12
+        }
+      },
+      "unlearn_lora_vit_cifar10_forget0": {
+        "forget_neighborhood": {
+          "overall_acc": 0.848,
+          "forget_acc": 0.848,
+          "retain_acc": 0.0,
+          "forget_samples": 1000,
+          "retain_samples": 0,
+          "total_samples": 1000,
+          "attack_type": "clean",
+          "mean_confidence": 0.9598141312599182,
+          "correct_confidence": 0.9816886186599731,
+          "incorrect_confidence": 0.837777853012085,
+          "forget_confidence": 0.9598141312599182,
+          "forget_correct_confidence": 0.9816886186599731,
+          "mean_entropy": 0.1007714495062828,
+          "max_entropy": 1.5474790334701538,
+          "min_entropy": 4.187944695893675e-12
+        }
+      },
+      "vpt_resurrect_vit_cifar10_forget0": {
+        "forget_neighborhood": {
+          "overall_acc": 0.992,
+          "forget_acc": 0.992,
+          "retain_acc": 0.0,
+          "forget_samples": 1000,
+          "retain_samples": 0,
+          "total_samples": 1000,
+          "attack_type": "clean",
+          "mean_confidence": 0.9987821578979492,
+          "correct_confidence": 0.9997934699058533,
+          "incorrect_confidence": 0.8733776211738586,
+          "forget_confidence": 0.9987821578979492,
+          "forget_correct_confidence": 0.9997934699058533,
+          "mean_entropy": 0.003460562787950039,
+          "max_entropy": 0.7786492109298706,
+          "min_entropy": 6.790401404957024e-15
+        }
+      }
+    },
+    "0.05": {
+      "base_vit_cifar10": {
+        "forget_neighborhood": {
+          "overall_acc": 0.84,
+          "forget_acc": 0.84,
+          "retain_acc": 0.0,
+          "forget_samples": 1000,
+          "retain_samples": 0,
+          "total_samples": 1000,
+          "attack_type": "clean",
+          "mean_confidence": 0.9524621367454529,
+          "correct_confidence": 0.9735875725746155,
+          "incorrect_confidence": 0.8415538668632507,
+          "forget_confidence": 0.9524621367454529,
+          "forget_correct_confidence": 0.9735875725746155,
+          "mean_entropy": 0.11838509142398834,
+          "max_entropy": 1.4497566223144531,
+          "min_entropy": 1.1742003203085716e-11
+        }
+      },
+      "unlearn_lora_vit_cifar10_forget0": {
+        "forget_neighborhood": {
+          "overall_acc": 0.825,
+          "forget_acc": 0.825,
+          "retain_acc": 0.0,
+          "forget_samples": 1000,
+          "retain_samples": 0,
+          "total_samples": 1000,
+          "attack_type": "clean",
+          "mean_confidence": 0.9568553566932678,
+          "correct_confidence": 0.9747262597084045,
+          "incorrect_confidence": 0.8726065754890442,
+          "forget_confidence": 0.9568553566932678,
+          "forget_correct_confidence": 0.9747262597084045,
+          "mean_entropy": 0.11138927191495895,
+          "max_entropy": 1.6999874114990234,
+          "min_entropy": 8.722077747547186e-12
+        }
+      },
+      "vpt_resurrect_vit_cifar10_forget0": {
+        "forget_neighborhood": {
+          "overall_acc": 0.993,
+          "forget_acc": 0.993,
+          "retain_acc": 0.0,
+          "forget_samples": 1000,
+          "retain_samples": 0,
+          "total_samples": 1000,
+          "attack_type": "clean",
+          "mean_confidence": 0.9984059929847717,
+          "correct_confidence": 0.9990171194076538,
+          "incorrect_confidence": 0.9117117524147034,
+          "forget_confidence": 0.9984059929847717,
+          "forget_correct_confidence": 0.9990171194076538,
+          "mean_entropy": 0.0034673288464546204,
+          "max_entropy": 0.7250958681106567,
+          "min_entropy": 5.648118606794766e-15
+        }
+      }
+    }
+  }
+}

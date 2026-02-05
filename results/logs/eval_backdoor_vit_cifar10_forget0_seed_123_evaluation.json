@@ -1,0 +1,65 @@
+{
+  "base_vit_cifar10": {
+    "backdoor_patch": {
+      "overall_acc": 0.099,
+      "forget_acc": 0.099,
+      "retain_acc": 0.0,
+      "forget_samples": 10000,
+      "retain_samples": 0,
+      "total_samples": 10000,
+      "attack_type": "backdoor_patch",
+      "backdoor_asr": 0.099,
+      "target_class": 0,
+      "mean_confidence": 0.9825857281684875,
+      "correct_confidence": 0.9852872490882874,
+      "incorrect_confidence": 0.9822890162467957,
+      "forget_confidence": 0.9825857281684875,
+      "forget_correct_confidence": 0.9852872490882874,
+      "mean_entropy": 0.04376508668065071,
+      "max_entropy": 1.5103625059127808,
+      "min_entropy": 2.1793741670269456e-13
+    }
+  },
+  "unlearn_lora_vit_cifar10_forget0": {
+    "backdoor_patch": {
+      "overall_acc": 0.0,
+      "forget_acc": 0.0,
+      "retain_acc": 0.0,
+      "forget_samples": 10000,
+      "retain_samples": 0,
+      "total_samples": 10000,
+      "attack_type": "backdoor_patch",
+      "backdoor_asr": 0.0,
+      "target_class": 0,
+      "mean_confidence": 0.9607200026512146,
+      "correct_confidence": 0.0,
+      "incorrect_confidence": 0.9607200026512146,
+      "forget_confidence": 0.9607200026512146,
+      "forget_correct_confidence": 0.0,
+      "mean_entropy": 0.10408482700586319,
+      "max_entropy": 1.8477656841278076,
+      "min_entropy": 2.8232714018201766e-13
+    }
+  },
+  "unlearn_kl_vit_cifar10_forget0": {
+    "backdoor_patch": {
+      "overall_acc": 0.0001,
+      "forget_acc": 0.0001,
+      "retain_acc": 0.0,
+      "forget_samples": 10000,
+      "retain_samples": 0,
+      "total_samples": 10000,
+      "attack_type": "backdoor_patch",
+      "backdoor_asr": 0.0001,
+      "target_class": 0,
+      "mean_confidence": 0.9199221730232239,
+      "correct_confidence": 0.23907823860645294,
+      "incorrect_confidence": 0.9199903607368469,
+      "forget_confidence": 0.9199221730232239,
+      "forget_correct_confidence": 0.23907823860645294,
+      "mean_entropy": 0.2253340780735016,
+      "max_entropy": 2.2863645553588867,
+      "min_entropy": 6.893156835260927e-13
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "suite": "probe_feature_leakage_vit_cifar10_forget0",
+  "seed": 456,
+  "dataset": "cifar10",
+  "model": "vit_tiny",
+  "forget_class": 0,
+  "run_info": {
+    "started_utc": "2026-02-02T04:50:06.143755Z",
+    "argv": [
+      "scripts/9_feature_probe_leakage.py",
+      "--config",
+      "configs/experiment_suites.yaml",
+      "--suite",
+      "probe_feature_leakage_vit_cifar10_forget0",
+      "--seed",
+      "456",
+      "--probe-layer",
+      "mid"
+    ],
+    "probe_layer": "mid"
+  },
+  "models": {
+    "base_vit_cifar10": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9505000710487366,
+      "val_acc": 0.9535000324249268,
+      "val_auc": 0.9651990501307212,
+      "n_train": 8000,
+      "n_val": 2000
+    },
+    "unlearn_kl_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9430000185966492,
+      "val_acc": 0.940500020980835,
+      "val_auc": 0.9581977600438402,
+      "n_train": 8000,
+      "n_val": 2000
+    },
+    "benign_relearn_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9536250233650208,
+      "val_acc": 0.9545000195503235,
+      "val_auc": 0.9658669269673825,
+      "n_train": 8000,
+      "n_val": 2000
+    },
+    "oracle_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9257500171661377,
+      "val_acc": 0.9375000596046448,
+      "val_auc": 0.920120217830599,
+      "n_train": 8000,
+      "n_val": 2000
+    }
+  }
+}
