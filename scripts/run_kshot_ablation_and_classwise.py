@@ -22,11 +22,7 @@ def main():
 
     config = args.config
     seed = args.seed
-
-    print("=" * 60)
-    print(f"ForgetGate: K-shot prompt ablation + class-wise gap (seed {seed})")
-    print("=" * 60)
-
+    print(f"Run: K-shot prompt ablation + class-wise gap (seed {seed})")
     # Prompt ablation (oracle + KL) for 10-shot
     print("[Prompt Ablation] Oracle 10-shot (prompt length 1/2/5)")
     for pl in (1, 2, 5):
@@ -114,17 +110,10 @@ def main():
 
     print("[Analysis] k-shot summary")
     run(["python", "scripts/analyze_kshot_experiments.py", "--seeds", str(seed)])
-
-    print("=" * 60)
     print("Done.")
-    print("=" * 60)
-
-
 if __name__ == "__main__":
     try:
         main()
     except subprocess.CalledProcessError as exc:
-        print("=" * 60)
         print(f"ERROR: Pipeline failed with exit code {exc.returncode}.")
-        print("=" * 60)
         sys.exit(exc.returncode)

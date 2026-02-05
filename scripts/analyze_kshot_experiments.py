@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive K-shot Analysis for ForgetGate
+Comprehensive K-shot Analysis
 Analyzes Oracle->VPT vs Unlearned->VPT sample efficiency experiments
 """
 
@@ -165,8 +165,8 @@ def analyze_kshot_sample_efficiency(results_dir, seeds):
 
         print(f"{k:<10} {oracle_str:<20} {kl_str:<20} {salun_str:<15} {scrub_str:<15} {gap_str:<20}")
 
-    # Analysis
-    print("KEY FINDINGS")
+    # Summary
+    print("Summary")
 
     avg_gap = np.mean([
         kl_results.get(k, {}).get('mean', kl_results.get(k, {}).get('final_acc', 0)) -
@@ -174,21 +174,21 @@ def analyze_kshot_sample_efficiency(results_dir, seeds):
         for k in kshots if k in oracle_results and k in kl_results
     ])
 
-    print(f"\nAverage Oracle->VPT gap: {avg_gap:+.2f}%")
+    print(f"\nAverage Oracle-to-VPT gap: {avg_gap:+.2f}%")
 
     if abs(avg_gap) < 2.0:
-        print("\n[OK] CONCLUSION: Oracle and Unlearned recovery are NEARLY IDENTICAL")
-        print("  -> VPT 'resurrection' is mostly just fast relearning")
-        print("  -> LoRA-unlearning provides MINIMAL security benefit")
-        print("  -> 0% forget accuracy != meaningful security guarantee")
-        print("\n  This VALIDATES the 'audit' framing of your paper!")
+        print("\nConclusion: Oracle and unlearned recovery are very close")
+        print("  - VPT recovery looks like fast relearning")
+        print("  - LoRA unlearning adds little security in this setting")
+        print("  - 0% forget accuracy alone is not a security guarantee")
+        print("\n  This supports the framing used in the paper.")
     elif avg_gap > 5.0:
-        print("\n! CONCLUSION: Unlearned models show HIGHER recovery than Oracle")
-        print("  -> Some hidden knowledge may be retained in frozen parameters")
-        print("  -> But gap is still small - security benefit is minimal")
+        print("\nConclusion: Unlearned models recover more than the oracle")
+        print("  - Some residual knowledge may remain in frozen weights")
+        print("  - The gap is still small in absolute terms")
     else:
-        print("\n[WARNING] CONCLUSION: Modest difference between Oracle and Unlearned")
-        print("  -> Some residual accessibility, but not dramatic")
+        print("\nConclusion: Modest difference between oracle and unlearned")
+        print("  - Some residual access, but not dramatic")
 
     return oracle_results, kl_results, salun_results, scrub_results
 
@@ -245,11 +245,9 @@ def generate_sample_efficiency_report(results_dir, oracle_kshot, kl_kshot,
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text("\n".join(lines))
 
-    print("\n" + "=" * 80)
-    print("SAMPLE-EFFICIENCY THRESHOLD REPORT")
-    print("=" * 80)
+    print("\nSample-efficiency threshold report")
     print("\n".join(lines))
-    print(f"\n[OK] Saved sample-efficiency report to {output_file}")
+    print(f"\nSaved sample-efficiency report to {output_file}")
 
 
 def analyze_prompt_capacity(results_dir, seeds):
@@ -479,6 +477,45 @@ def analyze_random_label_control(results_dir, seeds, prompt_length=5):
     return (oracle_acc, kl_acc, gap)
 
 
+def analyze_stratified_confidence(results_dir, seeds, prompt_length=10):
+    """Analyze stratified forget-set results by confidence buckets."""
+    print("STRATIFIED FORGET-SET (confidence buckets)")
+
+    if prompt_length != 10:
+        base = f"vpt_resurrect_kl_forget0_10shot_prompt{prompt_length}"
+    else:
+        base = "vpt_resurrect_kl_forget0_10shot"
+
+    modes = {
+        "high_conf": "highconf",
+        "mid_conf": "midconf",
+        "low_conf": "lowconf",
+    }
+
+    results = {}
+    for mode, suffix in modes.items():
+        pattern = f"{base}_{suffix}_seed_{{seed}}.jsonl"
+        data = load_multiseed_results(results_dir, pattern, seeds)
+        if data:
+            results[mode] = data
+
+    if not results:
+        print("No stratified confidence logs found.")
+        return {}
+
+    print("\nBucket     KL Unlearned (mean +/- std)")
+    print("--------------------------------------")
+    for mode in ["high_conf", "mid_conf", "low_conf"]:
+        data = results.get(mode)
+        if data:
+            print(f"{mode:<10} {data['mean']:.2f} +/- {data['std']:.2f}%")
+        else:
+            print(f"{mode:<10} N/A")
+
+    print("")
+    return results
+
+
 def generate_plots(results_dir, oracle_kshot, kl_kshot, salun_kshot, scrub_kshot,
                    oracle_prompt, kl_prompt, curve_seed):
     """Generate publication-quality plots"""
@@ -678,6 +715,7 @@ def main():
     lowshot_results = analyze_lowshot_controls(results_dir, seeds)
     shuffled_results = analyze_shuffled_label_control(results_dir, seeds)
     random_results = analyze_random_label_control(results_dir, seeds)
+    stratified_results = analyze_stratified_confidence(results_dir, seeds)
 
     # Generate plots
     if oracle_kshot and kl_kshot:

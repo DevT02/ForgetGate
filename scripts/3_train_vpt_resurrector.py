@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """
-Script 3: Train VPT resurrector against unlearned model for ForgetGate-V
+Script 3: Train VPT resurrector against unlearned model
 """
 
 import argparse
 import os
 import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import random
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, ConcatDataset, Dataset
+from torch.utils.data import ConcatDataset, DataLoader, Dataset, Subset
 from typing import Dict
 import yaml
 
@@ -24,8 +26,8 @@ from src.utils import log_experiment, create_experiment_log
 
 
 def load_oracle_model(experiment_suites: Dict, suite_config: Dict, device: torch.device, seed: int) -> nn.Module:
-    """Load oracle model (trained without forget class)"""
-    oracle_suite_name = suite_config.get('oracle_model_suite', '')
+    """Load oracle model (trained without forget class)."""
+    oracle_suite_name = suite_config.get("oracle_model_suite", "")
     if not oracle_suite_name:
         raise ValueError("No oracle_model_suite specified in VPT suite")
 
@@ -45,33 +47,33 @@ def load_oracle_model(experiment_suites: Dict, suite_config: Dict, device: torch
     dataset_info = data_config[dataset_name]
     model_type = oracle_suite_cfg["model"]
 
-    if model_type.startswith('vit'):
-        model_config_name = model_type.replace('vit_', '')
+    if model_type.startswith("vit"):
+        model_config_name = model_type.replace("vit_", "")
         oracle_model = create_vit_model(
-            model_config['vit'][model_config_name],
-            num_classes=dataset_info['num_classes']
+            model_config["vit"][model_config_name],
+            num_classes=dataset_info["num_classes"],
         )
     else:
         oracle_model = create_cnn_model(
-            model_config['cnn'][model_type],
-            num_classes=dataset_info['num_classes']
+            model_config["cnn"][model_type],
+            num_classes=dataset_info["num_classes"],
         )
 
-    oracle_model.load_state_dict(checkpoint['model_state_dict'])
+    oracle_model.load_state_dict(checkpoint["model_state_dict"])
     oracle_model = oracle_model.to(device)
 
     return oracle_model
 
 
 def load_unlearned_model(experiment_suites: Dict, suite_config: Dict, device: torch.device, seed: int) -> nn.Module:
-    """Load unlearned model with LoRA adapter"""
-    unlearned_suite_name = suite_config.get('unlearned_model_suite', '')
+    """Load unlearned model with LoRA adapter."""
+    unlearned_suite_name = suite_config.get("unlearned_model_suite", "")
     if not unlearned_suite_name:
         raise ValueError("No unlearned_model_suite specified in VPT suite")
 
     # Resolve the suite chain: VPT -> unlearned -> base
     unlearned_suite_config = experiment_suites.get(unlearned_suite_name, {})
-    base_suite_name = unlearned_suite_config.get('base_model_suite', '')
+    base_suite_name = unlearned_suite_config.get("base_model_suite", "")
     if not base_suite_name:
         raise ValueError("No base_model_suite found in unlearned suite")
 
@@ -99,19 +101,19 @@ def load_unlearned_model(experiment_suites: Dict, suite_config: Dict, device: to
     dataset_info = data_config[dataset_name]
     model_type = base_suite_cfg["model"]
 
-    if model_type.startswith('vit'):
-        model_config_name = model_type.replace('vit_', '')
+    if model_type.startswith("vit"):
+        model_config_name = model_type.replace("vit_", "")
         base_model = create_vit_model(
-            model_config['vit'][model_config_name],
-            num_classes=dataset_info['num_classes']
+            model_config["vit"][model_config_name],
+            num_classes=dataset_info["num_classes"],
         )
     else:
         base_model = create_cnn_model(
-            model_config['cnn'][model_type],
-            num_classes=dataset_info['num_classes']
+            model_config["cnn"][model_type],
+            num_classes=dataset_info["num_classes"],
         )
 
-    base_model.load_state_dict(checkpoint['model_state_dict'])
+    base_model.load_state_dict(checkpoint["model_state_dict"])
     base_model = base_model.to(device)
 
     # Load LoRA adapter
@@ -140,25 +142,49 @@ class LabelOverrideDataset(Dataset):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train VPT resurrector for ForgetGate-V")
-    parser.add_argument("--config", type=str, required=True,
-                       help="Path to experiment suites config")
-    parser.add_argument("--suite", type=str, required=True,
-                       help="Experiment suite name")
-    parser.add_argument("--seed", type=int, default=42,
-                       help="Random seed")
-    parser.add_argument("--device", type=str, default=None,
-                       help="Device to use")
-    parser.add_argument("--prompt-length", type=int, default=None,
-                       help="Override prompt length from config (for ablations)")
-    parser.add_argument("--label-mode", type=str, default=None, choices=["true", "shuffle", "random"],
-                       help="Override label mode for forget data: true, shuffle, or random")
-    parser.add_argument("--k-shot", type=int, default=None,
-                       help="Override k-shot count for forget data (controls)")
-    parser.add_argument("--stratify", type=str, default=None, choices=["high_conf", "low_conf"],
-                       help="Stratify forget data by model confidence before k-shot selection")
-    parser.add_argument("--stratify-fraction", type=float, default=None,
-                       help="Optional fraction of forget data to keep after stratification")
+    parser = argparse.ArgumentParser(description="Train VPT resurrector")
+    parser.add_argument("--config", type=str, required=True, help="Path to experiment suites config")
+    parser.add_argument("--suite", type=str, required=True, help="Experiment suite name")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed")
+    parser.add_argument("--device", type=str, default=None, help="Device to use")
+    parser.add_argument(
+        "--prompt-length",
+        type=int,
+        default=None,
+        help="Override prompt length from config (for ablations)",
+    )
+    parser.add_argument(
+        "--label-mode",
+        type=str,
+        default=None,
+        choices=["true", "shuffle", "random"],
+        help="Override label mode for forget data: true, shuffle, or random",
+    )
+    parser.add_argument(
+        "--k-shot",
+        type=int,
+        default=None,
+        help="Override k-shot count for forget data (controls)",
+    )
+    parser.add_argument(
+        "--lambda-retain",
+        type=float,
+        default=None,
+        help="Override lambda_retain for VPT training (tradeoff sweeps)",
+    )
+    parser.add_argument(
+        "--stratify",
+        type=str,
+        default=None,
+        choices=["high_conf", "mid_conf", "low_conf"],
+        help="Stratify forget data by model confidence before k-shot selection",
+    )
+    parser.add_argument(
+        "--stratify-fraction",
+        type=float,
+        default=None,
+        help="Optional fraction of forget data to keep after stratification",
+    )
 
     args = parser.parse_args()
 
@@ -176,21 +202,18 @@ def main():
 
     # Setup device
     device = get_device(args.device)
-
-    print("=" * 50)
-    print(f"ForgetGate-V: Training VPT Resurrector - {args.suite}")
-    print("=" * 50)
+    print(f"Run: Training VPT Resurrector - {args.suite}")
     print(f"Seed: {args.seed}")
     print(f"Device: {device}")
 
     # Get VPT parameters
-    vpt_params = suite_config.get('vpt_attack', {})
-    forget_class = vpt_params.get('target_class', 0)
-    prompt_length = vpt_params.get('prompt_length', 5)
+    vpt_params = suite_config.get("vpt_attack", {})
+    forget_class = vpt_params.get("target_class", 0)
+    prompt_length = vpt_params.get("prompt_length", 5)
     if args.prompt_length is not None:
         prompt_length = args.prompt_length
-    init_strategy = vpt_params.get('init_strategy', 'random')
-    label_mode = vpt_params.get('label_mode', 'true')
+    init_strategy = vpt_params.get("init_strategy", "random")
+    label_mode = vpt_params.get("label_mode", "true")
     if args.label_mode is not None:
         label_mode = args.label_mode
 
@@ -201,35 +224,35 @@ def main():
 
     # Create VPT configuration
     vpt_config = {
-        'prompt_type': vpt_params.get('prompt_type', 'prefix'),
-        'prompt_length': prompt_length,
-        'init_strategy': init_strategy,
-        'dropout': vpt_config_file['vpt_prompt'].get('dropout', 0.1)
+        "prompt_type": vpt_params.get("prompt_type", "prefix"),
+        "prompt_length": prompt_length,
+        "init_strategy": init_strategy,
+        "dropout": vpt_config_file["vpt_prompt"].get("dropout", 0.1),
     }
 
     # Determine if this is an oracle or unlearned suite
-    is_oracle = 'oracle_model_suite' in suite_config
-    is_unlearned = 'unlearned_model_suite' in suite_config
+    is_oracle = "oracle_model_suite" in suite_config
+    is_unlearned = "unlearned_model_suite" in suite_config
 
     if is_oracle:
         target_model = load_oracle_model(experiment_suites, suite_config, device, args.seed)
         print_model_info(target_model, "Oracle model")
         # Resolve dataset from oracle suite
-        oracle_suite_name = suite_config.get('oracle_model_suite', '')
+        oracle_suite_name = suite_config.get("oracle_model_suite", "")
         oracle_suite_config = experiment_suites.get(oracle_suite_name, {})
-        dataset_name = oracle_suite_config.get('dataset', 'cifar10')
+        dataset_name = oracle_suite_config.get("dataset", "cifar10")
     elif is_unlearned:
         target_model = load_unlearned_model(experiment_suites, suite_config, device, args.seed)
         print_model_info(target_model, "Unlearned model")
         # Resolve dataset from suite chain (VPT -> unlearned -> base)
-        unlearned_suite_name = suite_config.get('unlearned_model_suite', '')
+        unlearned_suite_name = suite_config.get("unlearned_model_suite", "")
         unlearned_suite_config = experiment_suites.get(unlearned_suite_name, {})
-        base_suite_name = unlearned_suite_config.get('base_model_suite', '')
+        base_suite_name = unlearned_suite_config.get("base_model_suite", "")
         if base_suite_name:
             base_suite_config = experiment_suites.get(base_suite_name, {})
-            dataset_name = base_suite_config.get('dataset', 'cifar10')
+            dataset_name = base_suite_config.get("dataset", "cifar10")
         else:
-            dataset_name = suite_config.get('dataset', 'cifar10')
+            dataset_name = suite_config.get("dataset", "cifar10")
     else:
         raise ValueError("Suite must specify either 'oracle_model_suite' or 'unlearned_model_suite'")
 
@@ -238,14 +261,17 @@ def main():
 
     # Load train dataset and split into forget/retain for training + validation
     train_dataset = data_manager.load_dataset(dataset_name, "train")
-    from src.data import create_forget_retain_splits
     forget_train, retain_train, forget_val, retain_val = create_forget_retain_splits(
         train_dataset, forget_class, train_ratio=0.8
     )
 
     # Optional stratification by model confidence on forget samples
-    stratify_mode = args.stratify or vpt_params.get('stratify', None)
-    stratify_fraction = args.stratify_fraction if args.stratify_fraction is not None else vpt_params.get('stratify_fraction', None)
+    stratify_mode = args.stratify or vpt_params.get("stratify", None)
+    stratify_fraction = (
+        args.stratify_fraction
+        if args.stratify_fraction is not None
+        else vpt_params.get("stratify_fraction", None)
+    )
     if stratify_mode:
         print(f"\nStratifying forget samples by confidence: {stratify_mode}")
         target_model.eval()
@@ -267,17 +293,29 @@ def main():
 
         # Rank indices by confidence
         idx_conf = list(enumerate(conf_scores))
-        idx_conf.sort(key=lambda x: x[1], reverse=(stratify_mode == "high_conf"))
+        # Sort by confidence (high -> low)
+        idx_conf.sort(key=lambda x: x[1], reverse=True)
         ranked_indices = [i for i, _ in idx_conf]
+
+        if stratify_mode == "low_conf":
+            ranked_indices = list(reversed(ranked_indices))
+
+        if stratify_mode == "mid_conf":
+            if stratify_fraction is None:
+                stratify_fraction = 0.5
 
         if stratify_fraction is not None:
             if not (0 < stratify_fraction <= 1.0):
                 raise ValueError("stratify_fraction must be in (0,1]")
             keep_n = max(1, int(len(ranked_indices) * stratify_fraction))
-            ranked_indices = ranked_indices[:keep_n]
-            print(f"Keeping top {keep_n}/{len(conf_scores)} forget samples after stratification")
+            if stratify_mode == "mid_conf":
+                start = max(0, (len(ranked_indices) - keep_n) // 2)
+                ranked_indices = ranked_indices[start:start + keep_n]
+                print(f"Keeping middle {keep_n}/{len(conf_scores)} forget samples after stratification")
+            else:
+                ranked_indices = ranked_indices[:keep_n]
+                print(f"Keeping top {keep_n}/{len(conf_scores)} forget samples after stratification")
 
-        from torch.utils.data import Subset
         forget_train = Subset(forget_train, ranked_indices)
 
     # K-shot sampling - limit training data if specified
@@ -287,9 +325,6 @@ def main():
     if k_shot is not None:
         print(f"\nK-shot mode: Using only {k_shot} samples from forget class")
         # Use torch.utils.data.Subset to limit samples
-        from torch.utils.data import Subset
-        import random
-
         # Create deterministic k-shot subset
         random.seed(args.seed)
         indices = list(range(len(forget_train)))
@@ -317,13 +352,12 @@ def main():
             return [ds[i][1] for i in range(len(ds))]
 
         # Determine num_classes from dataset config
-        num_classes = data_config.get(dataset_name, {}).get('num_classes', None)
+        num_classes = data_config.get(dataset_name, {}).get("num_classes", None)
         if num_classes is None:
             raise ValueError(f"num_classes not found for dataset '{dataset_name}' in configs/data.yaml")
 
         labels = _get_labels(forget_train)
         if label_mode == "shuffle":
-            import random
             random.seed(args.seed)
             shuffled = labels.copy()
             random.shuffle(shuffled)
@@ -332,7 +366,6 @@ def main():
                      for orig, lbl in zip(labels, shuffled)]
             new_labels = fixed
         elif label_mode == "random":
-            import random
             random.seed(args.seed)
             new_labels = [random.randrange(num_classes) for _ in labels]
             # Ensure labels differ from original
@@ -349,6 +382,12 @@ def main():
     persistent_workers = num_workers > 0
     prefetch_factor = 4 if num_workers > 0 else None
     training_params = vpt_params
+    if args.k_shot is not None:
+        training_params = dict(training_params)
+        training_params["k_shot"] = args.k_shot
+    if args.lambda_retain is not None:
+        training_params = dict(training_params)
+        training_params["lambda_retain"] = args.lambda_retain
     train_batch_size = training_params.get("train_batch_size", 64)
     retain_batch_size = training_params.get("retain_batch_size", 64)
     eval_batch_size = training_params.get("eval_batch_size", 256)
@@ -387,12 +426,12 @@ def main():
         target_model=target_model,
         forget_class=forget_class,
         prompt_config=vpt_config,
-        device=device
+        device=device,
     )
 
     # Train resurrection prompt
-    epochs = training_params.get('epochs', 100)
-    lr = training_params.get('lr', 1e-2)
+    epochs = training_params.get("epochs", 100)
+    lr = training_params.get("lr", 1e-2)
 
     print(f"\nTraining VPT resurrector for {epochs} epochs with lr={lr}...")
 
@@ -411,11 +450,11 @@ def main():
         val_forget_loader=forget_val_loader,  # held-out forget split
         epochs=epochs,
         lr=lr,
-        weight_decay=training_params.get('weight_decay', 0.0),
-        patience=vpt_config_file['vpt_training']['early_stopping'].get('patience', 20),
-        eval_every=training_params.get('eval_every', 10),
-        lambda_retain=training_params.get('lambda_retain', 1.0),
-        T=training_params.get('T', 1.0)
+        weight_decay=training_params.get("weight_decay", 0.0),
+        patience=vpt_config_file["vpt_training"]["early_stopping"].get("patience", 20),
+        eval_every=training_params.get("eval_every", 10),
+        lambda_retain=training_params.get("lambda_retain", 1.0),
+        T=training_params.get("T", 1.0),
     )
 
     # Save trained VPT prompt
@@ -424,8 +463,16 @@ def main():
         suite_name_for_io = f"{args.suite}_prompt{prompt_length}"
     if args.k_shot is not None:
         suite_name_for_io = f"{suite_name_for_io}_kshot{args.k_shot}"
+    if args.lambda_retain is not None:
+        lambda_tag = str(args.lambda_retain).replace(".", "p")
+        suite_name_for_io = f"{suite_name_for_io}_lam{lambda_tag}"
     if stratify_mode:
-        suffix = "highconf" if stratify_mode == "high_conf" else "lowconf"
+        if stratify_mode == "high_conf":
+            suffix = "highconf"
+        elif stratify_mode == "mid_conf":
+            suffix = "midconf"
+        else:
+            suffix = "lowconf"
         suite_name_for_io = f"{suite_name_for_io}_{suffix}"
     if label_mode != "true":
         suite_name_for_io = f"{suite_name_for_io}_{label_mode}labels"

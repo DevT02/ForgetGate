@@ -67,6 +67,36 @@ class CrossEntropyAscent(UnlearningObjective):
         return modified_loss.mean()
 
 
+class SmoothedGradientAscent(UnlearningObjective):
+    """Gradient ascent with label smoothing for stability (SGA)."""
+
+    def __init__(self, forget_class: int, num_classes: int = 10,
+                 smoothing: float = 0.1, retain_weight: float = 0.1, target_weight: float = 1.0):
+        super().__init__(forget_class, num_classes)
+        self.smoothing = smoothing
+        self.retain_weight = retain_weight
+        self.target_weight = target_weight
+
+    def forward(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        """
+        Smoothed CE ascent on forget class, smoothed CE descent on retain classes.
+        """
+        ce_loss = F.cross_entropy(
+            logits, labels, reduction='none', label_smoothing=self.smoothing
+        )
+
+        forget_mask = (labels == self.forget_class)
+        retain_mask = ~forget_mask
+
+        modified_loss = torch.where(
+            forget_mask,
+            -self.target_weight * ce_loss,
+            self.retain_weight * ce_loss
+        )
+
+        return modified_loss.mean()
+
+
 class UniformKL(UnlearningObjective):
     """KL divergence to uniform distribution on forget class"""
 
@@ -480,6 +510,9 @@ def create_unlearning_objective(objective_name: str, forget_class: int,
 
     if objective_name == "ce_ascent":
         return CrossEntropyAscent(forget_class, num_classes, **kwargs)
+
+    elif objective_name in ("sga", "smoothed_ga"):
+        return SmoothedGradientAscent(forget_class, num_classes, **kwargs)
 
     elif objective_name == "uniform_kl":
         return UniformKL(forget_class, num_classes, **kwargs)

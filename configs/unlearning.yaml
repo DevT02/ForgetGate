@@ -11,6 +11,14 @@ objectives:
     target_class_weight: 1.0
     retain_class_weight: 0.1
 
+  # Smoothed Gradient Ascent (stabilized CE ascent)
+  sga:
+    name: "sga"
+    loss_type: "ce_smooth_ascent"
+    smoothing: 0.1
+    target_class_weight: 1.0
+    retain_class_weight: 0.1
+
   # KL divergence to uniform distribution
   uniform_kl:
     name: "uniform_kl"
@@ -59,6 +67,8 @@ lora_unlearn:
   lr: 1e-3
   weight_decay: 0.01
   batch_size: 128
+  num_workers: 0
+  pin_memory: true
   epochs: 50
   warmup_epochs: 5
 

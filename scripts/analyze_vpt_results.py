@@ -10,8 +10,6 @@ def analyze_vpt_training(log_file, compare_oracle=True):
     """Parse VPT training log and show recovery progress"""
 
     print(f"\nAnalyzing: {log_file}")
-    print("=" * 80)
-
     with open(log_file, 'r') as f:
         epochs = [json.loads(line) for line in f]
 
@@ -69,7 +67,6 @@ def analyze_vpt_training(log_file, compare_oracle=True):
 
         if os.path.exists(oracle_file):
             print("[ORACLE COMPARISON]")
-            print("=" * 80)
             try:
                 with open(oracle_file, 'r') as f:
                     oracle_epochs = [json.loads(line) for line in f]
@@ -80,11 +77,11 @@ def analyze_vpt_training(log_file, compare_oracle=True):
                 print(f"   Recovery gap vs oracle: {gap*100:+.2f}%")
 
                 if abs(gap) < 0.05:  # Within 5%
-                    print(f"   [CONCLUSION] Recovery similar to oracle - mostly relearning")
+                    print(f"   Note: recovery is similar to oracle (mostly relearning)")
                 elif gap > 0:
-                    print(f"   [CONCLUSION] Better than oracle - possible residual accessibility")
+                    print(f"   Note: recovery is higher than oracle (possible residual access)")
                 else:
-                    print(f"   [CONCLUSION] Worse than oracle - unlearning may help")
+                    print(f"   Note: recovery is lower than oracle (unlearning may help)")
 
             except Exception as e:
                 print(f"   [ERROR] Could not load oracle: {e}")

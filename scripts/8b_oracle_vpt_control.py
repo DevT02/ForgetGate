@@ -201,7 +201,7 @@ def main():
 
     print(f"\nOracle model accuracy on class {args.target_class}: {oracle_target_acc:.2f}%")
     if oracle_target_acc > 15.0:
-        print(f"[WARNING] WARNING: Oracle accuracy is high ({oracle_target_acc:.2f}%)")
+        print(f"[WARNING] Oracle accuracy is high ({oracle_target_acc:.2f}%)")
         print(f"  Expected ~10% (random guessing on CIFAR-10)")
         print(f"  Oracle may have indirectly learned this class - results may be invalid")
     else:
@@ -319,7 +319,7 @@ def main():
                     print("  -> Your claims need revision")
                     verdict = "INVALID"
                 else:
-                    print("[WARNING] RESULTS UNCLEAR")
+                    print("[WARNING] Results unclear")
                     print("  Modest difference between Oracle and Unlearned VPT")
                     print("  -> Some hidden knowledge retained, but not dramatic")
                     print("  -> Discuss limitations in paper")

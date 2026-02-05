@@ -186,6 +186,78 @@ unlearn_kl_vit_cifar10_forget0:
     lr: 1e-3
   seeds: [42, 123, 456]
 
+# New baselines: SGA + GU projection + gradient surgery
+unlearn_sga_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: sga
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+unlearn_kl_gu_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: uniform_kl
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+    gu_projection: true
+  seeds: [42, 123, 456]
+
+unlearn_ce_gs_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: ce_ascent
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+    grad_surgery: true
+  seeds: [42, 123, 456]
+
+# Smoke versions (fast sanity checks)
+unlearn_sga_vit_cifar10_forget0_smoke:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: sga
+    forget_class: 0
+    lora_rank: 4
+    epochs: 5
+    lr: 1e-3
+  seeds: [42]
+
+unlearn_kl_gu_vit_cifar10_forget0_smoke:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: uniform_kl
+    forget_class: 0
+    lora_rank: 4
+    epochs: 5
+    lr: 1e-3
+    gu_projection: true
+  seeds: [42]
+
+unlearn_ce_gs_vit_cifar10_forget0_smoke:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: ce_ascent
+    forget_class: 0
+    lora_rank: 4
+    epochs: 5
+    lr: 1e-3
+    grad_surgery: true
+  seeds: [42]
+
 # Prune-then-unlearn (optional baseline)
 unlearn_prune_kl_vit_cifar10_forget0:
   base_model_suite: base_vit_cifar10
@@ -216,6 +288,19 @@ unlearn_noisy_retain_vit_cifar10_forget0:
     epochs: 50
     lr: 1e-3
     grad_noise_std: 0.001
+  seeds: [42, 123, 456]
+
+# Benign relearning probe (retain-only finetune from unlearned model)
+benign_relearn_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearned_model_suite: unlearn_kl_vit_cifar10_forget0
+  dataset: cifar10
+  model: vit_tiny
+  benign_relearn:
+    epochs: 5
+    lr: 1e-4
+    batch_size: 128
+    retain_fraction: 0.1
   seeds: [42, 123, 456]
 
 unlearn_kl_vit_cifar10_forget1:
@@ -635,6 +720,33 @@ eval_dependency_vit_cifar10_forget0:
       - retain_acc
   seeds: [42, 123, 456]
 
+# Dependency-aware eval v2 (retain+forget mix with opposite cue patches)
+eval_dependency_mix_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_lora_vit_cifar10_forget0
+    - vpt_resurrect_vit_cifar10_forget0
+  evaluation:
+    attacks:
+      - dependency_mix_patch
+    metrics:
+      - forget_acc
+      - retain_acc
+  seeds: [42, 123, 456]
+
+# Forget-neighborhood eval (forget-only samples with mild perturbations)
+eval_forget_neighborhood_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_lora_vit_cifar10_forget0
+    - vpt_resurrect_vit_cifar10_forget0
+  evaluation:
+    attacks:
+      - forget_neighborhood
+    metrics:
+      - forget_acc
+  seeds: [42, 123, 456]
+
 eval_prune_kl_vit_cifar10_forget0:
   model_suites:
     - base_vit_cifar10
@@ -794,6 +906,21 @@ eval_quick_baselines_vit_cifar10_forget0:
       - retain_acc
   seeds: [42]
 
+# Quick smoke eval for new objectives
+eval_quick_new_methods_vit_cifar10_forget0_smoke:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_sga_vit_cifar10_forget0_smoke
+    - unlearn_kl_gu_vit_cifar10_forget0_smoke
+    - unlearn_ce_gs_vit_cifar10_forget0_smoke
+  evaluation:
+    attacks:
+      - clean
+    metrics:
+      - forget_acc
+      - retain_acc
+  seeds: [42]
+
 # Comprehensive evaluation for paper - multiple seeds for statistical significance
 eval_paper_baselines_vit_cifar10_forget0:
   model_suites:
@@ -810,6 +937,43 @@ eval_paper_baselines_vit_cifar10_forget0:
       - forget_acc  # Lower is better (successful forgetting)
       - retain_acc  # Higher is better (utility preservation)
   seeds: [42, 123, 456]  # Multiple seeds for statistical analysis
+
+eval_benign_relearn_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_kl_vit_cifar10_forget0
+    - benign_relearn_vit_cifar10_forget0
+  evaluation:
+    attacks:
+      - clean
+    metrics:
+      - forget_acc
+      - retain_acc
+  seeds: [42, 123, 456]
+
+# Lightweight audits inspired by REMIND/leak@ (vision adaptation)
+audit_unlearning_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_lora_vit_cifar10_forget0
+    - unlearn_kl_vit_cifar10_forget0
+    - unlearn_salun_vit_cifar10_forget0
+    - unlearn_scrub_distill_vit_cifar10_forget0
+  evaluation:
+    audits:
+      - loss_landscape
+      - stochastic_leakage
+  seeds: [42, 123, 456]
+
+# Feature-probe leakage (linear probe on frozen features)
+probe_feature_leakage_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_kl_vit_cifar10_forget0
+    - benign_relearn_vit_cifar10_forget0
+    - oracle_vit_cifar10_forget0
+  forget_class: 0
+  seeds: [42, 123, 456]
 
 # Novel experiments: adversarial unlearning & resurrection attacks
 

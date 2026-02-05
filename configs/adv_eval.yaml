@@ -87,6 +87,12 @@ dependency_patch:
   alpha: 0.7
   position: "bottom_right"
 
+# Dependency-aware evaluation v2 (retain+forget mix with opposite cues)
+dependency_mix_patch:
+  patch_size: 8
+  alpha: 0.7
+  position: "bottom_right"
+
 # Backdoor patch evaluation (poisoning-style)
 backdoor_patch:
   type: "patch"
@@ -95,3 +101,7 @@ backdoor_patch:
   pattern: "checkerboard"
   intensity: 1.0
   target_class: null
+
+# Forget-neighborhood eval (mild perturbations on forget samples)
+forget_neighborhood:
+  noise_std: 0.01

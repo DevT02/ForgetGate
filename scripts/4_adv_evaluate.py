@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script 4: Run adversarial evaluation for ForgetGate-V
+Script 4: Run adversarial evaluation
 Tests clean accuracy, PGD, AutoAttack, and VPT resurrection
 """
 
@@ -8,6 +8,7 @@ import argparse
 import logging
 import os
 import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import torch
@@ -33,7 +34,7 @@ LOGGER = logging.getLogger("forgetgate.adv_eval")
 
 
 def resolve_base_suite_info(experiment_suites: Dict, suite_name: str) -> Tuple[str, Dict]:
-    """Resolve the base suite that contains dataset/model info, following suite references"""
+    """Resolve the base suite that contains dataset/model info."""
     suite = experiment_suites[suite_name]
 
     if "base_model_suite" in suite:
@@ -45,7 +46,7 @@ def resolve_base_suite_info(experiment_suites: Dict, suite_name: str) -> Tuple[s
 
 
 def get_evaluation_config(experiment_suites: Dict, eval_suite_name: str) -> Dict:
-    """Extract dataset, model, forget_class, and model_suites from the appropriate suites"""
+    """Extract dataset/model/forget_class and model_suites from the right suites."""
     eval_suite = experiment_suites[eval_suite_name]
     model_suites = eval_suite.get('model_suites', [])
 
@@ -91,7 +92,7 @@ def build_model_from_eval_config(eval_config: Dict, device: torch.device) -> nn.
     if model_type.startswith('vit'):
         model_config_name = model_type.replace('vit_', '')
         vit_cfg = dict(model_config['vit'][model_config_name])
-        vit_cfg['pretrained'] = False  # IMPORTANT: we're loading from checkpoint, not using pretrained
+        vit_cfg['pretrained'] = False  # We load from checkpoints, not pretrained weights.
         model = create_vit_model(
             vit_cfg,
             num_classes=dataset_info['num_classes']
@@ -162,6 +163,95 @@ class ForgetCuePatchDataset(Dataset):
         return x, y_retain
 
 
+class DependencyMixPatchDataset(Dataset):
+    """Mix retain and forget images with opposite-class cue patches."""
+
+    def __init__(self, retain_dataset: Dataset, forget_dataset: Dataset,
+                 patch_size: int = 8, alpha: float = 0.7,
+                 position: str = "bottom_right", seed: int = 0):
+        self.retain_dataset = retain_dataset
+        self.forget_dataset = forget_dataset
+        self.patch_size = patch_size
+        self.alpha = alpha
+        self.position = position
+        self.seed = seed
+
+        self.retain_len = len(self.retain_dataset)
+        self.forget_len = len(self.forget_dataset)
+
+    def __len__(self):
+        return self.retain_len + self.forget_len
+
+    def _sample_index(self, idx: int, total: int) -> int:
+        import random
+        rng = random.Random(self.seed + idx * 9973)
+        return rng.randrange(total)
+
+    def _get_patch_slice(self, h: int, w: int) -> Tuple[slice, slice]:
+        ps = self.patch_size
+        if self.position == "top_left":
+            return slice(0, ps), slice(0, ps)
+        if self.position == "top_right":
+            return slice(0, ps), slice(w - ps, w)
+        if self.position == "bottom_left":
+            return slice(h - ps, h), slice(0, ps)
+        return slice(h - ps, h), slice(w - ps, w)
+
+    def _apply_patch(self, base_img: torch.Tensor, patch_src: torch.Tensor) -> torch.Tensor:
+        if not torch.is_tensor(base_img):
+            base_img = torch.tensor(base_img)
+        if not torch.is_tensor(patch_src):
+            patch_src = torch.tensor(patch_src)
+
+        c, h, w = base_img.shape
+        ps = min(self.patch_size, h, w)
+        hs, ws = self._get_patch_slice(h, w)
+        patch = patch_src[:, :ps, :ps]
+
+        out = base_img.clone()
+        out[:, hs, ws] = (1 - self.alpha) * out[:, hs, ws] + self.alpha * patch
+        return torch.clamp(out, 0.0, 1.0)
+
+    def __getitem__(self, idx):
+        if idx < self.retain_len:
+            x_retain, y_retain = self.retain_dataset[idx]
+            fidx = self._sample_index(idx, self.forget_len)
+            x_forget, _ = self.forget_dataset[fidx]
+            x = self._apply_patch(x_retain, x_forget)
+            return x, y_retain
+
+        fidx = idx - self.retain_len
+        x_forget, y_forget = self.forget_dataset[fidx % self.forget_len]
+        ridx = self._sample_index(idx, self.retain_len)
+        x_retain, _ = self.retain_dataset[ridx]
+        x = self._apply_patch(x_forget, x_retain)
+        return x, y_forget
+
+
+class ForgetNeighborhoodDataset(Dataset):
+    """Forget-only dataset with mild perturbations to probe neighborhood leakage."""
+
+    def __init__(self, base_dataset: Dataset, forget_class: int, noise_std: float = 0.01):
+        self.base_dataset = base_dataset
+        self.forget_class = forget_class
+        self.noise_std = noise_std
+        self.indices = []
+        for idx in range(len(base_dataset)):
+            _, label = base_dataset[idx]
+            if int(label) == forget_class:
+                self.indices.append(idx)
+
+    def __len__(self):
+        return len(self.indices)
+
+    def __getitem__(self, idx):
+        x, y = self.base_dataset[self.indices[idx]]
+        if self.noise_std > 0:
+            noise = torch.randn_like(x) * self.noise_std
+            x = torch.clamp(x + noise, 0.0, 1.0)
+        return x, y
+
+
 def load_model_for_evaluation(
     experiment_suites: Dict,
     eval_config: Dict,
@@ -180,6 +270,21 @@ def load_model_for_evaluation(
         )
 
     # Determine model type from suite name
+    if 'benign_relearn' in model_suite_name:
+        checkpoint_path = f"checkpoints/benign_relearn/{model_suite_name}_seed_{seed}_final.pt"
+        if not os.path.exists(checkpoint_path):
+            print(f"Warning: Benign relearn checkpoint not found: {checkpoint_path}")
+            return None
+
+        checkpoint = torch.load(checkpoint_path, map_location=device)
+        model = build_model_from_eval_config(eval_config, device)
+        state_dict = checkpoint.get("model_state_dict", checkpoint)
+        if all(not k.startswith("model.") for k in state_dict.keys()):
+            state_dict = {f"model.{k}": v for k, v in state_dict.items()}
+        model.load_state_dict(state_dict)
+        print(f"Loaded benign relearn model from: {checkpoint_path}")
+        return model
+
     if 'base' in model_suite_name and 'unlearn' not in model_suite_name:
         # Base model
         checkpoint_path = f"checkpoints/base/{model_suite_name}_seed_{seed}_final.pt"
@@ -274,7 +379,9 @@ def load_model_for_evaluation(
 def run_evaluation(suite_config: Dict, model: nn.Module, model_name: str,
                   data_loader: DataLoader, evaluator: 'ForgetGateEvaluator',
                   attack_configs: Dict, device: torch.device,
-                  dependency_loader: Optional[DataLoader] = None) -> Dict[str, Dict]:
+                  dependency_loader: Optional[DataLoader] = None,
+                  dependency_mix_loader: Optional[DataLoader] = None,
+                  neighborhood_loader: Optional[DataLoader] = None) -> Dict[str, Dict]:
     """Run evaluation for a model under different attacks"""
     results = {}
 
@@ -299,8 +406,12 @@ def run_evaluation(suite_config: Dict, model: nn.Module, model_name: str,
                 attack_type_for_evaluator = "pgd"
             elif attack_type == "dependency_forget_patch":
                 attack_type_for_evaluator = "clean"
+            elif attack_type == "dependency_mix_patch":
+                attack_type_for_evaluator = "clean"
             elif attack_type == "backdoor_patch":
                 attack_type_for_evaluator = "backdoor_patch"
+            elif attack_type == "forget_neighborhood":
+                attack_type_for_evaluator = "clean"
             else:
                 attack_type_for_evaluator = "clean"
 
@@ -314,6 +425,14 @@ def run_evaluation(suite_config: Dict, model: nn.Module, model_name: str,
                 if dependency_loader is None:
                     raise ValueError("dependency_loader is required for dependency_forget_patch")
                 eval_loader = dependency_loader
+            if attack_type == "dependency_mix_patch":
+                if dependency_mix_loader is None:
+                    raise ValueError("dependency_mix_loader is required for dependency_mix_patch")
+                eval_loader = dependency_mix_loader
+            if attack_type == "forget_neighborhood":
+                if neighborhood_loader is None:
+                    raise ValueError("neighborhood_loader is required for forget_neighborhood")
+                eval_loader = neighborhood_loader
 
             metrics = evaluator.evaluate_model(
                 model=model,
@@ -337,7 +456,7 @@ def run_evaluation(suite_config: Dict, model: nn.Module, model_name: str,
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run adversarial evaluation for ForgetGate-V")
+    parser = argparse.ArgumentParser(description="Run adversarial evaluation")
     parser.add_argument("--config", type=str, required=True,
                        help="Path to experiment suites config")
     parser.add_argument("--suite", type=str, required=True,
@@ -352,6 +471,8 @@ def main():
                        help="Enable verbose debug logging")
     parser.add_argument("--dump-configs", action="store_true",
                        help="Print loaded YAML configs and derived attack configs, then continue")
+    parser.add_argument("--forget-neighborhood-noise-std", type=float, default=None,
+                       help="Override noise_std for forget_neighborhood eval (sweep)")
 
     args = parser.parse_args()
 
@@ -370,8 +491,11 @@ def main():
 
     suite_config = experiment_suites[args.suite]
     adv_eval_config = load_config("configs/adv_eval.yaml")
+    if args.forget_neighborhood_noise_std is not None:
+        adv_eval_config.setdefault("forget_neighborhood", {})
+        adv_eval_config["forget_neighborhood"]["noise_std"] = float(args.forget_neighborhood_noise_std)
 
-    # IMPORTANT: show what we loaded
+    # Log what was loaded.
     LOGGER.info("Loaded suite: %s", args.suite)
     LOGGER.info("Loaded adv_eval.yaml pgd section: %s", adv_eval_config.get("pgd", {}))
     LOGGER.info("Loaded adv_eval.yaml compute section: %s", adv_eval_config.get("compute", {}))
@@ -402,10 +526,7 @@ def main():
 
     # Setup device
     device = get_device(args.device)
-
-    print("=" * 50)
-    print(f"ForgetGate-V: Adversarial Evaluation - {args.suite}")
-    print("=" * 50)
+    print(f"Run: Adversarial Evaluation - {args.suite}")
     print(f"Seed: {args.seed}")
     print(f"Device: {device}")
     print(f"Dataset: {eval_config['dataset']}")
@@ -562,6 +683,14 @@ def main():
                 "position": str(dep_cfg.get("position", "bottom_right")),
             }
             LOGGER.debug("Built attack_config for %s: %s", attack, attack_configs[attack])
+        elif attack == "dependency_mix_patch":
+            dep_cfg = adv_eval_config.get("dependency_mix_patch", {})
+            attack_configs[attack] = {
+                "patch_size": int(dep_cfg.get("patch_size", 8)),
+                "alpha": float(dep_cfg.get("alpha", 0.7)),
+                "position": str(dep_cfg.get("position", "bottom_right")),
+            }
+            LOGGER.debug("Built attack_config for %s: %s", attack, attack_configs[attack])
         elif attack == "backdoor_patch":
             bd_cfg = adv_eval_config.get("backdoor_patch", {})
             bd_target = bd_cfg.get("target_class", forget_class)
@@ -574,6 +703,12 @@ def main():
                 "pattern": str(bd_cfg.get("pattern", "checkerboard")),
                 "intensity": float(bd_cfg.get("intensity", 1.0)),
                 "target_class": int(bd_target),
+            }
+            LOGGER.debug("Built attack_config for %s: %s", attack, attack_configs[attack])
+        elif attack == "forget_neighborhood":
+            nb_cfg = adv_eval_config.get("forget_neighborhood", {})
+            attack_configs[attack] = {
+                "noise_std": float(nb_cfg.get("noise_std", 0.01)),
             }
             LOGGER.debug("Built attack_config for %s: %s", attack, attack_configs[attack])
 
@@ -612,6 +747,59 @@ def main():
             pin_memory=True,
         )
 
+    dependency_mix_loader = None
+    if "dependency_mix_patch" in attacks_to_run:
+        dep_cfg = adv_eval_config.get("dependency_mix_patch", {})
+        retain_dataset = data_manager.load_dataset(
+            dataset_name, "test",
+            exclude_classes=[forget_class],
+            use_pretrained=True,
+            apply_imagenet_norm=False
+        )
+        forget_dataset = data_manager.load_dataset(
+            dataset_name, "test",
+            include_classes=[forget_class],
+            use_pretrained=True,
+            apply_imagenet_norm=False
+        )
+        dep_dataset = DependencyMixPatchDataset(
+            retain_dataset,
+            forget_dataset,
+            patch_size=int(dep_cfg.get("patch_size", 8)),
+            alpha=float(dep_cfg.get("alpha", 0.7)),
+            position=str(dep_cfg.get("position", "bottom_right")),
+            seed=args.seed,
+        )
+        dependency_mix_loader = DataLoader(
+            dep_dataset,
+            batch_size=adv_eval_config['compute'].get('eval_batch_size', 256),
+            shuffle=False,
+            num_workers=0,
+            pin_memory=True,
+        )
+
+    neighborhood_loader = None
+    if "forget_neighborhood" in attacks_to_run:
+        nb_cfg = adv_eval_config.get("forget_neighborhood", {})
+        forget_dataset = data_manager.load_dataset(
+            dataset_name, "test",
+            include_classes=[forget_class],
+            use_pretrained=True,
+            apply_imagenet_norm=False
+        )
+        neighborhood_dataset = ForgetNeighborhoodDataset(
+            forget_dataset,
+            forget_class=forget_class,
+            noise_std=float(nb_cfg.get("noise_std", 0.01))
+        )
+        neighborhood_loader = DataLoader(
+            neighborhood_dataset,
+            batch_size=adv_eval_config['compute'].get('eval_batch_size', 256),
+            shuffle=False,
+            num_workers=0,
+            pin_memory=True,
+        )
+
     # Evaluate each model
     model_suites = suite_config.get('model_suites', [])
     all_results = {}
@@ -621,7 +809,9 @@ def main():
     try:
         for model_suite in model_suites:
             # Determine model type for display
-            if 'base' in model_suite and 'unlearn' not in model_suite:
+            if 'benign_relearn' in model_suite:
+                model_key = "benign"
+            elif 'base' in model_suite and 'unlearn' not in model_suite:
                 model_key = "base"
             elif 'unlearn' in model_suite and 'vpt' not in model_suite:
                 model_key = "unlearned"
@@ -668,7 +858,9 @@ def main():
                 evaluator=evaluator,
                 attack_configs=relevant_attacks,
                 device=device,
-                dependency_loader=dependency_loader
+                dependency_loader=dependency_loader,
+                dependency_mix_loader=dependency_mix_loader,
+                neighborhood_loader=neighborhood_loader
             )
 
             # Save results with actual suite name to distinguish between methods

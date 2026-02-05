@@ -45,11 +45,7 @@ def main():
     seed_main = args.seed_main
     seed_classwise = args.seed_classwise
     prompt_lengths = args.prompt_lengths
-
-    print("=" * 70)
-    print("ForgetGate: High-value additions (resume-safe)")
-    print("=" * 70)
-
+    print("Run: High-value additions (resume-safe)")
     # Prompt-length ablation for forget0 (seed 123)
     print(f"[Prompt Ablation] forget0 seed {seed_main}")
     run_prompt_ablation(config, "vpt_oracle_vit_cifar10_forget0_10shot", seed_main, prompt_lengths)
@@ -87,17 +83,10 @@ def main():
     print(f"[Prompt Ablation] forget1 seed {seed_classwise}")
     run_prompt_ablation(config, "vpt_oracle_vit_cifar10_forget1_10shot", seed_classwise, prompt_lengths)
     run_prompt_ablation(config, "vpt_resurrect_kl_forget1_10shot", seed_classwise, prompt_lengths)
-
-    print("=" * 70)
     print("Done.")
-    print("=" * 70)
-
-
 if __name__ == "__main__":
     try:
         main()
     except subprocess.CalledProcessError as exc:
-        print("=" * 70)
         print(f"ERROR: Pipeline failed with exit code {exc.returncode}.")
-        print("=" * 70)
         sys.exit(exc.returncode)

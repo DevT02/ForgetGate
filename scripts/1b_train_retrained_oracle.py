@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script 1b: Train Retraining Oracle for ForgetGate-V
+Script 1b: Train Retraining Oracle
 Trains models from scratch WITHOUT the forget class - the gold standard for unlearning
 
 This creates the "oracle" baseline that represents perfect unlearning:
@@ -83,7 +83,7 @@ def validate(model: nn.Module, val_loader: DataLoader, criterion,
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train Retraining Oracle for ForgetGate-V")
+    parser = argparse.ArgumentParser(description="Train Retraining Oracle")
     parser.add_argument("--config", type=str, required=True,
                        help="Path to experiment suites config")
     parser.add_argument("--suite", type=str, required=True,
@@ -109,10 +109,7 @@ def main():
 
     # Setup device
     device = get_device(args.device)
-
-    print("=" * 50)
-    print(f"ForgetGate-V: Training Retraining Oracle - {args.suite}")
-    print("=" * 50)
+    print(f"Run: Training Retraining Oracle - {args.suite}")
     print(f"Seed: {args.seed}")
     print(f"Device: {device}")
 

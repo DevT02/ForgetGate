@@ -23,11 +23,7 @@ def main():
 
     config = args.config
     seed = args.seed
-
-    print("=" * 70)
-    print(f"ForgetGate: Fill missing k-shot suites (seed {seed})")
-    print("=" * 70)
-
+    print(f"Run: Fill missing k-shot suites (seed {seed})")
     suites = [
         # Oracle + KL (k=1,5)
         "vpt_oracle_vit_cifar10_forget0_1shot",
@@ -53,17 +49,10 @@ def main():
                 "--suite", suite,
                 "--seed", str(seed),
             ])
-
-    print("=" * 70)
     print("Done.")
-    print("=" * 70)
-
-
 if __name__ == "__main__":
     try:
         main()
     except subprocess.CalledProcessError as exc:
-        print("=" * 70)
         print(f"ERROR: Pipeline failed with exit code {exc.returncode}.")
-        print("=" * 70)
         sys.exit(exc.returncode)

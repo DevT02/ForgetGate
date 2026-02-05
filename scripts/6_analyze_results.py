@@ -222,7 +222,7 @@ def generate_comparison_table(aggregated: Dict, output_path: str = None):
 
 def print_detailed_analysis(aggregated: Dict):
     """Print detailed analysis for each method"""
-    print("DETAILED ANALYSIS")
+    print("Detailed analysis")
 
     for model_name, data in sorted(aggregated.items()):
         print(f"\n{model_name}:")
@@ -252,7 +252,7 @@ def main():
 
     args = parser.parse_args()
 
-    print("ForgetGate-V: Unlearning Results Analysis")
+    print("Run: Unlearning Results Analysis")
     print(f"Suite: {args.suite}")
     print(f"Seeds: {args.seeds}")
     print(f"Results directory: {args.results_dir}")
@@ -276,7 +276,7 @@ def main():
     # Print detailed analysis
     print_detailed_analysis(aggregated)
 
-    print("Analysis complete!")
+    print("Done.")
 
 
 if __name__ == "__main__":

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-Script 1: Train baseline model for ForgetGate-V
+Script 1: Train baseline model
 """
 
 import argparse
 import os
 import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import torch
@@ -26,7 +27,7 @@ from src.models.normalize import create_imagenet_normalizer
 
 
 def train_epoch(model, train_loader, optimizer, scheduler, device, epoch):
-    """Train model for one epoch"""
+    """Train model for one epoch."""
     model.train()
     total_loss = 0
     total_correct = 0
@@ -52,22 +53,19 @@ def train_epoch(model, train_loader, optimizer, scheduler, device, epoch):
         total_correct += correct
         total_samples += batch_size
 
-        pbar.set_postfix({
-            'loss': f"{loss.item():.4f}",
-            'acc': f"{correct/batch_size:.4f}"
-        })
+        pbar.set_postfix({"loss": f"{loss.item():.4f}", "acc": f"{correct/batch_size:.4f}"})
 
     if scheduler:
         scheduler.step()
 
     return {
-        'train_loss': total_loss / total_samples,
-        'train_acc': total_correct / total_samples
+        "train_loss": total_loss / total_samples,
+        "train_acc": total_correct / total_samples,
     }
 
 
 def train_epoch_adversarial(model, train_loader, optimizer, scheduler, device, epoch, adv_config):
-    """Train model for one epoch with adversarial training (Madry et al. defense)"""
+    """Train one epoch with adversarial training (Madry et al.)."""
     model.train()
     total_loss = 0
     total_correct = 0
@@ -77,9 +75,9 @@ def train_epoch_adversarial(model, train_loader, optimizer, scheduler, device, e
     # Create PGD attack for adversarial training
     attack = PGDAttack(
         model=model,
-        eps=adv_config.get('eps', 8/255),
-        alpha=adv_config.get('alpha', 2/255),
-        steps=adv_config.get('steps', 10),
+        eps=adv_config.get("eps", 8 / 255),
+        alpha=adv_config.get("alpha", 2 / 255),
+        steps=adv_config.get("steps", 10),
         random_start=True,
         norm='l_inf'
     )
@@ -117,24 +115,26 @@ def train_epoch_adversarial(model, train_loader, optimizer, scheduler, device, e
         total_adv_correct += adv_correct
         total_samples += batch_size
 
-        pbar.set_postfix({
-            'loss': f"{loss.item():.4f}",
-            'clean_acc': f"{clean_correct/batch_size:.4f}",
-            'adv_acc': f"{adv_correct/batch_size:.4f}"
-        })
+        pbar.set_postfix(
+            {
+                "loss": f"{loss.item():.4f}",
+                "clean_acc": f"{clean_correct/batch_size:.4f}",
+                "adv_acc": f"{adv_correct/batch_size:.4f}",
+            }
+        )
 
     if scheduler:
         scheduler.step()
 
     return {
-        'train_loss': total_loss / total_samples,
-        'train_acc': total_correct / total_samples,  # Clean accuracy
-        'train_adv_acc': total_adv_correct / total_samples  # Adversarial accuracy
+        "train_loss": total_loss / total_samples,
+        "train_acc": total_correct / total_samples,  # Clean accuracy
+        "train_adv_acc": total_adv_correct / total_samples,  # Adversarial accuracy
     }
 
 
 def validate(model, val_loader, device):
-    """Validate model"""
+    """Validate model."""
     model.eval()
     total_loss = 0
     total_correct = 0
@@ -155,21 +155,26 @@ def validate(model, val_loader, device):
             total_samples += inputs.size(0)
 
     return {
-        'val_loss': total_loss / total_samples,
-        'val_acc': total_correct / total_samples
+        "val_loss": total_loss / total_samples,
+        "val_acc": total_correct / total_samples,
     }
 
 
-def save_checkpoint(model: nn.Module, optimizer: optim.Optimizer, scheduler: optim.lr_scheduler._LRScheduler,
-                   epoch: int, save_path: str):
-    """Save model checkpoint"""
+def save_checkpoint(
+    model: nn.Module,
+    optimizer: optim.Optimizer,
+    scheduler: optim.lr_scheduler._LRScheduler,
+    epoch: int,
+    save_path: str,
+):
+    """Save model checkpoint."""
     ensure_dir(os.path.dirname(save_path))
 
     checkpoint = {
-        'epoch': epoch,
-        'model_state_dict': model.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict(),
-        'scheduler_state_dict': scheduler.state_dict() if scheduler else None,
+        "epoch": epoch,
+        "model_state_dict": model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+        "scheduler_state_dict": scheduler.state_dict() if scheduler else None,
     }
 
     torch.save(checkpoint, save_path)
@@ -177,15 +182,11 @@ def save_checkpoint(model: nn.Module, optimizer: optim.Optimizer, scheduler: opt
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train baseline model for ForgetGate-V")
-    parser.add_argument("--config", type=str, required=True,
-                       help="Path to experiment suites config")
-    parser.add_argument("--suite", type=str, required=True,
-                       help="Experiment suite name")
-    parser.add_argument("--seed", type=int, default=42,
-                       help="Random seed")
-    parser.add_argument("--device", type=str, default=None,
-                       help="Device to use")
+    parser = argparse.ArgumentParser(description="Train baseline model")
+    parser.add_argument("--config", type=str, required=True, help="Path to experiment suites config")
+    parser.add_argument("--suite", type=str, required=True, help="Experiment suite name")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed")
+    parser.add_argument("--device", type=str, default=None, help="Device to use")
 
     args = parser.parse_args()
 
@@ -203,10 +204,7 @@ def main():
 
     # Setup device
     device = get_device(args.device)
-
-    print("=" * 50)
-    print(f"ForgetGate-V: Training Baseline Model - {args.suite}")
-    print("=" * 50)
+    print(f"Run: Training Baseline Model - {args.suite}")
     print(f"Seed: {args.seed}")
     print(f"Device: {device}")
 
@@ -214,24 +212,24 @@ def main():
     data_manager = DataManager()
 
     # Get dataset info
-    dataset_name = suite_config.get('dataset', 'cifar10')
+    dataset_name = suite_config.get("dataset", "cifar10")
     dataset_info = data_config[dataset_name]
 
     # Create data loaders (train/val split from training set to avoid test leakage)
-    training_config = suite_config.get('training', {})
-    batch_size = training_config.get('batch_size', 128)
-    num_workers = training_config.get('num_workers', 4)
+    training_config = suite_config.get("training", {})
+    batch_size = training_config.get("batch_size", 128)
+    num_workers = training_config.get("num_workers", 4)
     env_workers = os.getenv("FG_NUM_WORKERS")
     if env_workers is not None:
         try:
             num_workers = int(env_workers)
         except ValueError:
             raise ValueError(f"Invalid FG_NUM_WORKERS='{env_workers}', must be int")
-    val_ratio = training_config.get('val_ratio', 0.1)
+    val_ratio = training_config.get("val_ratio", 0.1)
 
     # Check if adversarial training is enabled
-    adv_train_config = training_config.get('adv_train', {})
-    use_adv_train = adv_train_config.get('enabled', False)
+    adv_train_config = training_config.get("adv_train", {})
+    use_adv_train = adv_train_config.get("enabled", False)
 
     full_train_dataset = data_manager.load_dataset(
         dataset_name,
@@ -294,21 +292,21 @@ def main():
     print(f"Number of classes: {dataset_info['num_classes']}")
 
     # Create model
-    model_type = suite_config.get('model', 'vit_tiny')
+    model_type = suite_config.get("model", "vit_tiny")
     if 'vit' in model_type:
         # Extract model size from name (tiny, small, base, etc.)
         model_config_name = model_type.split('_')[1]
         model_config_key = f"vit_{model_config_name}"
         base_model = create_vit_model(
-            model_config['vit'][model_config_name],
-            num_classes=dataset_info['num_classes']
+        model_config["vit"][model_config_name],
+        num_classes=dataset_info["num_classes"],
         )
     else:
         # CNN model
         model_config_key = model_type
         base_model = create_cnn_model(
-            model_config['cnn'][model_config_key],
-            num_classes=dataset_info['num_classes']
+        model_config["cnn"][model_config_key],
+        num_classes=dataset_info["num_classes"],
         )
 
     base_model = base_model.to(device)
@@ -324,26 +322,28 @@ def main():
     # Setup optimizer
     optimizer = optim.AdamW(
         base_model.parameters(),
-        lr=training_config.get('lr', 1e-3),
-        weight_decay=training_config.get('weight_decay', 0.01)
+        lr=training_config.get("lr", 1e-3),
+        weight_decay=training_config.get("weight_decay", 0.01),
     )
 
     # Setup scheduler
     scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer,
-        T_max=training_config.get('epochs', 100)
+        T_max=training_config.get("epochs", 100)
     )
 
     # Training loop
-    max_epochs = training_config.get('epochs', 100)
+    max_epochs = training_config.get("epochs", 100)
     best_val_acc = 0.0
     log_path = create_experiment_log(f"{args.suite}_seed_{args.seed}", suite_config)
 
     if use_adv_train:
         print("\n[Adversarial Training ENABLED]")
-        print(f"   eps={adv_train_config.get('eps', 8/255):.6f}, "
-              f"alpha={adv_train_config.get('alpha', 2/255):.6f}, "
-              f"steps={adv_train_config.get('steps', 10)}")
+        print(
+            f"   eps={adv_train_config.get('eps', 8 / 255):.6f}, "
+            f"alpha={adv_train_config.get('alpha', 2 / 255):.6f}, "
+            f"steps={adv_train_config.get('steps', 10)}"
+        )
     else:
         print("\nStandard Training")
 
@@ -365,9 +365,9 @@ def main():
 
         # Combine metrics
         epoch_metrics = {
-            'epoch': epoch,
+            "epoch": epoch,
             **train_metrics,
-            **val_metrics
+            **val_metrics,
         }
 
         # Log metrics

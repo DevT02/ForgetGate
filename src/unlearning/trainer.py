@@ -31,7 +31,10 @@ class UnlearningTrainer:
                  robust_retain_eps: float = 8/255,
                  robust_retain_alpha: float = 2/255,
                  robust_retain_steps: int = 5,
-                 grad_noise_std: float = 0.0):
+                 grad_noise_std: float = 0.0,
+                 gu_projection: bool = False,
+                 grad_surgery: bool = False,
+                 projection_eps: float = 1e-12):
         """
         Args:
             model: Model with LoRA applied
@@ -44,6 +47,8 @@ class UnlearningTrainer:
             robust_retain_eps: Epsilon for robust retain (default: 8/255)
             robust_retain_alpha: Step size for robust retain (default: 2/255)
             robust_retain_steps: Number of PGD steps for robust retain (default: 5)
+            gu_projection: Project forget gradients to be orthogonal to retain gradients
+            grad_surgery: Apply conflict-aware projection (PCGrad-style)
         """
         self.model = model.to(device)
         self.objective = objective
@@ -58,6 +63,11 @@ class UnlearningTrainer:
         self.robust_retain_alpha = robust_retain_alpha
         self.robust_retain_steps = robust_retain_steps
         self.grad_noise_std = grad_noise_std
+        self.gu_projection = gu_projection
+        self.grad_surgery = grad_surgery
+        self.projection_eps = projection_eps
+        if self.gu_projection and self.grad_surgery:
+            raise ValueError("gu_projection and grad_surgery are mutually exclusive")
 
         # Create PGD attack for robust retain if enabled
         if self.robust_retain:
@@ -75,6 +85,47 @@ class UnlearningTrainer:
         self.current_epoch = 0
         self.best_val_metric = float('inf')
         self.training_history = []
+
+    def _trainable_params(self) -> List[nn.Parameter]:
+        return [p for p in self.model.parameters() if p.requires_grad]
+
+    def _compute_grads(self, loss: torch.Tensor, params: List[nn.Parameter]) -> List[Optional[torch.Tensor]]:
+        grads = torch.autograd.grad(
+            loss, params, retain_graph=True, allow_unused=True
+        )
+        return list(grads)
+
+    def _project_forget_grads(self,
+                              forget_grads: List[Optional[torch.Tensor]],
+                              retain_grads: List[Optional[torch.Tensor]],
+                              mode: str) -> List[Optional[torch.Tensor]]:
+        dot = 0.0
+        denom = 0.0
+        for g_f, g_r in zip(forget_grads, retain_grads):
+            if g_f is None or g_r is None:
+                continue
+            dot += torch.sum(g_f * g_r)
+            denom += torch.sum(g_r * g_r)
+
+        denom_val = float(denom)
+        if denom_val <= self.projection_eps:
+            return forget_grads
+
+        if mode == "grad_surgery":
+            if float(dot) >= 0:
+                return forget_grads
+
+        scale = dot / (denom + self.projection_eps)
+        projected = []
+        for g_f, g_r in zip(forget_grads, retain_grads):
+            if g_f is None:
+                projected.append(None)
+                continue
+            if g_r is None:
+                projected.append(g_f)
+                continue
+            projected.append(g_f - scale * g_r)
+        return projected
 
     def set_teacher_model(self, teacher_model: nn.Module):
         """
@@ -266,7 +317,29 @@ class UnlearningTrainer:
 
             # Backward pass
             self.optimizer.zero_grad()
-            loss.backward()
+            if (self.gu_projection or self.grad_surgery) and isinstance(batch, tuple) and len(batch) == 2 and forget_part is not None:
+                params = self._trainable_params()
+                retain_grads = self._compute_grads(retain_loss, params)
+                forget_grads = self._compute_grads(forget_loss, params)
+
+                if self.gu_projection:
+                    forget_grads = self._project_forget_grads(forget_grads, retain_grads, mode="gu")
+                if self.grad_surgery:
+                    forget_grads = self._project_forget_grads(forget_grads, retain_grads, mode="grad_surgery")
+
+                for param, g_f, g_r in zip(params, forget_grads, retain_grads):
+                    if g_f is None and g_r is None:
+                        continue
+                    grad = None
+                    if g_f is not None and g_r is not None:
+                        grad = g_f + g_r
+                    elif g_f is not None:
+                        grad = g_f
+                    else:
+                        grad = g_r
+                    param.grad = grad
+            else:
+                loss.backward()
             self._apply_saliency_mask()
             self._apply_grad_noise()
             self.optimizer.step()
@@ -496,7 +569,9 @@ def create_unlearning_trainer(model: nn.Module,
                              robust_retain_eps: float = 8/255,
                              robust_retain_alpha: float = 2/255,
                              robust_retain_steps: int = 5,
-                             grad_noise_std: float = 0.0) -> UnlearningTrainer:
+                             grad_noise_std: float = 0.0,
+                             gu_projection: bool = False,
+                             grad_surgery: bool = False) -> UnlearningTrainer:
     """
     Factory function to create unlearning trainer
 
@@ -514,6 +589,8 @@ def create_unlearning_trainer(model: nn.Module,
         robust_retain_eps: Epsilon for robust retain preservation
         robust_retain_alpha: Step size for robust retain preservation
         robust_retain_steps: Number of PGD steps for robust retain
+        gu_projection: Project forget gradients to be orthogonal to retain gradients
+        grad_surgery: Apply conflict-aware projection (PCGrad-style)
 
     Returns:
         Configured UnlearningTrainer
@@ -528,7 +605,9 @@ def create_unlearning_trainer(model: nn.Module,
         robust_retain_eps=robust_retain_eps,
         robust_retain_alpha=robust_retain_alpha,
         robust_retain_steps=robust_retain_steps,
-        grad_noise_std=grad_noise_std
+        grad_noise_std=grad_noise_std,
+        gu_projection=gu_projection,
+        grad_surgery=grad_surgery
     )
 
     return trainer

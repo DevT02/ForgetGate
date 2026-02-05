@@ -42,13 +42,9 @@ def main():
     vpt_scrub = "vpt_resurrect_scrub_forget0"
 
     eval_baselines = "eval_paper_baselines_vit_cifar10_forget0"
-
-    print("=" * 60)
     print("ForgetGate resume pipeline")
     print(f"Seeds: {seeds}")
     print(f"K-shots: {kshots}")
-    print("=" * 60)
-
     # 1) Base + Oracle + Unlearning
     for seed in seeds:
         base_ckpt = f"checkpoints/base/{base_suite}_seed_{seed}_final.pt"
@@ -145,17 +141,10 @@ def main():
         print("[SKIP] unlearning tables")
     else:
         run(["python", "scripts/6_analyze_results.py", "--suite", eval_baselines, "--seeds"] + [str(s) for s in seeds])
-
-    print("=" * 60)
     print("Done.")
-    print("=" * 60)
-
-
 if __name__ == "__main__":
     try:
         main()
     except subprocess.CalledProcessError as exc:
-        print("=" * 60)
         print(f"ERROR: Pipeline failed with exit code {exc.returncode}.")
-        print("=" * 60)
         sys.exit(exc.returncode)

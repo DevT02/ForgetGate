@@ -40,3 +40,19 @@ Seeds: 42, 123, 456
 | 42 | 0.00% | 11.30% | 0.00% | 11.70% |
 | 123 | 0.00% | 0.40% | 0.00% | 0.30% |
 | 456 | 0.00% | 0.00% | 0.00% | 0.10% |
+
+## Stratified forget-set (prompt length 10, k=10)
+
+| Bucket | KL | Missing (KL) |
+|---|---|---|
+| high_conf | 12.70% +/- 0.00% | [123, 456] |
+| mid_conf | 14.00% +/- 0.00% | [123, 456] |
+| low_conf | 13.60% +/- 0.00% | [123, 456] |
+
+### Stratified forget-set per-seed (prompt length 10, k=10)
+
+| Seed | KL high | KL mid | KL low |
+|---|---|---|---|
+| 42 | 12.70% | 14.00% | 13.60% |
+| 123 | N/A | N/A | N/A |
+| 456 | N/A | N/A | N/A |

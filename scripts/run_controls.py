@@ -24,11 +24,7 @@ def main():
     config = args.config
     seed = args.seed
     pl = args.prompt_length
-
-    print("=" * 60)
-    print(f"ForgetGate: Controls (low-shot + shuffled labels) seed {seed}")
-    print("=" * 60)
-
+    print(f"Run: Controls (low-shot + shuffled labels) seed {seed}")
     # Low-shot controls
     print("[Low-shot] Oracle + KL (prompt length %d, k=1/5)" % pl)
     for k in (1, 5):
@@ -86,17 +82,10 @@ def main():
             "--prompt-length", str(pl),
             "--label-mode", "shuffle",
         ])
-
-    print("=" * 60)
     print("Done.")
-    print("=" * 60)
-
-
 if __name__ == "__main__":
     try:
         main()
     except subprocess.CalledProcessError as exc:
-        print("=" * 60)
         print(f"ERROR: Pipeline failed with exit code {exc.returncode}.")
-        print("=" * 60)
         sys.exit(exc.returncode)

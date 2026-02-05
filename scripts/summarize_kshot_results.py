@@ -153,6 +153,29 @@ def main():
             f"| {seed} | {fmt_pct(os_val)} | {fmt_pct(ks_val)} | {fmt_pct(or_val)} | {fmt_pct(kr_val)} |"
         )
 
+    # Stratified confidence buckets (prompt length 10, k=10)
+    lines.append("\n## Stratified forget-set (prompt length 10, k=10)\n")
+    lines.append("| Bucket | KL | Missing (KL) |")
+    lines.append("|---|---|---|")
+    for mode, suffix in [("high_conf", "highconf"), ("mid_conf", "midconf"), ("low_conf", "lowconf")]:
+        kl_vals, kl_missing = collect(f"vpt_resurrect_kl_forget0_10shot_{suffix}")
+        k_mean, k_std = mean_std(kl_vals)
+        missing = f"{kl_missing}"
+        lines.append(
+            f"| {mode} | {fmt_pct(k_mean)} +/- {fmt_pct(k_std)} | {missing} |"
+        )
+
+    lines.append("\n### Stratified forget-set per-seed (prompt length 10, k=10)\n")
+    lines.append("| Seed | KL high | KL mid | KL low |")
+    lines.append("|---|---|---|---|")
+    for seed in seeds:
+        kh = get_val("vpt_resurrect_kl_forget0_10shot_highconf", seed)
+        km = get_val("vpt_resurrect_kl_forget0_10shot_midconf", seed)
+        kl = get_val("vpt_resurrect_kl_forget0_10shot_lowconf", seed)
+        lines.append(
+            f"| {seed} | {fmt_pct(kh)} | {fmt_pct(km)} | {fmt_pct(kl)} |"
+        )
+
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")

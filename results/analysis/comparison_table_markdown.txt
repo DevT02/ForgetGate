@@ -4,9 +4,14 @@
 
 | Method | Forget Acc (%) [lower] | Retain Acc (%) [higher] | Delta Utility |
 |--------|------------------------|-------------------------|---------------|
-| Base Model (No Unlearning) | 91.83 +/- 4.36 | 91.80 +/- 3.77 | +0.00pp |
-| Uniform KL | 33.73 +/- 46.33 | 92.04 +/- 3.90 | +0.25pp |
-| CE Ascent | 53.47 +/- 46.56 | 91.83 +/- 3.71 | +0.03pp |
-| SalUn (Fan et al. 2024) | 58.27 +/- 50.47 | 91.97 +/- 4.01 | +0.17pp |
-| SCRUB (Kurmanji et al. 2023) | 53.87 +/- 46.87 | 91.86 +/- 3.71 | +0.06pp |
-| Noisy Retain-Only (Proxy) | 52.87 +/- 33.75 | 92.31 +/- 3.59 | +0.51pp |
+| Base Model (No Unlearning) | 91.83 +/- 4.36 | 91.80 +/- 3.77 | n/a |
+| Uniform KL | **33.73 +/- 46.33** | 92.04 +/- 3.90 | +0.25% |
+| CE Ascent | 53.47 +/- 46.56 | 91.83 +/- 3.71 | +0.03% |
+| unlearn_noisy_retain_vit_cifar10_forget0 | 52.87 +/- 33.75 | **92.31 +/- 3.59** | +0.51% |
+| SalUn (Fan et al. 2024) | 58.27 +/- 50.47 | 91.97 +/- 4.01 | +0.17% |
+| SCRUB (Kurmanji et al. 2023) | 53.87 +/- 46.87 | 91.86 +/- 3.71 | +0.06% |
+
+**[lower]** Lower is better (successful forgetting)
+**[higher]** Higher is better (utility preservation)
+**Bold** indicates best performance among unlearning methods
+
