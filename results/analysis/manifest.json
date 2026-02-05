@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-05T02:49:20Z",
+  "generated_at": "2026-02-05T20:50:42Z",
   "results_dir": "results/logs",
   "seeds": [
     42,
@@ -10,7 +10,7 @@
     42,
     123
   ],
-  "log_count": 241,
+  "log_count": 249,
   "logs": [
     "results/logs/base_cnn_cifar10_seed_42.jsonl",
     "results/logs/base_vit_cifar10_seed_123.jsonl",
@@ -74,12 +74,20 @@
     "results/logs/eval_prune_kl_vit_cifar10_forget0_seed_42_evaluation.json",
     "results/logs/eval_prune_kl_vit_cifar10_forget0_seed_456.jsonl",
     "results/logs/eval_prune_kl_vit_cifar10_forget0_seed_456_evaluation.json",
+    "results/logs/eval_quick_baldro_vit_cifar10_forget0_smoke_seed_42.jsonl",
+    "results/logs/eval_quick_baldro_vit_cifar10_forget0_smoke_seed_42_evaluation.json",
     "results/logs/eval_quick_baselines_vit_cifar10_forget0_seed_42.jsonl",
     "results/logs/eval_quick_baselines_vit_cifar10_forget0_seed_42_evaluation.json",
     "results/logs/eval_quick_cnn_baselines_forget0_seed_42.jsonl",
     "results/logs/eval_quick_cnn_baselines_forget0_seed_42_evaluation.json",
+    "results/logs/eval_quick_falw_vit_cifar10_forget0_smoke_seed_42.jsonl",
+    "results/logs/eval_quick_falw_vit_cifar10_forget0_smoke_seed_42_evaluation.json",
     "results/logs/eval_quick_new_methods_vit_cifar10_forget0_smoke_seed_42.jsonl",
     "results/logs/eval_quick_new_methods_vit_cifar10_forget0_smoke_seed_42_evaluation.json",
+    "results/logs/eval_quick_orthoreg_vit_cifar10_forget0_smoke_seed_42.jsonl",
+    "results/logs/eval_quick_orthoreg_vit_cifar10_forget0_smoke_seed_42_evaluation.json",
+    "results/logs/eval_quick_rurk_vit_cifar10_forget0_smoke_seed_42.jsonl",
+    "results/logs/eval_quick_rurk_vit_cifar10_forget0_smoke_seed_42_evaluation.json",
     "results/logs/eval_v2_vit_cifar10_forget0_seed_42.jsonl",
     "results/logs/eval_v2_vit_cifar10_forget0_seed_42_evaluation.json",
     "results/logs/legacy_prompt10/vpt_oracle_vit_cifar10_forget0_1shot_prompt10_seed_123.jsonl",

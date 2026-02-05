@@ -1,0 +1,59 @@
+{
+  "audit": {
+    "n_perturb": 8,
+    "noise_std": 0.01,
+    "max_samples": 512
+  },
+  "models": {
+    "base_vit_cifar10": {
+      "forget_loss_mean": 0.3480093479156494,
+      "forget_loss_var": 2.9494707584381104,
+      "retain_loss_mean": 0.33846592903137207,
+      "retain_loss_var": 2.9456851482391357,
+      "forget_any_correct": 0.94140625,
+      "forget_any_forget": 0.94140625,
+      "retain_any_correct": 0.951171875,
+      "retain_any_forget": 0.0078125
+    },
+    "unlearn_lora_vit_cifar10_forget0": {
+      "forget_loss_mean": 2.107954978942871,
+      "forget_loss_var": 19.49588394165039,
+      "retain_loss_mean": 0.311175674200058,
+      "retain_loss_var": 2.805027961730957,
+      "forget_any_correct": 0.744140625,
+      "forget_any_forget": 0.744140625,
+      "retain_any_correct": 0.95703125,
+      "retain_any_forget": 0.0
+    },
+    "unlearn_kl_vit_cifar10_forget0": {
+      "forget_loss_mean": 4.165026664733887,
+      "forget_loss_var": 8.000205039978027,
+      "retain_loss_mean": 0.2112208902835846,
+      "retain_loss_var": 1.084881067276001,
+      "forget_any_correct": 0.13671875,
+      "forget_any_forget": 0.13671875,
+      "retain_any_correct": 0.95703125,
+      "retain_any_forget": 0.0
+    },
+    "unlearn_salun_vit_cifar10_forget0": {
+      "forget_loss_mean": 0.6287644505500793,
+      "forget_loss_var": 4.0582146644592285,
+      "retain_loss_mean": 0.29532960057258606,
+      "retain_loss_var": 2.32369065284729,
+      "forget_any_correct": 0.876953125,
+      "forget_any_forget": 0.876953125,
+      "retain_any_correct": 0.951171875,
+      "retain_any_forget": 0.001953125
+    },
+    "unlearn_scrub_distill_vit_cifar10_forget0": {
+      "forget_loss_mean": 1.9901821613311768,
+      "forget_loss_var": 17.773244857788086,
+      "retain_loss_mean": 0.31838807463645935,
+      "retain_loss_var": 3.1015846729278564,
+      "forget_any_correct": 0.75390625,
+      "forget_any_forget": 0.75390625,
+      "retain_any_correct": 0.955078125,
+      "retain_any_forget": 0.001953125
+    }
+  }
+}
