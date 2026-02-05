@@ -19,6 +19,31 @@ objectives:
     target_class_weight: 1.0
     retain_class_weight: 0.1
 
+  # BalDRO-style loss reweighting for hard forget samples
+  bal_dro:
+    name: "bal_dro"
+    loss_type: "loss_reweight"
+    temperature: 1.0
+    min_weight: 0.1
+    target_class_weight: 1.0
+    retain_class_weight: 0.1
+
+  # FaLW-style long-tail reweighting
+  falw:
+    name: "falw"
+    loss_type: "class_balance"
+    gamma: 1.0
+    target_class_weight: 1.0
+    retain_class_weight: 0.1
+
+  # RURK-style robust forget loss (perturbed inputs)
+  rurk:
+    name: "rurk"
+    loss_type: "robust_forget"
+    noise_std: 0.01
+    target_class_weight: 1.0
+    retain_class_weight: 0.1
+
   # KL divergence to uniform distribution
   uniform_kl:
     name: "uniform_kl"

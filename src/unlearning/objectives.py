@@ -97,6 +97,153 @@ class SmoothedGradientAscent(UnlearningObjective):
         return modified_loss.mean()
 
 
+class BalDROUnlearning(UnlearningObjective):
+    """Loss-reweighted unlearning for hard forget samples (BalDRO-style)."""
+
+    def __init__(self, forget_class: int, num_classes: int = 10,
+                 retain_weight: float = 0.1, target_weight: float = 1.0,
+                 temperature: float = 1.0, min_weight: float = 0.1):
+        super().__init__(forget_class, num_classes)
+        self.retain_weight = retain_weight
+        self.target_weight = target_weight
+        self.temperature = max(temperature, 1e-6)
+        self.min_weight = min_weight
+
+    def forward(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        """
+        For forget samples, weight CE loss by softmax over per-sample losses.
+        Retain samples use standard CE (scaled by retain_weight).
+        """
+        ce_loss = F.cross_entropy(logits, labels, reduction='none')
+        forget_mask = (labels == self.forget_class)
+        retain_mask = ~forget_mask
+
+        total = 0.0
+        parts = 0
+
+        if forget_mask.any():
+            forget_losses = ce_loss[forget_mask]
+            weights = F.softmax((forget_losses / self.temperature).detach(), dim=0)
+            weights = torch.clamp(weights, min=self.min_weight / weights.numel())
+            weights = weights / weights.sum()
+            forget_term = (weights * forget_losses).sum()
+            total += -self.target_weight * forget_term
+            parts += 1
+
+        if retain_mask.any():
+            retain_term = ce_loss[retain_mask].mean()
+            total += self.retain_weight * retain_term
+            parts += 1
+
+        if parts == 0:
+            return torch.tensor(0.0, device=logits.device)
+
+        return total / parts
+
+
+class FaLWUnlearning(UnlearningObjective):
+    """Long-tailed aware unlearning via class-balanced weighting (FaLW-style)."""
+
+    def __init__(self, forget_class: int, num_classes: int = 10,
+                 retain_weight: float = 0.1, target_weight: float = 1.0,
+                 class_counts: Optional[Dict[int, int]] = None,
+                 total_samples: Optional[int] = None,
+                 gamma: float = 1.0):
+        super().__init__(forget_class, num_classes)
+        self.retain_weight = retain_weight
+        self.target_weight = target_weight
+        self.class_counts = class_counts or {}
+        self.total_samples = total_samples
+        self.gamma = gamma
+
+    def _class_weight(self, label: torch.Tensor) -> torch.Tensor:
+        if not self.class_counts or self.total_samples is None:
+            return torch.ones_like(label, dtype=torch.float32)
+        counts = torch.tensor([self.class_counts.get(int(y), 1) for y in label],
+                              device=label.device, dtype=torch.float32)
+        num_classes = max(len(self.class_counts), 1)
+        weights = self.total_samples / (num_classes * counts)
+        weights = weights.pow(self.gamma)
+        return weights
+
+    def forward(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        ce_loss = F.cross_entropy(logits, labels, reduction='none')
+        weights = self._class_weight(labels)
+
+        forget_mask = (labels == self.forget_class)
+        retain_mask = ~forget_mask
+
+        total = 0.0
+        parts = 0
+
+        if forget_mask.any():
+            forget_loss = (ce_loss[forget_mask] * weights[forget_mask]).mean()
+            total += -self.target_weight * forget_loss
+            parts += 1
+
+        if retain_mask.any():
+            retain_loss = (ce_loss[retain_mask] * weights[retain_mask]).mean()
+            total += self.retain_weight * retain_loss
+            parts += 1
+
+        if parts == 0:
+            return torch.tensor(0.0, device=logits.device)
+
+        return total / parts
+
+
+class RURKUnlearning(UnlearningObjective):
+    """Robust unlearning via perturbation loss on forget samples (RURK-style)."""
+
+    def __init__(self, forget_class: int, num_classes: int = 10,
+                 retain_weight: float = 0.1, target_weight: float = 1.0,
+                 noise_std: float = 0.01):
+        super().__init__(forget_class, num_classes)
+        self.retain_weight = retain_weight
+        self.target_weight = target_weight
+        self.noise_std = noise_std
+        self.model = None
+
+    def set_model(self, model: nn.Module):
+        self.model = model
+
+    def forward(self, logits: torch.Tensor, labels: torch.Tensor,
+                inputs: Optional[torch.Tensor] = None) -> torch.Tensor:
+        if self.model is None:
+            raise ValueError("RURKUnlearning requires model to be set via set_model().")
+        if inputs is None:
+            raise ValueError("RURKUnlearning requires inputs for perturbation loss.")
+
+        ce_loss = F.cross_entropy(logits, labels, reduction='none')
+        forget_mask = (labels == self.forget_class)
+        retain_mask = ~forget_mask
+
+        total = 0.0
+        parts = 0
+
+        if forget_mask.any():
+            forget_inputs = inputs[forget_mask]
+            noise = torch.randn_like(forget_inputs) * self.noise_std
+            noisy_inputs = torch.clamp(forget_inputs + noise, 0.0, 1.0)
+            noisy_logits = self.model(noisy_inputs)
+            noisy_labels = labels[forget_mask]
+            noisy_loss = F.cross_entropy(noisy_logits, noisy_labels, reduction='mean')
+            clean_loss = ce_loss[forget_mask].mean()
+            forget_term = clean_loss + noisy_loss
+            total += -self.target_weight * forget_term
+            parts += 1
+
+        if retain_mask.any():
+            retain_term = ce_loss[retain_mask].mean()
+            total += self.retain_weight * retain_term
+            parts += 1
+
+        if parts == 0:
+            return torch.tensor(0.0, device=logits.device)
+
+        return total / parts
+
+
 class UniformKL(UnlearningObjective):
     """KL divergence to uniform distribution on forget class"""
 
@@ -513,6 +660,15 @@ def create_unlearning_objective(objective_name: str, forget_class: int,
 
     elif objective_name in ("sga", "smoothed_ga"):
         return SmoothedGradientAscent(forget_class, num_classes, **kwargs)
+
+    elif objective_name in ("bal_dro", "baldro"):
+        return BalDROUnlearning(forget_class, num_classes, **kwargs)
+
+    elif objective_name in ("falw", "fa_lw"):
+        return FaLWUnlearning(forget_class, num_classes, **kwargs)
+
+    elif objective_name in ("rurk", "robust_unlearn"):
+        return RURKUnlearning(forget_class, num_classes, **kwargs)
 
     elif objective_name == "uniform_kl":
         return UniformKL(forget_class, num_classes, **kwargs)

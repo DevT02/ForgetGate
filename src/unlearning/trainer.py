@@ -34,7 +34,8 @@ class UnlearningTrainer:
                  grad_noise_std: float = 0.0,
                  gu_projection: bool = False,
                  grad_surgery: bool = False,
-                 projection_eps: float = 1e-12):
+                 projection_eps: float = 1e-12,
+                 orthogonal_reg: float = 0.0):
         """
         Args:
             model: Model with LoRA applied
@@ -66,8 +67,11 @@ class UnlearningTrainer:
         self.gu_projection = gu_projection
         self.grad_surgery = grad_surgery
         self.projection_eps = projection_eps
+        self.orthogonal_reg = orthogonal_reg
         if self.gu_projection and self.grad_surgery:
             raise ValueError("gu_projection and grad_surgery are mutually exclusive")
+        if (self.gu_projection or self.grad_surgery) and self.orthogonal_reg > 0:
+            raise ValueError("orthogonal_reg is not compatible with gu_projection/grad_surgery")
 
         # Create PGD attack for robust retain if enabled
         if self.robust_retain:
@@ -98,7 +102,8 @@ class UnlearningTrainer:
     def _project_forget_grads(self,
                               forget_grads: List[Optional[torch.Tensor]],
                               retain_grads: List[Optional[torch.Tensor]],
-                              mode: str) -> List[Optional[torch.Tensor]]:
+                              mode: str,
+                              scale_override: Optional[float] = None) -> List[Optional[torch.Tensor]]:
         dot = 0.0
         denom = 0.0
         for g_f, g_r in zip(forget_grads, retain_grads):
@@ -116,6 +121,8 @@ class UnlearningTrainer:
                 return forget_grads
 
         scale = dot / (denom + self.projection_eps)
+        if scale_override is not None:
+            scale = scale * scale_override
         projected = []
         for g_f, g_r in zip(forget_grads, retain_grads):
             if g_f is None:
@@ -317,7 +324,7 @@ class UnlearningTrainer:
 
             # Backward pass
             self.optimizer.zero_grad()
-            if (self.gu_projection or self.grad_surgery) and isinstance(batch, tuple) and len(batch) == 2 and forget_part is not None:
+            if ((self.gu_projection or self.grad_surgery) or self.orthogonal_reg > 0) and isinstance(batch, tuple) and len(batch) == 2 and forget_part is not None:
                 params = self._trainable_params()
                 retain_grads = self._compute_grads(retain_loss, params)
                 forget_grads = self._compute_grads(forget_loss, params)
@@ -326,6 +333,10 @@ class UnlearningTrainer:
                     forget_grads = self._project_forget_grads(forget_grads, retain_grads, mode="gu")
                 if self.grad_surgery:
                     forget_grads = self._project_forget_grads(forget_grads, retain_grads, mode="grad_surgery")
+                if self.orthogonal_reg > 0:
+                    forget_grads = self._project_forget_grads(
+                        forget_grads, retain_grads, mode="orthogonal_reg", scale_override=self.orthogonal_reg
+                    )
 
                 for param, g_f, g_r in zip(params, forget_grads, retain_grads):
                     if g_f is None and g_r is None:
@@ -571,7 +582,8 @@ def create_unlearning_trainer(model: nn.Module,
                              robust_retain_steps: int = 5,
                              grad_noise_std: float = 0.0,
                              gu_projection: bool = False,
-                             grad_surgery: bool = False) -> UnlearningTrainer:
+                             grad_surgery: bool = False,
+                             orthogonal_reg: float = 0.0) -> UnlearningTrainer:
     """
     Factory function to create unlearning trainer
 
@@ -607,8 +619,12 @@ def create_unlearning_trainer(model: nn.Module,
         robust_retain_steps=robust_retain_steps,
         grad_noise_std=grad_noise_std,
         gu_projection=gu_projection,
-        grad_surgery=grad_surgery
+        grad_surgery=grad_surgery,
+        orthogonal_reg=orthogonal_reg
     )
+
+    if hasattr(objective, "set_model"):
+        objective.set_model(model)
 
     return trainer
 

@@ -182,6 +182,18 @@ def main():
 
     # Create forget/retain split
     full_train_dataset = data_manager.load_dataset(dataset_name, "train")
+
+    # Objective-specific data stats (FaLW-style)
+    if objective_name in ("falw", "fa_lw"):
+        if hasattr(full_train_dataset, "targets") and full_train_dataset.targets is not None:
+            labels = [int(x) for x in full_train_dataset.targets]
+        else:
+            labels = [int(full_train_dataset[i][1]) for i in range(len(full_train_dataset))]
+        class_counts = {}
+        for y in labels:
+            class_counts[y] = class_counts.get(y, 0) + 1
+        objective_kwargs["class_counts"] = class_counts
+        objective_kwargs["total_samples"] = len(labels)
     forget_train, retain_train, forget_test, retain_test = create_forget_retain_splits(
         full_train_dataset, forget_class, train_ratio=0.8
     )
@@ -238,6 +250,7 @@ def main():
     )
     gu_projection = unlearning_params.get("gu_projection", False)
     grad_surgery = unlearning_params.get("grad_surgery", False)
+    orthogonal_reg = float(unlearning_params.get("orthogonal_reg", 0.0))
     trainer = create_unlearning_trainer(
         model=lora_model,
         objective_name=objective_name,
@@ -250,7 +263,8 @@ def main():
         objective_kwargs=objective_kwargs,
         grad_noise_std=grad_noise_std,
         gu_projection=gu_projection,
-        grad_surgery=grad_surgery
+        grad_surgery=grad_surgery,
+        orthogonal_reg=orthogonal_reg
     )
 
     # Set teacher model for SCRUB (distillation-based unlearning)
