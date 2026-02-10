@@ -230,6 +230,48 @@ Full-data VPT runs reach near-complete recovery in results/logs/vpt_resurrect_*_
 
 **AutoAttack (seed 42)**: full AutoAttack drives both forget and retain accuracy to ~0 on base/unlearned/VPT models (see `results/logs/eval_autoattack_vit_cifar10_forget0_seed_42_evaluation.json`).
 
+---
+
+## Feature-Probe Analysis: LoRA Leaves Features Intact
+
+This is a feature-probe leakage check: freeze the model, extract the 192-dim CLS features, and train a linear classifier to tell forget samples apart from retain. If a simple probe can still separate them after unlearning, the class information hasn't actually been erased -- it's just been disconnected from the output head.
+
+### What this shows
+
+LoRA unlearning drops forget accuracy to 0%, but the features barely change. A linear probe still picks out the forget class at 96-99% across every LoRA method tested. The oracle (retrained from scratch without the class) sits around 94%. The reason is straightforward: LoRA updates a low-rank slice of the weights. That's enough to rotate the classifier head away from the forget class, but it doesn't have the capacity to rewrite the feature representations deeper in the network. The class signal is still there -- it just doesn't reach the output anymore.
+
+### Probe results (seed 42, final layer)
+
+| Method | Adaptation | Probe Acc (%) | Probe AUC |
+|--------|-----------|:---:|:---:|
+| Base (no unlearning) | -- | 99.1 | 0.997 |
+| Uniform KL | LoRA | 98.4 | 0.996 |
+| SalUn | LoRA | 98.4 | 0.996 |
+| OrthoReg | LoRA | 98.5 | 0.992 |
+| RURK | LoRA | 98.3 | 0.993 |
+| SGA | LoRA | 97.3 | 0.982 |
+| BalDRO | LoRA | 96.5 | 0.981 |
+| FaLW | LoRA | 96.0 | 0.976 |
+| SCRUB | LoRA | 94.4 | 0.958 |
+| BalDRO-SCRUB-Ortho (Full FT) | Full FT | 91.2 | 0.958 |
+| Pure Manifold (Full FT) | Full FT | 90.2 | 0.955 |
+| Imposter Defense (Full FT) | Full FT | 91.4 | 0.943 |
+| **Oracle** | **--** | **93.8** | **0.947** |
+
+*Linear probe (BCEWithLogits) on frozen features, CIFAR-10 test set (10k samples). Oracle retrained without class 0. Defense scripts and checkpoints on `prompt-ablation-classgap`.*
+
+### Takeaways
+
+1. **LoRA doesn't touch features.** 96-99% probe accuracy across every LoRA method (AUC 0.976-0.996). The probe separates forget from retain with almost no effort.
+
+2. **SCRUB is the odd one out.** 94.4% / AUC 0.958 -- close to oracle. SCRUB's distillation step forces the student to match the teacher's feature distribution, which actually disrupts the class-specific structure rather than just rerouting the output.
+
+3. **Full fine-tuning closes the gap.** The Full FT defenses land at 91-91.4% / AUC 0.943-0.958, at or below oracle. Full FT can actually overwrite the representations; LoRA can't.
+
+4. **The oracle is the floor.** At 93.8% / AUC 0.947, even a model that never saw the class has some distributional structure a probe can pick up on. The imposter defense (AUC 0.943) hits that floor. There's nowhere left to go.
+
+---
+
 ## Results Provenance
 
 - Seeds by table:
