@@ -385,3 +385,7 @@ MIT.
 - **LoRA** (Hu et al., ICLR 2022): https://arxiv.org/abs/2106.09685
 - **VPT** (Jia et al., ECCV 2022): https://arxiv.org/abs/2203.12119
 - **AutoAttack** (Croce & Hein, ICML 2020): https://arxiv.org/abs/2003.01690
+- **SGA** (Pang et al., 2025): https://arxiv.org/abs/2510.22376
+- **BalDRO** (Shao et al., 2026): https://arxiv.org/abs/2601.09172
+- **FaLW** (Yu et al., 2026): https://arxiv.org/abs/2601.18650
+- **RURK** (Hsu et al., 2026): https://arxiv.org/abs/2601.22359
