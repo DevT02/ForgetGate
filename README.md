@@ -1,18 +1,18 @@
-# ForgetGate: Visual Prompt Attacks on Unlearning
+# ForgetGate: Exposing Feature-Level Leakage in LoRA-Based Machine Unlearning
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-ForgetGate audits LoRA-based machine unlearning under a simple question:
+LoRA-based unlearning drops forget-class accuracy to 0%, but a linear probe on frozen features still separates forgotten from retained samples at 96-99%. The class signal is intact; it just doesn't reach the output head anymore.
 
-> If an attacker can train a tiny visual prompt, do "forgotten" classes come back because of residual knowledge, or because the attacker is just relearning?
+> **Core finding:** LoRA updates a low-rank slice of the weights, which is enough to reroute the classifier but not enough to rewrite the feature representations. Full fine-tuning or distillation (SCRUB) is required to approach the oracle floor.
 
-This repo evaluates a **visual prompt tuning (VPT)** "resurrection" attack (e.g., 10 tokens x 192 dims = **1,920 params** for ViT-Tiny) against LoRA unlearning methods, and compares against an **oracle baseline** trained from scratch *without* the forget class.
+This repo provides two complementary evaluation angles: (1) a **feature-probe attack** that exposes representation-level leakage across 10+ unlearning methods, and (2) a **visual prompt tuning (VPT) resurrection attack** that measures output-level recoverability against an oracle baseline trained without the forget class.
 
 ## Project Overview
 
-ForgetGate is a small, focused audit: we train a model, unlearn one class with LoRA, then test whether a tiny visual prompt can bring that class back. By comparing against an oracle model (trained without the class), we separate **relearning capacity** from **residual knowledge**. The result is a set of tables and plots that show when "unlearning" looks secure and when it doesn't.
+ForgetGate tests whether LoRA-based machine unlearning actually erases class knowledge or just disconnects it from the output. A linear probe on frozen CLS-token features answers the first question; a VPT attack (10 tokens x 192 dims = 1,920 params for ViT-Tiny) answers the second. Both are compared against an oracle model retrained from scratch without the forget class, establishing a hard floor for what "fully unlearned" looks like.
 
 ## TL;DR
 
@@ -239,11 +239,11 @@ Full-data VPT runs reach near-complete recovery in results/logs/vpt_resurrect_*_
 
 ## Feature-Probe Analysis: LoRA Leaves Features Intact
 
-This is a feature-probe leakage check: freeze the model, extract the 192-dim CLS features, and train a linear classifier to tell forget samples apart from retain. If a simple probe can still separate them after unlearning, the class information hasn't actually been erased -- it's just been disconnected from the output head.
+This is a feature-probe leakage check: freeze the model, extract the 192-dim CLS features, and train a linear classifier to tell forget samples apart from retain. If a simple probe can still separate them after unlearning, the class information hasn't actually been erased. It's just been disconnected from the output head.
 
 ### What this shows
 
-LoRA unlearning drops forget accuracy to 0%, but the features barely change. A linear probe still picks out the forget class at 96-99% across every LoRA method tested. The oracle (retrained from scratch without the class) sits around 94%. The reason is straightforward: LoRA updates a low-rank slice of the weights. That's enough to rotate the classifier head away from the forget class, but it doesn't have the capacity to rewrite the feature representations deeper in the network. The class signal is still there -- it just doesn't reach the output anymore. This is consistent with the theoretical analysis in LUNE (Liu et al., 2025), which shows that LoRA-based updates amount to projecting the gradient onto a low-rank subspace, explicitly preserving all directions orthogonal to that subspace. LUNE frames this preservation as a benefit for general utility; the probe results here show it is also a liability, since the class-discriminative signal survives in those orthogonal directions.
+LoRA unlearning drops forget accuracy to 0%, but the features barely change. A linear probe still picks out the forget class at 96-99% across every LoRA method tested. The oracle (retrained from scratch without the class) sits around 94%. The reason is straightforward: LoRA updates a low-rank slice of the weights. That's enough to rotate the classifier head away from the forget class, but it doesn't have the capacity to rewrite the feature representations deeper in the network. The class signal is still there; it just doesn't reach the output anymore. This is consistent with the theoretical analysis in LUNE (Liu et al., 2025), which shows that LoRA-based updates amount to projecting the gradient onto a low-rank subspace, explicitly preserving all directions orthogonal to that subspace. LUNE frames this preservation as a benefit for general utility; the probe results here show it is also a liability, since the class-discriminative signal survives in those orthogonal directions.
 
 ### Probe results (seed 42, final layer)
 
@@ -269,7 +269,7 @@ LoRA unlearning drops forget accuracy to 0%, but the features barely change. A l
 
 1. **LoRA doesn't touch features.** 96-99% probe accuracy across every LoRA method (AUC 0.976-0.996). The probe separates forget from retain with almost no effort.
 
-2. **SCRUB is the odd one out.** 94.4% / AUC 0.958 -- close to oracle. SCRUB's distillation step forces the student to match the teacher's feature distribution, which actually disrupts the class-specific structure rather than just rerouting the output.
+2. **SCRUB is the odd one out.** 94.4% / AUC 0.958, close to oracle. SCRUB's distillation step forces the student to match the teacher's feature distribution, which actually disrupts the class-specific structure rather than just rerouting the output.
 
 3. **Full fine-tuning closes the gap.** The Full FT defenses land at 91-91.4% / AUC 0.943-0.958, at or below oracle. Full FT can actually overwrite the representations; LoRA can't.
 
@@ -310,7 +310,7 @@ Attacker capabilities assumed:
 - Has some forget-class samples (k-shot or full-data)
 - Does not change model weights (prompt-only adaptation)
 
-**Oracle baseline details:** The oracle is a 10-class classifier trained on retain data only (class 0 excluded from training). The class-0 logit head is never updated during training, so its outputs are random -- this is why oracle forget-class accuracy sits near chance. The oracle represents the best-case unlearning outcome: a model that genuinely never learned the forget class.
+**Oracle baseline details:** The oracle is a 10-class classifier trained on retain data only (class 0 excluded from training). The class-0 logit head is never updated during training, so its outputs are random. This is why oracle forget-class accuracy sits near chance. The oracle represents the best-case unlearning outcome: a model that genuinely never learned the forget class.
 
 **VPT evaluation:** Prompts are applied to all inputs (both forget and retain classes) at evaluation time. This means VPT can hurt retain accuracy while recovering forget accuracy. For example, in full-data runs, retain accuracy drops from ~94% to ~52% under VPT. This models an attacker who wraps the model with a fixed input transformation.
 
@@ -361,7 +361,7 @@ unlearn_salun_vit_cifar10_forget0:
 
 ```bibtex
 @misc{forgetgate2025,
-  title = {ForgetGate: Auditing Machine Unlearning with Visual Prompt Attacks},
+  title = {ForgetGate: Exposing Feature-Level Leakage in LoRA-Based Machine Unlearning},
   author = {Tayal, Devansh},
   year = {2025},
   url = {https://github.com/DevT02/ForgetGate}
@@ -396,4 +396,4 @@ MIT.
 - **BalDRO** (Shao et al., 2026): https://arxiv.org/abs/2601.09172
 - **FaLW** (Yu et al., 2026): https://arxiv.org/abs/2601.18650
 - **RURK** (Hsu et al., 2026): https://arxiv.org/abs/2601.22359
-- **LUNE** (Liu et al., 2025): https://arxiv.org/abs/2512.07375 -- LoRA-based LLM unlearning; Section 3.5 provides a theoretical basis for why LoRA preserves orthogonal feature directions
+- **LUNE** (Liu et al., 2025): https://arxiv.org/abs/2512.07375. LoRA-based LLM unlearning; Section 3.5 provides a theoretical basis for why LoRA preserves orthogonal feature directions.
