@@ -12,7 +12,7 @@ This repo evaluates a **visual prompt tuning (VPT)** "resurrection" attack (e.g.
 
 ## Project Overview
 
-ForgetGate is a small, focused audit: we train a model, unlearn one class with LoRA, then test whether a tiny visual prompt can bring that class back. By comparing against an oracle model (trained without the class), we separate **relearning capacity** from **residual knowledge**. The result is a practical checklist and set of plots that show when "unlearning" looks secure and when it doesn't.
+ForgetGate is a small, focused audit: we train a model, unlearn one class with LoRA, then test whether a tiny visual prompt can bring that class back. By comparing against an oracle model (trained without the class), we separate **relearning capacity** from **residual knowledge**. The result is a set of tables and plots that show when "unlearning" looks secure and when it doesn't.
 
 ## TL;DR
 
@@ -20,7 +20,11 @@ Two attacker data regimes are considered:
 
 - **Full-data** (attacker has the full forget-class training set): VPT reaches ~100% recovery on both the unlearned model and the oracle baseline -> the attack is effectively relearning.
 - **K-shot, default prompt length (10 tokens)**: recovery stays low at k=10-100 (KL 0.43-1.90%; oracle 0.00%). Mean gap across k=10/25/50/100 is +0.81pp (seeds 42/123/456).
-- **Controls (prompt length 5)**: low-shot + label controls expose residual access. Seeds 42/123/456: k=1: 4.27%, k=5: 4.53%, shuffled-label (k=10): 3.90%, random-label (k=10): 4.03% (oracle stays 0.00%). Prompt-length ablation (seeds 42/123, k=10): KL 1/2/5 tokens = 7.05/7.35/7.80% (oracle 0.00%). Class-wise 10-shot gaps are mostly small (0.70-1.13%), with class 9 higher at 6.77%.
+- **Controls (prompt length 5)**: low-shot + label controls expose residual access (oracle stays 0.00% throughout):
+  - Low-shot (seeds 42/123/456): k=1 → 4.27%, k=5 → 4.53%
+  - Label controls (seeds 42/123/456, k=10): shuffled → 3.90%, random → 4.03%
+  - Prompt-length ablation (seeds 42/123, k=10): 1/2/5 tokens → 7.05/7.35/7.80%
+  - Class-wise 10-shot gaps: mostly 0.70-1.13%, except class 9 at 6.77%
 
 **Takeaway:** "0% forget accuracy" alone doesn't say much about security. Oracle-normalized evaluation helps separate *relearning capacity* from *residual knowledge access*, and the gap is sensitive to prompt length and low-shot/label controls.
 
@@ -98,19 +102,18 @@ python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yam
 python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_resurrect_kl_forget0_50shot  --seed 42
 python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_resurrect_kl_forget0_100shot --seed 42
 
-Note: you can also run `python scripts/run_paper_resume.py` to skip completed steps and continue from existing checkpoints/logs.
-
 # 6) Aggregate results across seeds
 python scripts/analyze_kshot_experiments.py --seeds 42 123 456
 ```
 
-Note: `scripts/1_train_base.py` uses a train/val split from the training set. The test set is reserved for final evaluation via `scripts/4_adv_evaluate.py`.
+> **Note:** You can also run `python scripts/run_paper_resume.py` to skip completed steps and continue from existing checkpoints/logs. `scripts/1_train_base.py` uses a train/val split from the training set; the test set is reserved for final evaluation via `scripts/4_adv_evaluate.py`.
 
 Outputs:
 - Models: `checkpoints/`
 - Logs: `results/logs/`
 - Tables/analysis: `results/analysis/`
-Note: the main branch omits checkpoints/logs to keep clones lightweight. Full artifacts live on `prompt-ablation-classgap`.
+
+> **Note:** The main branch omits checkpoints/logs to keep clones lightweight. Full artifacts live on `prompt-ablation-classgap` (Git-LFS tracked; switching to that branch will download ~500 MB of model checkpoints).
 
 Common artifacts:
 - `results/logs/*_evaluation.json`: test-set metrics per suite/seed (clean/pgd/autoattack/vpt).
@@ -138,7 +141,7 @@ ForgetGate/
     2_train_unlearning_lora.py
     3_train_vpt_resurrector.py
     4_adv_evaluate.py
-    6_analyze_results.py
+    6_analyze_results.py          # (5_ reserved / removed)
     analyze_kshot_experiments.py
     analyze_vpt_results.py
   src/
@@ -163,6 +166,8 @@ ForgetGate/
 - SalUn (saliency-masked random relabeling)
 - SCRUB (distillation)
 
+Additional LoRA methods evaluated in the feature-probe analysis (see table below): SGA, BalDRO, FaLW, RURK, OrthoReg. Full FT defense code and checkpoints (BalDRO-SCRUB-Ortho, Pure Manifold, Imposter) live on the `prompt-ablation-classgap` branch (Git-LFS; expect ~500 MB of checkpoint downloads).
+
 ### Models
 - ViT-Tiny
 - ResNet-18
@@ -181,7 +186,7 @@ ForgetGate/
 
 | Method | Forget Acc (%) [lower] | Retain Acc (%) [higher] | Delta Utility |
 |--------|------------------------|-------------------------|---------------|
-| Base Model (No Unlearning) | 90.63 +/- 3.76 | 90.67 +/- 3.21 |  |
+| Base Model (No Unlearning) | 90.63 +/- 3.76 | 90.67 +/- 3.21 | -- |
 | Uniform KL | 58.90 +/- 50.87 | 90.76 +/- 3.36 | +0.09pp |
 | CE Ascent | **53.37 +/- 46.48** | **90.89 +/- 3.12** | +0.22pp |
 | SalUn (Fan et al. 2024) | 59.70 +/- 51.82 | 90.61 +/- 3.46 | -0.06pp |
@@ -238,7 +243,7 @@ This is a feature-probe leakage check: freeze the model, extract the 192-dim CLS
 
 ### What this shows
 
-LoRA unlearning drops forget accuracy to 0%, but the features barely change. A linear probe still picks out the forget class at 96-99% across every LoRA method tested. The oracle (retrained from scratch without the class) sits around 94%. The reason is straightforward: LoRA updates a low-rank slice of the weights. That's enough to rotate the classifier head away from the forget class, but it doesn't have the capacity to rewrite the feature representations deeper in the network. The class signal is still there -- it just doesn't reach the output anymore.
+LoRA unlearning drops forget accuracy to 0%, but the features barely change. A linear probe still picks out the forget class at 96-99% across every LoRA method tested. The oracle (retrained from scratch without the class) sits around 94%. The reason is straightforward: LoRA updates a low-rank slice of the weights. That's enough to rotate the classifier head away from the forget class, but it doesn't have the capacity to rewrite the feature representations deeper in the network. The class signal is still there -- it just doesn't reach the output anymore. This is consistent with the theoretical analysis in LUNE (Liu et al., 2025), which shows that LoRA-based updates amount to projecting the gradient onto a low-rank subspace, explicitly preserving all directions orthogonal to that subspace. LUNE frames this preservation as a benefit for general utility; the probe results here show it is also a liability, since the class-discriminative signal survives in those orthogonal directions.
 
 ### Probe results (seed 42, final layer)
 
@@ -258,7 +263,7 @@ LoRA unlearning drops forget accuracy to 0%, but the features barely change. A l
 | Imposter Defense (Full FT) | Full FT | 91.4 | 0.943 |
 | **Oracle** | **--** | **93.8** | **0.947** |
 
-*Linear probe (BCEWithLogits) on frozen features, CIFAR-10 test set (10k samples). Oracle retrained without class 0. Defense scripts and checkpoints on `prompt-ablation-classgap`.*
+*Linear probe (logistic regression) on frozen CLS-token features, CIFAR-10 test set (10k samples). Oracle retrained without class 0. Defense scripts and checkpoints on `prompt-ablation-classgap`.*
 
 ### Takeaways
 
@@ -286,6 +291,7 @@ LoRA unlearning drops forget accuracy to 0%, but the features barely change. A l
 - Prompt-length ablation (1/2/5 tokens) aggregates seeds 42/123.
 - Legacy default-prompt k=1/5 logs are archived in `results/logs/legacy_prompt10` to avoid confusion with the prompt-length-5 controls.
 - Full-data recovery values are from VPT training logs; test-set VPT/PGD numbers require `eval_full_vit_cifar10_forget0`.
+- Feature-probe results use `scripts/9_feature_probe_leakage.py` with CLS-token features from `blocks[-1]`. Probe is logistic regression on a 50/50 forget/retain split; reported metrics are validation accuracy and AUC. Full FT defense checkpoints are on the `prompt-ablation-classgap` branch.
 
 ## Artifacts
 
@@ -304,7 +310,7 @@ Attacker capabilities assumed:
 - Has some forget-class samples (k-shot or full-data)
 - Does not change model weights (prompt-only adaptation)
 
-**Oracle baseline details:** The oracle is a 10-class classifier trained on retain data only (class 0 excluded from training). Class 0 predictions come from the untrained logit, so the oracle represents what happens if you retrain from scratch without the forget class.
+**Oracle baseline details:** The oracle is a 10-class classifier trained on retain data only (class 0 excluded from training). The class-0 logit head is never updated during training, so its outputs are random -- this is why oracle forget-class accuracy sits near chance. The oracle represents the best-case unlearning outcome: a model that genuinely never learned the forget class.
 
 **VPT evaluation:** Prompts are applied to all inputs (both forget and retain classes) at evaluation time. This means VPT can hurt retain accuracy while recovering forget accuracy. For example, in full-data runs, retain accuracy drops from ~94% to ~52% under VPT. This models an attacker who wraps the model with a fixed input transformation.
 
@@ -319,14 +325,15 @@ Attacker capabilities assumed:
 
 ## Next Steps (Recommended)
 
-1) **Random-label control**: run `--label-mode random` to further rule out relearning (if missing for new seeds).
+1) **Feature-probe across forget classes**: run `9_feature_probe_leakage.py` for forget classes 1/2/5/9 to confirm the LoRA leakage pattern generalizes.
 2) **Class-wise + prompt-length**: repeat prompt-length ablation for forget classes 1/2/5/9.
 3) **AutoAttack across seeds**: run eval_autoattack for seed 123/456 to reduce variance in robustness claims.
+4) **Random-label control**: run `--label-mode random` to further rule out relearning (if missing for new seeds).
 
 ## Follow-ups (If You Want More Rigor)
 
 - Add additional seeds beyond 456 for tighter confidence intervals.
-- Run AutoAttack for seed 123/456 to reduce variance in robustness claims.
+- Test feature probes at multiple layers (not just final block) to characterize where leakage concentrates.
 - Report k-shot recovery on a fixed, deterministic split for even tighter comparisons.
 
 ---
@@ -389,3 +396,4 @@ MIT.
 - **BalDRO** (Shao et al., 2026): https://arxiv.org/abs/2601.09172
 - **FaLW** (Yu et al., 2026): https://arxiv.org/abs/2601.18650
 - **RURK** (Hsu et al., 2026): https://arxiv.org/abs/2601.22359
+- **LUNE** (Liu et al., 2025): https://arxiv.org/abs/2512.07375 -- LoRA-based LLM unlearning; Section 3.5 provides a theoretical basis for why LoRA preserves orthogonal feature directions
