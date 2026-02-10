@@ -1,0 +1,29 @@
+{
+  "suite": "probe_baldro_scrub_forget0_strong",
+  "seed": 42,
+  "dataset": "cifar10",
+  "model": "vit_tiny",
+  "forget_class": 0,
+  "run_info": {
+    "started_utc": "2026-02-09T05:23:56.441317Z",
+    "argv": [
+      "scripts/9_feature_probe_leakage.py",
+      "--config",
+      "configs/experiment_suites.yaml",
+      "--suite",
+      "probe_baldro_scrub_forget0_strong"
+    ],
+    "probe_layer": "final"
+  },
+  "models": {
+    "unlearn_baldro_scrub_vit_cifar10_forget0_strong": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9462500214576721,
+      "val_acc": 0.9470000267028809,
+      "val_auc": 0.9635305555555556,
+      "n_train": 8000,
+      "n_val": 2000
+    }
+  }
+}

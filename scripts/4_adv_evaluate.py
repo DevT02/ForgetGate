@@ -302,6 +302,7 @@ def load_model_for_evaluation(
         # Unlearned model - load base weights + LoRA adapter
         unlearned_suite_config = experiment_suites.get(model_suite_name, {})
         base_suite = unlearned_suite_config.get("base_model_suite", None)
+        unlearn_method = unlearned_suite_config.get("unlearning", {}).get("method", "lora")
         if not base_suite:
             # Fallback to first suite when base_model_suite is not available
             base_suite = model_suites[0]
@@ -317,15 +318,27 @@ def load_model_for_evaluation(
         model = build_model_from_eval_config(eval_config, device)
         model.load_state_dict(checkpoint['model_state_dict'])
 
-        adapter_path = f"checkpoints/unlearn_lora/{model_suite_name}_seed_{seed}"
-        if os.path.exists(adapter_path):
-            model = load_lora_adapter(model, adapter_path)
-            print(f"Loaded unlearned (LoRA) model from: {adapter_path}")
-        else:
-            # Still return the base-weight model (useful for debugging),
-            # but warn loudly.
-            print(f"Warning: LoRA adapter not found at {adapter_path}. "
-                  f"Evaluating base weights without unlearning adapter.")
+        if unlearn_method == "lora":
+            adapter_path = f"checkpoints/unlearn_lora/{model_suite_name}_seed_{seed}"
+            if os.path.exists(adapter_path):
+                model = load_lora_adapter(model, adapter_path)
+                print(f"Loaded unlearned (LoRA) model from: {adapter_path}")
+            else:
+                # Still return the base-weight model (useful for debugging),
+                # but warn loudly.
+                print(f"Warning: LoRA adapter not found at {adapter_path}. "
+                      f"Evaluating base weights without unlearning adapter.")
+            return model.to(device)
+
+        # Full finetune / head-only / last-block paths
+        full_ckpt = f"checkpoints/unlearn_full/{model_suite_name}_seed_{seed}_final.pt"
+        if not os.path.exists(full_ckpt):
+            print(f"Warning: Full unlearn checkpoint not found: {full_ckpt}")
+            return model.to(device)
+        ckpt = torch.load(full_ckpt, map_location=device)
+        state_dict = ckpt.get("model_state_dict", ckpt)
+        model.load_state_dict(state_dict)
+        print(f"Loaded unlearned full model from: {full_ckpt}")
         return model.to(device)
 
     elif 'vpt' in model_suite_name:

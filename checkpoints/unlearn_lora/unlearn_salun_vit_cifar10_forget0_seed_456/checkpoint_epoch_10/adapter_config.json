@@ -32,10 +32,10 @@
   "rank_pattern": {},
   "revision": null,
   "target_modules": [
-    "mlp.fc2",
     "mlp.fc1",
     "attn.proj",
-    "attn.qkv"
+    "attn.qkv",
+    "mlp.fc2"
   ],
   "target_parameters": null,
   "task_type": null,

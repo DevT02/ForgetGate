@@ -25,6 +25,7 @@ class UnlearningTrainer:
                  objective: UnlearningObjective,
                  train_loader: DataLoader,
                  val_loader: Optional[DataLoader] = None,
+                 normal_loader: Optional[DataLoader] = None,
                  device: str = "cuda" if torch.cuda.is_available() else "cpu",
                  retain_lambda: float = 1.0,
                  robust_retain: bool = False,
@@ -35,7 +36,12 @@ class UnlearningTrainer:
                  gu_projection: bool = False,
                  grad_surgery: bool = False,
                  projection_eps: float = 1e-12,
-                 orthogonal_reg: float = 0.0):
+                 orthogonal_reg: float = 0.0,
+                 gu_beta: float = 1.0,
+                 scrub_rewind: bool = False,
+                 scrub_rewind_on_train: bool = True,
+                 scrub_full_schedule: bool = False,
+                 scrub_max_steps: Optional[int] = None):
         """
         Args:
             model: Model with LoRA applied
@@ -55,6 +61,7 @@ class UnlearningTrainer:
         self.objective = objective
         self.train_loader = train_loader
         self.val_loader = val_loader
+        self.normal_loader = normal_loader
         self.device = device
         self.retain_lambda = retain_lambda
 
@@ -68,6 +75,11 @@ class UnlearningTrainer:
         self.grad_surgery = grad_surgery
         self.projection_eps = projection_eps
         self.orthogonal_reg = orthogonal_reg
+        self.gu_beta = gu_beta
+        self.scrub_rewind = scrub_rewind
+        self.scrub_rewind_on_train = scrub_rewind_on_train
+        self.scrub_full_schedule = scrub_full_schedule
+        self.scrub_max_steps = scrub_max_steps
         if self.gu_projection and self.grad_surgery:
             raise ValueError("gu_projection and grad_surgery are mutually exclusive")
         if (self.gu_projection or self.grad_surgery) and self.orthogonal_reg > 0:
@@ -304,6 +316,23 @@ class UnlearningTrainer:
             noise = torch.randn_like(param.grad) * self.grad_noise_std
             param.grad.add_(noise)
 
+    def _evaluate_accuracy(self, loader: DataLoader) -> float:
+        """Compute accuracy on a provided loader."""
+        if loader is None:
+            return 0.0
+        self.model.eval()
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for inputs, labels in loader:
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
+                outputs = self.model(inputs)
+                _, predicted = outputs.max(1)
+                correct += predicted.eq(labels).sum().item()
+                total += labels.size(0)
+        self.model.train()
+        return (correct / total) if total > 0 else 0.0
+
     def train_epoch(self) -> Dict[str, float]:
         """Train for one epoch"""
         self.model.train()
@@ -312,6 +341,12 @@ class UnlearningTrainer:
 
         # SalUn: update saliency masks periodically using forget_loader
         self._maybe_update_saliency_mask()
+
+        normal_iter = None
+        if self.normal_loader is not None:
+            normal_iter = iter(self.normal_loader)
+        elif hasattr(self.train_loader, "retain_loader"):
+            normal_iter = iter(self.train_loader.retain_loader)
 
         pbar = tqdm(self.train_loader, desc=f"Epoch {self.current_epoch}")
         for batch_idx, batch in enumerate(pbar):
@@ -340,6 +375,68 @@ class UnlearningTrainer:
                     # Forward pass on forget batch - use full objective (handles forget ascent + retain descent with retain_weight)
                     forget_outputs = self.model(forget_inputs)
 
+                    # SCRUB: alternating max (forget) and min (retain) steps
+                    if hasattr(self.objective, "compute_forget_loss") and hasattr(self.objective, "compute_retain_loss"):
+                        obj_name = self.objective.__class__.__name__.lower()
+                        if "scrub" in obj_name and "feature" not in obj_name:
+                            if getattr(self.objective, "teacher_model", None) is None:
+                                raise ValueError("Distillation-based SCRUB requires teacher_model to be set.")
+                            # Forget (maximize KL): gradient ascent = minimize negative KL
+                            self.optimizer.zero_grad()
+                            with torch.no_grad():
+                                teacher_forget = self.objective.teacher_model(forget_inputs)
+                            forget_loss = self.objective.compute_forget_loss(forget_outputs, teacher_forget, labels=forget_labels)
+                            # compute_forget_loss already returns -KL; minimize directly
+                            (self.objective.forget_weight * forget_loss).backward()
+                            self._apply_saliency_mask()
+                            self._apply_grad_noise()
+                            self.optimizer.step()
+
+                            # Retain (minimize KL + CE)
+                            self.optimizer.zero_grad()
+                            if self.robust_retain:
+                                retain_for_inputs = self.robust_retain_attack(retain_inputs, retain_labels)
+                            else:
+                                retain_for_inputs = retain_inputs
+                            retain_outputs = self.model(retain_for_inputs)
+                            with torch.no_grad():
+                                teacher_retain = self.objective.teacher_model(retain_for_inputs)
+                            retain_loss = self.objective.compute_retain_loss(
+                                retain_outputs, teacher_retain, retain_labels
+                            )
+                            retain_loss = retain_loss * self.retain_lambda
+                            retain_loss.backward()
+                            self._apply_saliency_mask()
+                            self._apply_grad_noise()
+                            self.optimizer.step()
+
+                            # Optional extra retain steps (SCRUB schedule)
+                            extra_steps = getattr(self.objective, "extra_retain_steps", 0)
+                            for _ in range(extra_steps):
+                                self.optimizer.zero_grad()
+                                if self.robust_retain:
+                                    retain_for_inputs = self.robust_retain_attack(retain_inputs, retain_labels)
+                                else:
+                                    retain_for_inputs = retain_inputs
+                                retain_outputs = self.model(retain_for_inputs)
+                                with torch.no_grad():
+                                    teacher_retain = self.objective.teacher_model(retain_for_inputs)
+                                retain_loss = self.objective.compute_retain_loss(
+                                    retain_outputs, teacher_retain, retain_labels
+                                )
+                                retain_loss = retain_loss * self.retain_lambda
+                                retain_loss.backward()
+                                self._apply_saliency_mask()
+                                self._apply_grad_noise()
+                                self.optimizer.step()
+
+                            # Logging loss (approx)
+                            loss = (retain_loss + (self.objective.forget_weight * forget_loss)).detach()
+                            epoch_loss += loss.item()
+                            num_batches += 1
+                            pbar.set_postfix({'loss': f"{loss.item():.4f}"})
+                            continue
+
                     # Check if objective accepts inputs parameter (for SCRUB distillation)
                     try:
                         forget_loss = self.objective(forget_outputs, forget_labels, inputs=forget_inputs)
@@ -355,7 +452,24 @@ class UnlearningTrainer:
                         if hasattr(self.objective, "compute_normal_loss"):
                             normal_loss_raw = self.objective.compute_normal_loss(retain_outputs, retain_labels)
                         else:
+                            # If SGA requests multiple "normal" batches, average across them.
+                            k = int(getattr(self.objective, "num_normal_samples", 1))
                             normal_loss_raw = retain_loss_raw
+                            if k > 1 and normal_iter is not None:
+                                extra_losses = [retain_loss_raw]
+                                for _ in range(k - 1):
+                                    try:
+                                        nx, ny = next(normal_iter)
+                                    except StopIteration:
+                                        if self.normal_loader is not None:
+                                            normal_iter = iter(self.normal_loader)
+                                        elif hasattr(self.train_loader, "retain_loader"):
+                                            normal_iter = iter(self.train_loader.retain_loader)
+                                        nx, ny = next(normal_iter)
+                                    nx, ny = nx.to(self.device), ny.to(self.device)
+                                    nout = self.model(nx)
+                                    extra_losses.append(nn.functional.cross_entropy(nout, ny))
+                                normal_loss_raw = sum(extra_losses) / float(len(extra_losses))
                         loss = self.objective.combine_losses(forget_loss_raw, normal_loss_raw)
                     else:
                         loss = forget_loss + retain_loss
@@ -397,11 +511,14 @@ class UnlearningTrainer:
                         continue
                     grad = None
                     if g_f is not None and g_r is not None:
-                        grad = g_f + g_r
+                        if self.gu_projection:
+                            grad = g_f + (self.gu_beta * g_r)
+                        else:
+                            grad = g_f + g_r
                     elif g_f is not None:
                         grad = g_f
                     else:
-                        grad = g_r
+                        grad = (self.gu_beta * g_r) if self.gu_projection else g_r
                     param.grad = grad
             else:
                 loss.backward()
@@ -418,6 +535,56 @@ class UnlearningTrainer:
 
         epoch_loss /= num_batches
         return {'train_loss': epoch_loss}
+
+    def _scrub_max_epoch(self, forget_loader: DataLoader) -> Dict[str, float]:
+        """SCRUB max phase: maximize KL on forget set (minimize -KL)."""
+        if self.objective.teacher_model is None:
+            raise ValueError("SCRUB requires teacher_model to be set.")
+        self.model.train()
+        total_loss = 0.0
+        num_batches = 0
+        for inputs, labels in forget_loader:
+            inputs, labels = inputs.to(self.device), labels.to(self.device)
+            outputs = self.model(inputs)
+            with torch.no_grad():
+                teacher_logits = self.objective.teacher_model(inputs)
+            loss = self.objective.compute_forget_loss(outputs, teacher_logits)
+            loss = self.objective.forget_weight * loss
+            self.optimizer.zero_grad()
+            loss.backward()
+            self._apply_saliency_mask()
+            self._apply_grad_noise()
+            self.optimizer.step()
+            total_loss += loss.item()
+            num_batches += 1
+        avg_loss = total_loss / max(1, num_batches)
+        return {"scrub_max_loss": avg_loss}
+
+    def _scrub_min_epoch(self, retain_loader: DataLoader) -> Dict[str, float]:
+        """SCRUB min phase: minimize KL+CE on retain set."""
+        if self.objective.teacher_model is None:
+            raise ValueError("SCRUB requires teacher_model to be set.")
+        self.model.train()
+        total_loss = 0.0
+        num_batches = 0
+        for inputs, labels in retain_loader:
+            inputs, labels = inputs.to(self.device), labels.to(self.device)
+            if self.robust_retain:
+                inputs = self.robust_retain_attack(inputs, labels)
+            outputs = self.model(inputs)
+            with torch.no_grad():
+                teacher_logits = self.objective.teacher_model(inputs)
+            loss = self.objective.compute_retain_loss(outputs, teacher_logits, labels)
+            loss = loss * self.retain_lambda
+            self.optimizer.zero_grad()
+            loss.backward()
+            self._apply_saliency_mask()
+            self._apply_grad_noise()
+            self.optimizer.step()
+            total_loss += loss.item()
+            num_batches += 1
+        avg_loss = total_loss / max(1, num_batches)
+        return {"scrub_min_loss": avg_loss}
 
     def validate(self) -> Dict[str, float]:
         """Validate model"""
@@ -508,6 +675,7 @@ class UnlearningTrainer:
 
         best_metric = float('inf') if mode == "min" else float('-inf')
         patience_counter = 0
+        scrub_rewind_records = []
 
         for epoch in range(max_epochs):
             self.current_epoch = epoch
@@ -520,7 +688,20 @@ class UnlearningTrainer:
                     self.objective.set_class_stats(class_mu, class_sigma)
 
             # Train epoch
-            train_metrics = self.train_epoch()
+            if self.scrub_full_schedule and self.objective.__class__.__name__.lower() == "scrub":
+                if not hasattr(self.train_loader, "forget_loader") or not hasattr(self.train_loader, "retain_loader"):
+                    raise ValueError("SCRUB full schedule requires train_loader.forget_loader and retain_loader")
+                self._maybe_update_saliency_mask()
+                max_steps = self.scrub_max_steps if self.scrub_max_steps is not None else max_epochs
+                train_metrics = {}
+                if epoch < max_steps:
+                    train_metrics.update(self._scrub_max_epoch(self.train_loader.forget_loader))
+                else:
+                    train_metrics["scrub_max_loss"] = 0.0
+                train_metrics.update(self._scrub_min_epoch(self.train_loader.retain_loader))
+                train_metrics["train_loss"] = train_metrics.get("scrub_max_loss", 0.0) + train_metrics.get("scrub_min_loss", 0.0)
+            else:
+                train_metrics = self.train_epoch()
 
             # Validate
             val_metrics = self.validate()
@@ -531,6 +712,24 @@ class UnlearningTrainer:
 
             # Store history
             self.training_history.append(epoch_metrics)
+
+            # SCRUB rewind bookkeeping
+            if self.scrub_rewind:
+                forget_train_acc = 0.0
+                if hasattr(self.train_loader, "forget_loader"):
+                    forget_train_acc = self._evaluate_accuracy(self.train_loader.forget_loader)
+                forget_val_acc = val_metrics.get("forget_acc", 0.0)
+                record = {
+                    "epoch": epoch,
+                    "forget_train_acc": forget_train_acc,
+                    "forget_val_acc": forget_val_acc,
+                    "checkpoint_path": None
+                }
+                if checkpoint_dir:
+                    ckpt_path = os.path.join(checkpoint_dir, f"scrub_rewind_epoch_{epoch}.pt")
+                    torch.save(self.model.state_dict(), ckpt_path)
+                    record["checkpoint_path"] = ckpt_path
+                scrub_rewind_records.append(record)
 
             # Learning rate scheduling
             if self.scheduler:
@@ -571,14 +770,30 @@ class UnlearningTrainer:
         if checkpoint_dir:
             self.save_checkpoint(os.path.join(checkpoint_dir, "final_model"))
 
+        # SCRUB rewind: select checkpoint closest to reference forget error
+        if self.scrub_rewind and scrub_rewind_records:
+            reference = scrub_rewind_records[-1].get("forget_val_acc", 0.0)
+            key = "forget_train_acc" if self.scrub_rewind_on_train else "forget_val_acc"
+            best = min(scrub_rewind_records, key=lambda r: abs(r.get(key, 0.0) - reference))
+            if best.get("checkpoint_path") and os.path.exists(best["checkpoint_path"]):
+                print(f"[SCRUB rewind] Loading epoch {best['epoch']} (ref={reference:.4f}, {key}={best.get(key,0.0):.4f})")
+                state = torch.load(best["checkpoint_path"], map_location=self.device)
+                self.model.load_state_dict(state)
+
         return self.training_history
 
     def save_checkpoint(self, path: str):
         """Save model checkpoint"""
         os.makedirs(path, exist_ok=True)
 
-        # Save LoRA adapter
-        save_lora_adapter(self.model, path)
+        # Save LoRA adapter or full model weights
+        if hasattr(self.model, "save_pretrained"):
+            save_lora_adapter(self.model, path)
+        else:
+            torch.save(
+                {"model_state_dict": self.model.state_dict()},
+                os.path.join(path, "model_state_dict.pt"),
+            )
 
         # Save training state
         state = {
@@ -604,8 +819,7 @@ class UnlearningTrainer:
             self.best_val_metric = state['best_val_metric']
             self.training_history = state['training_history']
 
-        # Load LoRA adapter (handled by the model itself)
-        # This should be done when loading the model
+        # LoRA adapter loading handled elsewhere; full model loading is separate.
 
     def save_training_history(self, path: str):
         """Save training history to JSON"""
@@ -633,6 +847,7 @@ def create_unlearning_trainer(model: nn.Module,
                              forget_class: int,
                              train_loader: DataLoader,
                              val_loader: Optional[DataLoader] = None,
+                             normal_loader: Optional[DataLoader] = None,
                              num_classes: int = 10,
                              device: str = "cuda",
                              retain_lambda: float = 1.0,
@@ -644,7 +859,12 @@ def create_unlearning_trainer(model: nn.Module,
                              grad_noise_std: float = 0.0,
                              gu_projection: bool = False,
                              grad_surgery: bool = False,
-                             orthogonal_reg: float = 0.0) -> UnlearningTrainer:
+                             orthogonal_reg: float = 0.0,
+                             gu_beta: float = 1.0,
+                             scrub_rewind: bool = False,
+                             scrub_rewind_on_train: bool = True,
+                             scrub_full_schedule: bool = False,
+                             scrub_max_steps: Optional[int] = None) -> UnlearningTrainer:
     """
     Factory function to create unlearning trainer
 
@@ -673,7 +893,7 @@ def create_unlearning_trainer(model: nn.Module,
 
     objective = create_unlearning_objective(objective_name, forget_class, num_classes, **objective_kwargs)
     trainer = UnlearningTrainer(
-        model, objective, train_loader, val_loader, device, retain_lambda,
+        model, objective, train_loader, val_loader, normal_loader, device, retain_lambda,
         robust_retain=robust_retain,
         robust_retain_eps=robust_retain_eps,
         robust_retain_alpha=robust_retain_alpha,
@@ -681,7 +901,12 @@ def create_unlearning_trainer(model: nn.Module,
         grad_noise_std=grad_noise_std,
         gu_projection=gu_projection,
         grad_surgery=grad_surgery,
-        orthogonal_reg=orthogonal_reg
+        orthogonal_reg=orthogonal_reg,
+        gu_beta=gu_beta,
+        scrub_rewind=scrub_rewind,
+        scrub_rewind_on_train=scrub_rewind_on_train,
+        scrub_full_schedule=scrub_full_schedule,
+        scrub_max_steps=scrub_max_steps
     )
 
     if hasattr(objective, "set_model"):

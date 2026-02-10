@@ -20,21 +20,21 @@
   },
   "unlearn_rurk_vit_cifar10_forget0_smoke": {
     "clean": {
-      "overall_acc": 0.8428,
+      "overall_acc": 0.8458,
       "forget_acc": 0.0,
-      "retain_acc": 0.9364444444444444,
+      "retain_acc": 0.9397777777777778,
       "forget_samples": 1000,
       "retain_samples": 9000,
       "total_samples": 10000,
       "attack_type": "clean",
-      "mean_confidence": 0.9704493284225464,
-      "correct_confidence": 0.9881867170333862,
-      "incorrect_confidence": 0.8753533959388733,
-      "forget_confidence": 0.9072996377944946,
+      "mean_confidence": 0.9698460698127747,
+      "correct_confidence": 0.9881324172019958,
+      "incorrect_confidence": 0.8695435523986816,
+      "forget_confidence": 0.8948288559913635,
       "forget_correct_confidence": 0.0,
-      "mean_entropy": 0.07789033651351929,
-      "max_entropy": 1.8892546892166138,
-      "min_entropy": 7.762258175635084e-13
+      "mean_entropy": 0.07815372943878174,
+      "max_entropy": 1.7814360857009888,
+      "min_entropy": 1.4148616089490473e-12
     }
   }
 }

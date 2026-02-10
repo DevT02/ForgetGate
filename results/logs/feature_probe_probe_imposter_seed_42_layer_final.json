@@ -1,0 +1,29 @@
+{
+  "suite": "probe_imposter",
+  "seed": 42,
+  "dataset": "cifar10",
+  "model": "vit_tiny",
+  "forget_class": 0,
+  "run_info": {
+    "started_utc": "2026-02-10T02:33:03.754966Z",
+    "argv": [
+      "scripts/9_feature_probe_leakage.py",
+      "--config",
+      "configs/experiment_suites.yaml",
+      "--suite",
+      "probe_imposter"
+    ],
+    "probe_layer": "final"
+  },
+  "models": {
+    "unlearn_baldro_scrub_ortho_imposter": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9100000262260437,
+      "val_acc": 0.9140000343322754,
+      "val_auc": 0.9425888888888889,
+      "n_train": 8000,
+      "n_val": 2000
+    }
+  }
+}

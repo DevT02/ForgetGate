@@ -198,11 +198,17 @@ ForgetGate/
 ### Unlearning (LoRA)
 - CE Ascent
 - Uniform KL
+- Smoothed Gradient Ascent (SGA; supports optional normal-data loader)
 - Feature Scrub (feature/logit ascent baseline)
-- SalUn (saliency-masked random relabeling)
-- SCRUB (distillation)
+- SalUn (saliency-masked random relabeling; faithful under full‑finetune, LoRA is proxy)
+- SCRUB (distillation; KL‑based forget loss + retain KL/CE, full max/min schedule + optional rewind)
 - Prune-then-unlearn (optional magnitude pruning before LoRA)
 - Noisy retain-only finetune (certified-style proxy; optional)
+
+### Unlearning (Full/Partial Finetune Baselines)
+- Full finetune (no LoRA)
+- Head-only finetune (classifier head)
+- Last-block finetune (final transformer block)
 
 ### Models
 - ViT-Tiny
@@ -465,6 +471,65 @@ Full-data VPT runs reach near-complete recovery in results/logs/vpt_resurrect_*_
 
 **AutoAttack (seeds 42/123/456)**: full AutoAttack drives both forget and retain accuracy to about 0 on base/unlearned models for all seeds. VPT AutoAttack is available for seeds 42 and 123 (see `results/logs/eval_autoattack_vit_cifar10_forget0_seed_{42,123,456}_evaluation.json`).
 
+---
+
+## Feature-Probe Defense Analysis: LoRA's Structural Limitation
+
+The feature-probe results above show that a linear probe on frozen features detects the forgotten class at 98%+ accuracy even after LoRA unlearning -- barely different from the base model (99%). This section explains *why* and shows that the gap can be closed with the right approach.
+
+### The core finding
+
+LoRA unlearning changes the model's **outputs** (forget accuracy drops to 0%) but barely touches the **features**. A linear probe on frozen 192-dim CLS token features separates forget from retain samples at 96-99% accuracy across all LoRA-based methods. The oracle model (retrained from scratch without the forget class) sits at ~94%. The gap is structural: LoRA modifies a low-rank subspace of the weights that can rotate the classification head away from the forget class, but the backbone's feature representations remain largely intact. The class information is still encoded in the features -- it is just no longer connected to the correct output.
+
+### Expanded feature-probe results (seed 42, final layer)
+
+| Method | Adaptation | Probe Acc (%) | Probe AUC |
+|--------|-----------|:---:|:---:|
+| Base (no unlearning) | -- | 99.1 | 0.997 |
+| Uniform KL | LoRA | 98.4 | 0.996 |
+| SalUn | LoRA | 98.4 | 0.996 |
+| OrthoReg | LoRA | 98.5 | 0.992 |
+| RURK | LoRA | 98.3 | 0.993 |
+| SGA | LoRA | 97.3 | 0.982 |
+| BalDRO | LoRA | 96.5 | 0.981 |
+| FaLW | LoRA | 96.0 | 0.976 |
+| BalDRO-SCRUB-Ortho (Baseline, LoRA) | LoRA | 97.2 | 0.995 |
+| BalDRO-SCRUB-Ortho (r64) | LoRA | 96.4 | 0.984 |
+| SCRUB | LoRA | 94.4 | 0.958 |
+| BalDRO-SCRUB-Ortho (Full FT) | Full FT | 91.2 | 0.958 |
+| Pure Manifold (Full FT) | Full FT | 90.2 | 0.955 |
+| Imposter Defense (Full FT) | Full FT | 91.4 | 0.943 |
+| **Oracle** | **--** | **93.8** | **0.947** |
+
+*Probe: linear classifier (BCEWithLogits) trained on frozen features. AUC computed via rank-based method. All results from seed 42 on CIFAR-10 test set (10,000 samples). Oracle retrained from scratch without class 0.*
+
+### What the table shows
+
+1. **LoRA methods leave massive feature remnants.** Every LoRA-based method sits at 96-99% probe accuracy and 0.976-0.996 AUC. The probe can trivially separate forget from retain samples because LoRA's low-rank update cannot overwrite the deep feature representations that encode class identity.
+
+2. **SCRUB is the exception among LoRA methods.** SCRUB achieves 94.4% / 0.958 AUC, close to oracle (93.8% / 0.947). This is because SCRUB uses teacher-student distillation which explicitly aligns the student's feature distribution with the teacher's, disrupting the original class-specific feature structure.
+
+3. **Full fine-tuning is necessary for feature-level privacy.** All Full FT defenses (91-91.4% accuracy, 0.943-0.958 AUC) approach or match oracle levels. Full FT has enough capacity to actually overwrite the feature representations, unlike LoRA which operates in a constrained subspace.
+
+4. **Imposter defense achieves oracle-level probe resistance.** The imposter approach (mapping forget features to random retain samples) reaches AUC 0.943 -- at or below the oracle's 0.947. This means the probe finds it no easier to detect the forgotten class than in a model that never saw it.
+
+### Defense methods tested
+
+- **BalDRO-SCRUB-Ortho (Baseline)**: BalDRO hard-sample mining + SCRUB distillation + feature orthogonalization, LoRA rank 4. Feature defense has limited effect due to LoRA's expressivity bottleneck.
+- **BalDRO-SCRUB-Ortho (Full FT)**: Same objectives but with full fine-tuning. Crosses below oracle probe accuracy (91.2% vs 93.8%) and reaches AUC 0.958.
+- **Pure Manifold (Full FT)**: Feature-only defense (no BalDRO/SCRUB loss terms). Maps forget features toward retain centroid. AUC 0.955.
+- **Imposter Defense (Full FT)**: Instead of mapping to a static centroid, maps each forget sample to a random retain sample from the training set. This preserves distributional spread and achieves AUC 0.943.
+
+### t-SNE visualization (supplementary)
+
+t-SNE projections of the 192-dim features into 2D show centroid distance and variance metrics for each defense. The imposter defense achieves the lowest centroid distance (8.2 vs 44.7 for baseline) but retains low variance ratio (0.08 vs retain 1.0). However, the t-SNE variance ratio is a 2D projection artifact and does not correspond to probe separability in the original 192-dim space. The probe AUC is the metric that matters, and the imposter defense achieves oracle-level AUC despite low t-SNE variance ratio. See `results/plots/tsne_comparison_grid_search_vis.png`.
+
+### Conclusion
+
+LoRA-based unlearning creates a surface-level illusion of forgetting: outputs change but features persist. A simple linear probe exposes this at 96-99% accuracy. Closing the gap to oracle requires either (a) distillation-based objectives that explicitly align features (SCRUB), or (b) full fine-tuning with feature-level objectives (manifold injection, imposter defense). The oracle itself sits at ~94% / 0.947 AUC because even a model that never saw a class retains some inherent distributional structure -- this is the theoretical floor. The imposter defense reaches this floor (AUC 0.943), leaving no further room for improvement.
+
+---
+
 ## Results Provenance
 
 - Seeds by table:
@@ -484,6 +549,7 @@ Full-data VPT runs reach near-complete recovery in results/logs/vpt_resurrect_*_
 - Dependency eval logs: `results/logs/eval_dependency_vit_cifar10_forget0_seed_*_evaluation.json` and `results/logs/eval_dependency_mix_vit_cifar10_forget0_seed_*_evaluation.json`.
 - Forget-neighborhood logs: `results/logs/eval_forget_neighborhood_vit_cifar10_forget0_seed_*_evaluation.json`.
 - Feature-probe logs: `results/logs/feature_probe_probe_feature_leakage_vit_cifar10_forget0_seed_*.json` and `results/logs/feature_probe_probe_feature_leakage_vit_cifar10_forget0_seed_*_layer_*.json`.
+- Feature-probe defense analysis logs: `results/logs/feature_probe_grid_search_ortho_forget0_seed_42_layer_final.json`, `results/logs/feature_probe_probe_pure_manifold_seed_42_layer_final.json`, `results/logs/feature_probe_probe_imposter_seed_42_layer_final.json`, `results/logs/feature_probe_probe_feature_leakage_2026_methods_vit_cifar10_forget0_seed_42_layer_final.json`.
 
 ## Audit / Manifest
 

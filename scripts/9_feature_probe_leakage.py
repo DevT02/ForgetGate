@@ -326,14 +326,38 @@ def main():
                 state = {f"model.{k}": v for k, v in state.items()}
             model.load_state_dict(state)
         elif model_suite.startswith("unlearn_"):
-            base_suite = experiment_suites[model_suite].get("base_model_suite", None)
+            spec = experiment_suites[model_suite]
+            base_suite = spec.get("base_model_suite", None)
             if not base_suite:
                 raise ValueError(f"Missing base_model_suite for {model_suite}")
+            
             ckpt_path = load_checkpoint_or_best("checkpoints/base", base_suite, args.seed)
             checkpoint = torch.load(ckpt_path, map_location=device)
             model.load_state_dict(checkpoint["model_state_dict"])
-            adapter_path = f"checkpoints/unlearn_lora/{model_suite}_seed_{args.seed}"
-            model = load_lora_adapter(model, adapter_path).to(device)
+            
+            # Determine path to unlearned weights
+            custom_path = spec.get("path", None)
+            if custom_path:
+                tgt_path = custom_path
+            else:
+                tgt_path = f"checkpoints/unlearn_lora/{model_suite}_seed_{args.seed}"
+                
+            # Check for Full FT (File or explicit model.pt)
+            is_full_ft = False
+            if os.path.isfile(tgt_path):
+                is_full_ft = True
+            elif os.path.isdir(tgt_path) and not os.path.exists(os.path.join(tgt_path, "adapter_config.json")):
+                 if os.path.exists(os.path.join(tgt_path, "model.pt")):
+                     tgt_path = os.path.join(tgt_path, "model.pt")
+                     is_full_ft = True
+
+            if is_full_ft:
+                print(f"[Info] Loading Full FT model from {tgt_path}")
+                ft_ckpt = torch.load(tgt_path, map_location=device)
+                model.load_state_dict(ft_ckpt["model_state_dict"])
+            else:
+                print(f"[Info] Loading LoRA adapter from {tgt_path}")
+                model = load_lora_adapter(model, tgt_path).to(device)
         else:
             continue
 

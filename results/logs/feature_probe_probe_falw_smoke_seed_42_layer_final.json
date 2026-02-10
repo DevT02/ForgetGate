@@ -1,0 +1,29 @@
+{
+  "suite": "probe_falw_smoke",
+  "seed": 42,
+  "dataset": "cifar10",
+  "model": "vit_tiny",
+  "forget_class": 0,
+  "run_info": {
+    "started_utc": "2026-02-09T05:36:14.834529Z",
+    "argv": [
+      "scripts/9_feature_probe_leakage.py",
+      "--config",
+      "configs/experiment_suites.yaml",
+      "--suite",
+      "probe_falw_smoke"
+    ],
+    "probe_layer": "final"
+  },
+  "models": {
+    "unlearn_falw_vit_cifar10_forget0_smoke": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9251250624656677,
+      "val_acc": 0.9285000562667847,
+      "val_auc": 0.962375,
+      "n_train": 8000,
+      "n_val": 2000
+    }
+  }
+}

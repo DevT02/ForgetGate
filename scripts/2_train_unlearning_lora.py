@@ -108,16 +108,22 @@ def main():
     forget_class = unlearning_params.get("forget_class", 0)
     objective_name = unlearning_params.get("objective", "ce_ascent")
     lora_rank = unlearning_params.get("lora_rank", 8)
+    unlearning_method = unlearning_params.get("method", "lora")
 
     # Get objective-specific config from unlearning.yaml
     objective_config = unlearning_config.get("objectives", {}).get(objective_name, {})
 
     # Extract all parameters except 'name' and 'loss_type' (metadata only)
-    objective_kwargs = {k: v for k, v in objective_config.items() if k not in ["name", "loss_type"]}
+    objective_kwargs = {
+        k: v
+        for k, v in objective_config.items()
+        if k not in ["name", "loss_type", "normal_source", "scrub_full_schedule", "scrub_max_steps"]
+    }
 
     print(f"Forget class: {forget_class}")
     print(f"Unlearning objective: {objective_name}")
     print(f"LoRA rank: {lora_rank}")
+    print(f"Unlearning method: {unlearning_method}")
 
     # Load base model
     base_model = load_base_model(experiment_suites, suite_config, device, args.seed)
@@ -139,7 +145,7 @@ def main():
     # For SCRUB, we need a separate teacher model (frozen copy of base)
     # Load it BEFORE applying LoRA to avoid reference issues
     teacher_model = None
-    if objective_name == "scrub":
+    if "scrub" in objective_name and "feature" not in objective_name:
         print("\nLoading separate teacher model for SCRUB...")
         teacher_model = load_base_model(experiment_suites, suite_config, device, args.seed)
         if pruning_cfg.get("enabled", False) and pruning_cfg.get("apply_to_teacher", True):
@@ -161,19 +167,69 @@ def main():
     base_suite_config = experiment_suites.get(base_suite, {})
     model_type = base_suite_config.get("model", "vit_tiny")
 
-    # Apply LoRA - select target modules based on model type
-    if model_type.startswith("vit"):
-        target_modules = model_config["lora"]["vit_target_modules"]
-    else:
-        target_modules = model_config["lora"]["cnn_target_modules"]
+    def _unwrap_core_model(m: nn.Module) -> nn.Module:
+        if hasattr(m, "model"):
+            return m.model
+        return m
 
-    lora_config = create_lora_config(
-        r=lora_rank,
-        lora_alpha=unlearning_config["lora_unlearn"].get("lora_alpha", 16),
-        target_modules=target_modules
-    )
-    lora_model = apply_lora_to_model(base_model, lora_config)
-    print_model_info(lora_model, f"LoRA-{lora_rank} {objective_name}")
+    def _freeze_all(m: nn.Module):
+        for p in m.parameters():
+            p.requires_grad = False
+
+    def _unfreeze_names(m: nn.Module, name_keywords):
+        for name, param in m.named_parameters():
+            if any(k in name for k in name_keywords):
+                param.requires_grad = True
+
+    def _unfreeze_last_block(m: nn.Module):
+        core = _unwrap_core_model(m)
+        # ViT: blocks[-1]
+        if hasattr(core, "blocks") and len(core.blocks) > 0:
+            for p in core.blocks[-1].parameters():
+                p.requires_grad = True
+            # also unfreeze head
+            if hasattr(core, "head"):
+                for p in core.head.parameters():
+                    p.requires_grad = True
+            if hasattr(core, "fc"):
+                for p in core.fc.parameters():
+                    p.requires_grad = True
+            return
+        # ResNet: layer4 + fc
+        if hasattr(core, "layer4"):
+            for p in core.layer4.parameters():
+                p.requires_grad = True
+        if hasattr(core, "fc"):
+            for p in core.fc.parameters():
+                p.requires_grad = True
+
+    # Apply LoRA or configure finetuning method
+    if unlearning_method == "lora":
+        if model_type.startswith("vit"):
+            target_modules = model_config["lora"]["vit_target_modules"]
+        else:
+            target_modules = model_config["lora"]["cnn_target_modules"]
+
+        lora_config = create_lora_config(
+            r=lora_rank,
+            lora_alpha=unlearning_config["lora_unlearn"].get("lora_alpha", 16),
+            target_modules=target_modules
+        )
+        lora_model = apply_lora_to_model(base_model, lora_config)
+        print_model_info(lora_model, f"LoRA-{lora_rank} {objective_name}")
+    else:
+        lora_model = base_model
+        _freeze_all(lora_model)
+        if unlearning_method == "head_only":
+            _unfreeze_names(lora_model, ["head", "fc", "classifier"])
+        elif unlearning_method == "last_block":
+            _unfreeze_last_block(lora_model)
+        elif unlearning_method == "full_finetune":
+            for p in lora_model.parameters():
+                p.requires_grad = True
+        else:
+            raise ValueError(f"Unknown unlearning method: {unlearning_method}")
+        print_model_info(lora_model, f"{unlearning_method} {objective_name}")
 
     # Create data manager and loaders
     data_manager = DataManager()
@@ -184,19 +240,25 @@ def main():
     full_train_dataset = data_manager.load_dataset(dataset_name, "train")
 
     # Objective-specific data stats (FaLW-style)
+    forget_train, retain_train, forget_test, retain_test = create_forget_retain_splits(
+        full_train_dataset, forget_class, train_ratio=0.8
+    )
     if objective_name in ("falw", "fa_lw"):
-        if hasattr(full_train_dataset, "targets") and full_train_dataset.targets is not None:
-            labels = [int(x) for x in full_train_dataset.targets]
+        # FaLW balance factor should be computed from the forget set distribution.
+        if hasattr(forget_train, "dataset") and hasattr(forget_train, "indices"):
+            base_dataset = forget_train.dataset
+            indices = forget_train.indices
+            if hasattr(base_dataset, "targets") and base_dataset.targets is not None:
+                labels = [int(base_dataset.targets[i]) for i in indices]
+            else:
+                labels = [int(base_dataset[i][1]) for i in indices]
         else:
-            labels = [int(full_train_dataset[i][1]) for i in range(len(full_train_dataset))]
+            labels = [int(forget_train[i][1]) for i in range(len(forget_train))]
         class_counts = {}
         for y in labels:
             class_counts[y] = class_counts.get(y, 0) + 1
         objective_kwargs["class_counts"] = class_counts
         objective_kwargs["total_samples"] = len(labels)
-    forget_train, retain_train, forget_test, retain_test = create_forget_retain_splits(
-        full_train_dataset, forget_class, train_ratio=0.8
-    )
 
     # Create data loaders
     default_workers = unlearning_config["lora_unlearn"].get("num_workers")
@@ -221,6 +283,29 @@ def main():
         num_workers=default_workers,
         pin_memory=pin_memory
     )
+
+    normal_loader = None
+    if objective_name in ("sga", "smoothed_ga"):
+        normal_source = unlearning_params.get("normal_source", objective_config.get("normal_source", "retain"))
+        normal_cfg = unlearning_params.get("normal_data")
+        if normal_cfg:
+            normal_dataset = normal_cfg.get("dataset", dataset_name)
+            normal_split = normal_cfg.get("split", "train")
+            exclude_class = normal_cfg.get("exclude_class")
+            include_classes = normal_cfg.get("include_classes")
+            normal_loader = data_manager.get_dataloader(
+                normal_dataset,
+                split=normal_split,
+                batch_size=unlearning_config["lora_unlearn"].get("batch_size", 128),
+                include_classes=include_classes,
+                exclude_classes=exclude_class,
+                num_workers=default_workers,
+                use_pretrained=True,
+                apply_imagenet_norm=True
+            )
+            print(f"SGA normal data loader: {normal_dataset}:{normal_split}")
+        elif normal_source == "retain":
+            normal_loader = retain_loader
 
     print(f"Forget class {forget_class} samples: {len(forget_train)}")
     print(f"Retain samples: {len(retain_train)}")
@@ -251,12 +336,19 @@ def main():
     gu_projection = unlearning_params.get("gu_projection", False)
     grad_surgery = unlearning_params.get("grad_surgery", False)
     orthogonal_reg = float(unlearning_params.get("orthogonal_reg", 0.0))
+    gu_beta = float(unlearning_params.get("gu_beta", 1.0))
+    scrub_rewind = bool(unlearning_params.get("scrub_rewind", False))
+    scrub_rewind_on_train = bool(unlearning_params.get("scrub_rewind_on_train", True))
+    scrub_full_schedule = bool(unlearning_params.get("scrub_full_schedule", False))
+    scrub_max_steps = unlearning_params.get("scrub_max_steps")
+    scrub_max_steps = None if scrub_max_steps is None else int(scrub_max_steps)
     trainer = create_unlearning_trainer(
         model=lora_model,
         objective_name=objective_name,
         forget_class=forget_class,
         train_loader=combined_train_loader,  # Use combined loader
         val_loader=val_loader,  # Use combined validation set
+        normal_loader=normal_loader,
         num_classes=data_config[dataset_name]["num_classes"],
         device=device,
         retain_lambda=retain_lambda,
@@ -264,11 +356,16 @@ def main():
         grad_noise_std=grad_noise_std,
         gu_projection=gu_projection,
         grad_surgery=grad_surgery,
-        orthogonal_reg=orthogonal_reg
+        orthogonal_reg=orthogonal_reg,
+        gu_beta=gu_beta,
+        scrub_rewind=scrub_rewind,
+        scrub_rewind_on_train=scrub_rewind_on_train,
+        scrub_full_schedule=scrub_full_schedule,
+        scrub_max_steps=scrub_max_steps
     )
 
     # Set teacher model for SCRUB (distillation-based unlearning)
-    if objective_name == "scrub":
+    if "scrub" in objective_name and "feature" not in objective_name:
         print("\nSetting teacher model in SCRUB objective...")
         # Use the separately loaded teacher model
         trainer.set_teacher_model(teacher_model)
@@ -305,25 +402,32 @@ def main():
     history_path = f"results/logs/{args.suite}_seed_{args.seed}_history.json"
     trainer.save_training_history(history_path)
 
-    # Save final LoRA adapter
-    adapter_save_path = f"checkpoints/unlearn_lora/{args.suite}_seed_{args.seed}"
-    save_lora_adapter(lora_model, adapter_save_path)
+    if unlearning_method == "lora":
+        # Save final LoRA adapter
+        adapter_save_path = f"checkpoints/unlearn_lora/{args.suite}_seed_{args.seed}"
+        save_lora_adapter(lora_model, adapter_save_path)
 
-    # If a best model was saved during training, overwrite with it
-    best_model_path = os.path.join(checkpoint_dir, "best_model")
-    if os.path.exists(best_model_path):
-        print(f"Copying best model from {best_model_path} to {adapter_save_path}")
-        # Remove the final adapter files
-        for filename in os.listdir(adapter_save_path):
-            if filename.endswith(('.bin', '.safetensors', '.json')):
-                os.remove(os.path.join(adapter_save_path, filename))
-        # Copy best model files
-        for filename in os.listdir(best_model_path):
-            if filename.endswith(('.bin', '.safetensors', '.json')):
-                shutil.copy2(os.path.join(best_model_path, filename), adapter_save_path)
+        # If a best model was saved during training, overwrite with it
+        best_model_path = os.path.join(checkpoint_dir, "best_model")
+        if os.path.exists(best_model_path):
+            print(f"Copying best model from {best_model_path} to {adapter_save_path}")
+            # Remove the final adapter files
+            for filename in os.listdir(adapter_save_path):
+                if filename.endswith(('.bin', '.safetensors', '.json')):
+                    os.remove(os.path.join(adapter_save_path, filename))
+            # Copy best model files
+            for filename in os.listdir(best_model_path):
+                if filename.endswith(('.bin', '.safetensors', '.json')):
+                    shutil.copy2(os.path.join(best_model_path, filename), adapter_save_path)
 
-    print("\nUnlearning training complete!")
-    print(f"LoRA adapter saved to: {adapter_save_path}")
+        print("\nUnlearning training complete!")
+        print(f"LoRA adapter saved to: {adapter_save_path}")
+    else:
+        full_save_path = f"checkpoints/unlearn_full/{args.suite}_seed_{args.seed}_final.pt"
+        os.makedirs(os.path.dirname(full_save_path), exist_ok=True)
+        torch.save({"model_state_dict": lora_model.state_dict()}, full_save_path)
+        print("\nUnlearning training complete!")
+        print(f"Full model saved to: {full_save_path}")
     print(f"Training history saved to: {history_path}")
 
     # Print final metrics

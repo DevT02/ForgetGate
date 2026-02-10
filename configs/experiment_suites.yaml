@@ -186,6 +186,36 @@ unlearn_kl_vit_cifar10_forget0:
     lr: 1e-3
   seeds: [42, 123, 456]
 
+unlearn_fullft_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: full_finetune
+    objective: uniform_kl
+    forget_class: 0
+    epochs: 10
+    lr: 5e-5
+  seeds: [42, 123, 456]
+
+unlearn_headonly_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: head_only
+    objective: uniform_kl
+    forget_class: 0
+    epochs: 10
+    lr: 1e-3
+  seeds: [42, 123, 456]
+
+unlearn_lastblock_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: last_block
+    objective: uniform_kl
+    forget_class: 0
+    epochs: 10
+    lr: 5e-4
+  seeds: [42, 123, 456]
+
 # New baselines: SGA + GU projection + gradient surgery
 unlearn_sga_vit_cifar10_forget0:
   base_model_suite: base_vit_cifar10
@@ -422,6 +452,8 @@ unlearn_scrub_distill_vit_cifar10_forget0:
     method: lora
     objective: scrub
     forget_class: 0
+    scrub_rewind: true
+    scrub_rewind_on_train: true
     lora_rank: 8
     epochs: 50
     lr: 1e-3
@@ -472,6 +504,8 @@ unlearn_scrub_cnn_forget0:
     method: lora
     objective: scrub
     forget_class: 0
+    scrub_rewind: true
+    scrub_rewind_on_train: true
     lora_rank: 8
     epochs: 50
     lr: 1e-3
@@ -966,6 +1000,18 @@ eval_quick_new_methods_vit_cifar10_forget0_smoke:
       - retain_acc
   seeds: [42]
 
+eval_quick_sga_only_smoke:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_sga_vit_cifar10_forget0_smoke
+  evaluation:
+    attacks:
+      - clean
+    metrics:
+      - forget_acc
+      - retain_acc
+  seeds: [42]
+
 eval_quick_baldro_vit_cifar10_forget0_smoke:
   model_suites:
     - base_vit_cifar10
@@ -1068,6 +1114,63 @@ probe_feature_leakage_vit_cifar10_forget0:
   forget_class: 0
   seeds: [42, 123, 456]
 
+# Feature-probe leakage for ALL unlearning methods (comprehensive)
+probe_feature_leakage_all_methods_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_kl_vit_cifar10_forget0
+    - unlearn_salun_vit_cifar10_forget0
+    - unlearn_scrub_distill_vit_cifar10_forget0
+    - unlearn_sga_vit_cifar10_forget0_smoke
+    - oracle_vit_cifar10_forget0
+  forget_class: 0
+  seeds: [42, 123, 456]
+
+# Feature-probe leakage for 2025-2026 methods (breaking newer methods)
+probe_feature_leakage_2026_methods_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_baldro_vit_cifar10_forget0_smoke
+    - unlearn_falw_vit_cifar10_forget0_smoke
+    - unlearn_rurk_vit_cifar10_forget0_smoke
+    - unlearn_orthoreg_vit_cifar10_forget0_smoke
+    - oracle_vit_cifar10_forget0
+  forget_class: 0
+  seeds: [42, 123, 456]
+
+# Feature-probe for DEFENDED 2026 methods (verify defense works)
+probe_defended_methods_vit_cifar10_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - unlearn_baldro_defended_vit_cifar10_forget0
+    - unlearn_falw_defended_vit_cifar10_forget0
+    - oracle_vit_cifar10_forget0
+  forget_class: 0
+  seeds: [42]
+
+# Suite config for defended BalDRO
+unlearn_baldro_defended_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: baldro
+    forget_class: 0
+    lora_rank: 8
+  seeds: [42]
+
+# Suite config for defended FaLW
+unlearn_falw_defended_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: falw
+    forget_class: 0
+    lora_rank: 8
+  seeds: [42]
+
+
+
+
 # Novel experiments: adversarial unlearning & resurrection attacks
 
 # Unlearning on adversarially robust base model
@@ -1109,6 +1212,18 @@ vpt_resurrect_kl_forget0:
 # VPT resurrection attack on SCRUB
 vpt_resurrect_scrub_forget0:
   unlearned_model_suite: unlearn_scrub_distill_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 50
+    lr: 1e-2
+    target_class: 0
+  seeds: [42, 123, 456]
+
+# VPT resurrection attack on Oracle (baseline)
+vpt_resurrect_oracle_forget0:
+  oracle_model_suite: oracle_vit_cifar10_forget0
   vpt_attack:
     prompt_type: prefix
     prompt_length: 10
@@ -1734,3 +1849,216 @@ eval_backdoor_resurrection:
       - backdoor_asr  # Attack success rate
       - resurrection_asr  # Resurrected backdoor success
   seeds: [42, 123, 456]
+
+# 10-shot VPT for SCRUB
+vpt_resurrect_scrub_forget0_10shot:
+  unlearned_model_suite: unlearn_scrub_distill_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+    k_shot: 10
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+# 10-shot VPT for Oracle
+vpt_resurrect_oracle_forget0_10shot:
+  oracle_model_suite: oracle_vit_cifar10_forget0
+  vpt_attack:
+    prompt_type: prefix
+    prompt_length: 10
+    init_strategy: random
+    epochs: 100
+    lr: 1e-2
+    target_class: 0
+    k_shot: 10
+    lambda_retain: 1.0
+    T: 1.0
+    eval_every: 10
+  seeds: [42, 123, 456]
+
+unlearn_baldro_scrub_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  dataset: cifar10
+  model: vit_tiny_patch16_224
+  unlearning:
+    method: lora
+    objective: baldro_scrub
+    epochs: 10
+    lr: 1e-4
+    batch_size: 128
+    forget_class: 0
+    # BalDRO params
+    retain_weight: 0.1
+    target_weight: 1.0
+    retain_ce_weight: 1.0
+    temperature: 2.0
+  seeds: [42]
+
+probe_baldro_scrub_forget0:
+  model_suites:
+    - unlearn_baldro_scrub_vit_cifar10_forget0
+  forget_class: 0
+
+unlearn_baldro_scrub_vit_cifar10_forget0_strong:
+  base_model_suite: base_vit_cifar10
+  dataset: cifar10
+  model: vit_tiny_patch16_224
+  unlearning:
+    method: lora
+    objective: baldro_scrub
+    epochs: 10
+    lr: 1e-3
+    batch_size: 128
+    forget_class: 0
+    lora_rank: 64
+    # BalDRO params
+    retain_weight: 1.0
+    target_weight: 5.0
+    beta: 1.0
+    top_fraction: 1.0
+    # SCRUB params
+    distill_weight: 1.0
+    forget_weight: 10.0
+    retain_ce_weight: 1.0
+    temperature: 2.0
+  seeds: [42]
+
+probe_baldro_scrub_forget0_strong:
+  model_suites:
+    - unlearn_baldro_scrub_vit_cifar10_forget0_strong
+  forget_class: 0
+
+probe_falw_smoke:
+  model_suites:
+    - unlearn_falw_vit_cifar10_forget0_smoke
+  forget_class: 0
+
+visualize_all_methods_forget0:
+  model_suites:
+    - base_vit_cifar10
+    - oracle_vit_cifar10_forget0
+    - unlearn_scrub_distill_vit_cifar10_forget0
+    - unlearn_baldro_scrub_vit_cifar10_forget0_strong
+    - unlearn_falw_vit_cifar10_forget0_smoke
+    - unlearn_rurk_vit_cifar10_forget0_smoke
+    - unlearn_orthoreg_vit_cifar10_forget0_smoke
+    - unlearn_baldro_scrub_ortho_vit_cifar10_forget0
+  forget_class: 0
+
+# BalDRO-SCRUB-Ortho Experiment
+train_baldro_scrub_ortho_forget0:
+  - command: python scripts/train_baldro_scrub_ortho.py --ortho-weight 10.0 --forget-class 0 --seed 42 --epochs 10
+    output_dir: checkpoints/unlearn_lora/unlearn_baldro_scrub_ortho_vit_cifar10_forget0_seed_42
+
+unlearn_baldro_scrub_ortho_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  dataset: cifar10
+  model: vit_tiny_patch16_224
+  unlearning:
+    method: lora
+    objective: baldro_scrub_ortho
+    epochs: 10
+    ortho_weight: 10.0
+    forget_class: 0
+  seeds: [42]
+  
+probe_baldro_scrub_ortho_forget0:
+  model_suites:
+    - unlearn_baldro_scrub_ortho_vit_cifar10_forget0
+  forget_class: 0
+
+# Grid Search Ortho Experiments
+unlearn_baldro_scrub_ortho_baseline:
+  base_model_suite: base_vit_cifar10
+  dataset: cifar10
+  model: vit_tiny_patch16_224
+  path: checkpoints/unlearn_lora/unlearn_baldro_scrub_ortho_vit_cifar10_forget0_seed_42_baseline
+  seeds: [42]
+
+unlearn_baldro_scrub_ortho_r8:
+  base_model_suite: base_vit_cifar10
+  dataset: cifar10
+  model: vit_tiny_patch16_224
+  path: checkpoints/unlearn_lora/unlearn_baldro_scrub_ortho_vit_cifar10_forget0_seed_42_r8
+  seeds: [42]
+
+unlearn_baldro_scrub_ortho_r64:
+  base_model_suite: base_vit_cifar10
+  dataset: cifar10
+  model: vit_tiny_patch16_224
+  path: checkpoints/unlearn_lora/unlearn_baldro_scrub_ortho_vit_cifar10_forget0_seed_42_r64
+  seeds: [42]
+
+unlearn_baldro_scrub_ortho_full_ft:
+  base_model_suite: base_vit_cifar10
+  unlearning_method: baldro_scrub_ortho
+  path: checkpoints/unlearn_lora/unlearn_baldro_scrub_ortho_vit_cifar10_forget0_seed_42_full/model.pt
+
+unlearn_baldro_scrub_ortho_pure_manifold:
+  base_model_suite: base_vit_cifar10
+  unlearning_method: baldro_scrub_ortho
+  path: checkpoints/unlearn_lora/unlearn_baldro_scrub_ortho_vit_cifar10_forget0_seed_42_pure_manifold_full/model.pt
+
+unlearn_baldro_scrub_ortho_full:
+  base_model_suite: base_vit_cifar10
+  dataset: cifar10
+  model: vit_tiny_patch16_224
+  path: checkpoints/unlearn_lora/unlearn_baldro_scrub_ortho_vit_cifar10_forget0_seed_42_full
+  seeds: [42]
+
+grid_search_ortho_forget0:
+  model_suites:
+    - unlearn_baldro_scrub_ortho_baseline
+    - unlearn_baldro_scrub_ortho_r8
+    - unlearn_baldro_scrub_ortho_r64
+    - unlearn_baldro_scrub_ortho_full_ft
+  forget_class: 0
+
+probe_pure_manifold:
+  forget_class: 0
+  model_suites:
+     - unlearn_baldro_scrub_ortho_pure_manifold
+
+grid_search_vis:
+  dataset: cifar10
+  forget_class: 0
+  model_suites:
+    - unlearn_baldro_scrub_ortho_baseline
+    - unlearn_baldro_scrub_ortho_full_ft
+    - unlearn_baldro_scrub_ortho_pure_manifold
+    - unlearn_baldro_scrub_ortho_imposter
+
+unlearn_baldro_scrub_ortho_imposter:
+  dataset: cifar10
+  base_model_suite: base_vit_cifar10
+  path: checkpoints/unlearn_lora/unlearn_baldro_scrub_ortho_vit_cifar10_forget0_seed_42_full_imposter/model.pt
+  unlearning:
+    method: baldro_scrub_ortho
+  training:
+    epochs: 5
+    lr: 1e-4
+    seed: 42
+    args:
+       - --ortho-weight
+       - 200.0
+       - --full-ft
+       - --imposter-mode
+       - --target-weight
+       - 0.0
+       - --forget-weight
+       - 0.0
+       - --distill-weight
+       - 0.0
+       - --retain-ce-weight
+       - 1.0
+
+probe_imposter:
+  model_suites:
+    - unlearn_baldro_scrub_ortho_imposter
+  forget_class: 0

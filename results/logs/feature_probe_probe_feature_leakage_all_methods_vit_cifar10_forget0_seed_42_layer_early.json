@@ -1,0 +1,78 @@
+{
+  "suite": "probe_feature_leakage_all_methods_vit_cifar10_forget0",
+  "seed": 42,
+  "dataset": "cifar10",
+  "model": "vit_tiny",
+  "forget_class": 0,
+  "run_info": {
+    "started_utc": "2026-02-07T03:30:00.932006Z",
+    "argv": [
+      "scripts/9_feature_probe_leakage.py",
+      "--config",
+      "configs/experiment_suites.yaml",
+      "--suite",
+      "probe_feature_leakage_all_methods_vit_cifar10_forget0",
+      "--seed",
+      "42",
+      "--probe-layer",
+      "early"
+    ],
+    "probe_layer": "early"
+  },
+  "models": {
+    "base_vit_cifar10": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9185000658035278,
+      "val_acc": 0.9205000400543213,
+      "val_auc": 0.8987388888888889,
+      "n_train": 8000,
+      "n_val": 2000
+    },
+    "unlearn_kl_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9328750371932983,
+      "val_acc": 0.9320000410079956,
+      "val_auc": 0.9331,
+      "n_train": 8000,
+      "n_val": 2000
+    },
+    "unlearn_salun_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.920875072479248,
+      "val_acc": 0.9230000376701355,
+      "val_auc": 0.9020611111111111,
+      "n_train": 8000,
+      "n_val": 2000
+    },
+    "unlearn_scrub_distill_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.908750057220459,
+      "val_acc": 0.9160000681877136,
+      "val_auc": 0.897875,
+      "n_train": 8000,
+      "n_val": 2000
+    },
+    "unlearn_sga_vit_cifar10_forget0_smoke": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9207500219345093,
+      "val_acc": 0.9250000715255737,
+      "val_auc": 0.9093694444444445,
+      "n_train": 8000,
+      "n_val": 2000
+    },
+    "oracle_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9275000691413879,
+      "val_acc": 0.921000063419342,
+      "val_auc": 0.9193583333333334,
+      "n_train": 8000,
+      "n_val": 2000
+    }
+  }
+}

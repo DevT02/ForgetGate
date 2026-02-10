@@ -1,0 +1,72 @@
+{
+  "suite": "probe_feature_leakage_all_methods_vit_cifar10_forget0",
+  "seed": 123,
+  "probe_type": "mlp",
+  "hidden_dim": 256,
+  "forget_class": 0,
+  "run_info": {
+    "started_utc": "2026-02-07T03:42:27.906082Z"
+  },
+  "models": {
+    "base_vit_cifar10": {
+      "n_samples": 10000,
+      "train_acc": 0.9920000433921814,
+      "val_acc": 0.9925000667572021,
+      "val_auc": 0.9989558476953435,
+      "n_train": 8000,
+      "n_val": 2000,
+      "probe_type": "mlp",
+      "hidden_dim": 256
+    },
+    "unlearn_kl_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "train_acc": 0.920875072479248,
+      "val_acc": 0.9285000562667847,
+      "val_auc": 0.9984072252979816,
+      "n_train": 8000,
+      "n_val": 2000,
+      "probe_type": "mlp",
+      "hidden_dim": 256
+    },
+    "unlearn_salun_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "train_acc": 0.9195000529289246,
+      "val_acc": 0.9255000352859497,
+      "val_auc": 0.9914491595163865,
+      "n_train": 8000,
+      "n_val": 2000,
+      "probe_type": "mlp",
+      "hidden_dim": 256
+    },
+    "unlearn_scrub_distill_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "train_acc": 0.952125072479248,
+      "val_acc": 0.9480000734329224,
+      "val_auc": 0.971742996953081,
+      "n_train": 8000,
+      "n_val": 2000,
+      "probe_type": "mlp",
+      "hidden_dim": 256
+    },
+    "unlearn_sga_vit_cifar10_forget0_smoke": {
+      "n_samples": 10000,
+      "train_acc": 0.9505000710487366,
+      "val_acc": 0.9430000185966492,
+      "val_auc": 0.9710763912444584,
+      "n_train": 8000,
+      "n_val": 2000,
+      "probe_type": "mlp",
+      "hidden_dim": 256
+    },
+    "oracle_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "train_acc": 0.9701250195503235,
+      "val_acc": 0.9590000510215759,
+      "val_auc": 0.9838451351056393,
+      "n_train": 8000,
+      "n_val": 2000,
+      "probe_type": "mlp",
+      "hidden_dim": 256
+    }
+  }
+}

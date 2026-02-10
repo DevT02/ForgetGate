@@ -20,21 +20,21 @@
   },
   "unlearn_falw_vit_cifar10_forget0_smoke": {
     "clean": {
-      "overall_acc": 0.8462,
+      "overall_acc": 0.8488,
       "forget_acc": 0.0,
-      "retain_acc": 0.9402222222222222,
+      "retain_acc": 0.9431111111111111,
       "forget_samples": 1000,
       "retain_samples": 9000,
       "total_samples": 10000,
       "attack_type": "clean",
-      "mean_confidence": 0.9654778242111206,
-      "correct_confidence": 0.9880262017250061,
-      "incorrect_confidence": 0.8414179086685181,
-      "forget_confidence": 0.8573257923126221,
+      "mean_confidence": 0.9600245356559753,
+      "correct_confidence": 0.984010636806488,
+      "incorrect_confidence": 0.825373113155365,
+      "forget_confidence": 0.8429456353187561,
       "forget_correct_confidence": 0.0,
-      "mean_entropy": 0.08937326818704605,
-      "max_entropy": 1.6624277830123901,
-      "min_entropy": 2.4316321525774676e-12
+      "mean_entropy": 0.10809078067541122,
+      "max_entropy": 1.8175698518753052,
+      "min_entropy": 2.2077858204822e-12
     }
   }
 }

@@ -33,9 +33,9 @@
   "revision": null,
   "target_modules": [
     "attn.qkv",
+    "attn.proj",
     "mlp.fc2",
-    "mlp.fc1",
-    "attn.proj"
+    "mlp.fc1"
   ],
   "target_parameters": null,
   "task_type": null,

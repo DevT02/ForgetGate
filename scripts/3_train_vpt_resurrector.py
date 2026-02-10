@@ -16,7 +16,7 @@ from torch.utils.data import ConcatDataset, DataLoader, Dataset, Subset
 from typing import Dict
 import yaml
 
-from src.data import DataManager
+from src.data import DataManager, create_forget_retain_splits
 from src.models.vit import create_vit_model, add_vpt_to_model
 from src.models.cnn import create_cnn_model, add_vpt_to_cnn_model
 from src.models.peft_lora import load_lora_adapter

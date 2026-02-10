@@ -17,6 +17,7 @@ objectives:
     loss_type: "ce_smooth_ascent"
     smoothing_rate: 0.5
     num_normal_samples: 1
+    normal_source: "retain"  # or "external" via normal_data in suite
     target_class_weight: 1.0
     retain_class_weight: 0.1
 
@@ -34,7 +35,6 @@ objectives:
     name: "falw"
     loss_type: "class_balance"
     tau: 1.0
-    eta: 1.0
     target_class_weight: 1.0
     retain_class_weight: 0.1
 
@@ -42,7 +42,11 @@ objectives:
   rurk:
     name: "rurk"
     loss_type: "robust_forget"
-    noise_std: 0.01
+    adv_eps: 0.031372549  # 8/255
+    adv_alpha: 0.007843137  # 2/255
+    adv_steps: 3
+    adv_samples: 1
+    adv_lambda: 1.0
     target_class_weight: 1.0
     retain_class_weight: 0.1
 
@@ -80,8 +84,12 @@ objectives:
   scrub:
     name: "scrub"
     loss_type: "distillation_forget"
-    distill_weight: 1.0  # Weight for retain distillation loss
-    forget_weight: 1.0   # Weight for forget maximization loss
+    distill_weight: 1.0  # alpha: retain KL weight
+    retain_ce_weight: 1.0  # gamma: retain CE weight
+    forget_weight: 1.0   # beta: forget KL weight
+    extra_retain_steps: 0  # batch-level extra retain steps (unused in full schedule)
+    scrub_full_schedule: true  # run epoch-level max/min schedule
+    scrub_max_steps: null  # defaults to max_epochs
     temperature: 2.0     # Temperature for distillation
     forget_mode: "ce_ascent"  # or "max_entropy"
 

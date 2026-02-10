@@ -1,0 +1,72 @@
+{
+  "suite": "probe_feature_leakage_2026_methods_vit_cifar10_forget0",
+  "seed": 42,
+  "probe_type": "mlp",
+  "hidden_dim": 256,
+  "forget_class": 0,
+  "run_info": {
+    "started_utc": "2026-02-07T03:49:07.470378Z"
+  },
+  "models": {
+    "base_vit_cifar10": {
+      "n_samples": 10000,
+      "train_acc": 0.9927500486373901,
+      "val_acc": 0.9935000538825989,
+      "val_auc": 0.9991972222222222,
+      "n_train": 8000,
+      "n_val": 2000,
+      "probe_type": "mlp",
+      "hidden_dim": 256
+    },
+    "unlearn_baldro_vit_cifar10_forget0_smoke": {
+      "n_samples": 10000,
+      "train_acc": 0.9412500262260437,
+      "val_acc": 0.936500072479248,
+      "val_auc": 0.9452666666666667,
+      "n_train": 8000,
+      "n_val": 2000,
+      "probe_type": "mlp",
+      "hidden_dim": 256
+    },
+    "unlearn_falw_vit_cifar10_forget0_smoke": {
+      "n_samples": 10000,
+      "train_acc": 0.9452500343322754,
+      "val_acc": 0.9435000419616699,
+      "val_auc": 0.976925,
+      "n_train": 8000,
+      "n_val": 2000,
+      "probe_type": "mlp",
+      "hidden_dim": 256
+    },
+    "unlearn_rurk_vit_cifar10_forget0_smoke": {
+      "n_samples": 10000,
+      "train_acc": 0.9392500519752502,
+      "val_acc": 0.936500072479248,
+      "val_auc": 0.9547416666666667,
+      "n_train": 8000,
+      "n_val": 2000,
+      "probe_type": "mlp",
+      "hidden_dim": 256
+    },
+    "unlearn_orthoreg_vit_cifar10_forget0_smoke": {
+      "n_samples": 10000,
+      "train_acc": 0.9465000629425049,
+      "val_acc": 0.9460000395774841,
+      "val_auc": 0.9636583333333333,
+      "n_train": 8000,
+      "n_val": 2000,
+      "probe_type": "mlp",
+      "hidden_dim": 256
+    },
+    "oracle_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "train_acc": 0.9588750600814819,
+      "val_acc": 0.9550000429153442,
+      "val_auc": 0.973325,
+      "n_train": 8000,
+      "n_val": 2000,
+      "probe_type": "mlp",
+      "hidden_dim": 256
+    }
+  }
+}

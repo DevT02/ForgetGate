@@ -1,0 +1,29 @@
+{
+  "suite": "probe_pure_manifold",
+  "seed": 42,
+  "dataset": "cifar10",
+  "model": "vit_tiny",
+  "forget_class": 0,
+  "run_info": {
+    "started_utc": "2026-02-10T00:15:28.569523Z",
+    "argv": [
+      "scripts/9_feature_probe_leakage.py",
+      "--config",
+      "configs/experiment_suites.yaml",
+      "--suite",
+      "probe_pure_manifold"
+    ],
+    "probe_layer": "final"
+  },
+  "models": {
+    "unlearn_baldro_scrub_ortho_pure_manifold": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9012500643730164,
+      "val_acc": 0.9015000462532043,
+      "val_auc": 0.9552611111111111,
+      "n_train": 8000,
+      "n_val": 2000
+    }
+  }
+}

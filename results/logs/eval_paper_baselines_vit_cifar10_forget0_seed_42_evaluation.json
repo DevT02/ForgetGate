@@ -58,40 +58,40 @@
   },
   "unlearn_salun_vit_cifar10_forget0": {
     "clean": {
-      "overall_acc": 0.9376,
-      "forget_acc": 0.886,
-      "retain_acc": 0.9433333333333334,
+      "overall_acc": 0.8519,
+      "forget_acc": 0.002,
+      "retain_acc": 0.9463333333333334,
       "forget_samples": 1000,
       "retain_samples": 9000,
       "total_samples": 10000,
       "attack_type": "clean",
-      "mean_confidence": 0.9806582927703857,
-      "correct_confidence": 0.9893467426300049,
-      "incorrect_confidence": 0.8501116633415222,
-      "forget_confidence": 0.9611861705780029,
-      "forget_correct_confidence": 0.9785811305046082,
-      "mean_entropy": 0.051007550209760666,
-      "max_entropy": 1.6566143035888672,
-      "min_entropy": 2.1493389208183944e-13
+      "mean_confidence": 0.9308115243911743,
+      "correct_confidence": 0.9845916628837585,
+      "incorrect_confidence": 0.6214579939842224,
+      "forget_confidence": 0.534004271030426,
+      "forget_correct_confidence": 0.3495563864707947,
+      "mean_entropy": 0.19507482647895813,
+      "max_entropy": 2.1630725860595703,
+      "min_entropy": 3.225994124611553e-12
     }
   },
   "unlearn_scrub_distill_vit_cifar10_forget0": {
     "clean": {
-      "overall_acc": 0.9247,
-      "forget_acc": 0.763,
-      "retain_acc": 0.9426666666666667,
+      "overall_acc": 0.8468,
+      "forget_acc": 0.0,
+      "retain_acc": 0.9408888888888889,
       "forget_samples": 1000,
       "retain_samples": 9000,
       "total_samples": 10000,
       "attack_type": "clean",
-      "mean_confidence": 0.9812576174736023,
-      "correct_confidence": 0.9901663661003113,
-      "incorrect_confidence": 0.8718560934066772,
-      "forget_confidence": 0.950922966003418,
-      "forget_correct_confidence": 0.9764989614486694,
-      "mean_entropy": 0.04671956226229668,
-      "max_entropy": 1.678459882736206,
-      "min_entropy": 8.556184732076699e-14
+      "mean_confidence": 0.9658715724945068,
+      "correct_confidence": 0.9861111044883728,
+      "incorrect_confidence": 0.8539994955062866,
+      "forget_confidence": 0.8702895641326904,
+      "forget_correct_confidence": 0.0,
+      "mean_entropy": 0.08929455280303955,
+      "max_entropy": 1.7170567512512207,
+      "min_entropy": 6.475768272312665e-13
     }
   },
   "unlearn_noisy_retain_vit_cifar10_forget0": {

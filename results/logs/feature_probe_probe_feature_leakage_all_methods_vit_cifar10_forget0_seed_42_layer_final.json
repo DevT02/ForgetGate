@@ -1,0 +1,78 @@
+{
+  "suite": "probe_feature_leakage_all_methods_vit_cifar10_forget0",
+  "seed": 42,
+  "dataset": "cifar10",
+  "model": "vit_tiny",
+  "forget_class": 0,
+  "run_info": {
+    "started_utc": "2026-02-09T02:56:44.506333Z",
+    "argv": [
+      "scripts/9_feature_probe_leakage.py",
+      "--config",
+      "configs/experiment_suites.yaml",
+      "--suite",
+      "probe_feature_leakage_all_methods_vit_cifar10_forget0",
+      "--seed",
+      "42",
+      "--probe-layer",
+      "final"
+    ],
+    "probe_layer": "final"
+  },
+  "models": {
+    "base_vit_cifar10": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9882500171661377,
+      "val_acc": 0.9910000562667847,
+      "val_auc": 0.9971138888888889,
+      "n_train": 8000,
+      "n_val": 2000
+    },
+    "unlearn_kl_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9805000424385071,
+      "val_acc": 0.984000027179718,
+      "val_auc": 0.9964444444444445,
+      "n_train": 8000,
+      "n_val": 2000
+    },
+    "unlearn_salun_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9793750643730164,
+      "val_acc": 0.984000027179718,
+      "val_auc": 0.9964916666666667,
+      "n_train": 8000,
+      "n_val": 2000
+    },
+    "unlearn_scrub_distill_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9421250224113464,
+      "val_acc": 0.9440000653266907,
+      "val_auc": 0.958475,
+      "n_train": 8000,
+      "n_val": 2000
+    },
+    "unlearn_sga_vit_cifar10_forget0_smoke": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.9758750200271606,
+      "val_acc": 0.9730000495910645,
+      "val_auc": 0.9820583333333334,
+      "n_train": 8000,
+      "n_val": 2000
+    },
+    "oracle_vit_cifar10_forget0": {
+      "n_samples": 10000,
+      "feature_dim": 192,
+      "train_acc": 0.936625063419342,
+      "val_acc": 0.9375000596046448,
+      "val_auc": 0.9474972222222222,
+      "n_train": 8000,
+      "n_val": 2000
+    }
+  }
+}
