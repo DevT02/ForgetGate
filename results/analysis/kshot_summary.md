@@ -15,16 +15,19 @@ Seeds: 42, 123, 456
 
 | K-shot | Oracle | KL | Missing (Oracle/KL) |
 |---|---|---|---|
-| 1 | 0.00% +/- 0.00% | 34.17% +/- 47.64% | []/[] |
-| 5 | 0.00% +/- 0.00% | 35.47% +/- 48.92% | []/[] |
+| 1 | 0.00% +/- 0.00% | 4.27% +/- 7.04% | []/[] |
+| 5 | 0.00% +/- 0.00% | 4.53% +/- 7.68% | []/[] |
+
+Source note: prompt-length-5 low-shot controls prefer `*_10shot_prompt5_kshot{k}` logs and
+fall back to legacy `*_{k}shot_prompt5` logs when the newer filenames are incomplete.
 
 ### Low-shot controls (prompt length 5) per-seed
 
 | Seed | Oracle k=1 | KL k=1 | Oracle k=5 | KL k=5 |
 |---|---|---|---|---|
-| 42 | 0.00% | 13.80% | 0.00% | 15.00% |
+| 42 | 0.00% | 12.40% | 0.00% | 13.40% |
 | 123 | 0.00% | 0.10% | 0.00% | 0.10% |
-| 456 | 0.00% | 88.60% | 0.00% | 91.30% |
+| 456 | 0.00% | 0.30% | 0.00% | 0.10% |
 
 ## Label controls (prompt length 5, k=10)
 

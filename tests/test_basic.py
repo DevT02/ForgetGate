@@ -7,8 +7,8 @@ import torch
 import sys
 import os
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+# Add repo root to path so `import src...` works under both pytest and direct execution.
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 
 def test_imports():

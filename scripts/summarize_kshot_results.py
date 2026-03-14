@@ -2,7 +2,6 @@
 import argparse
 import json
 import os
-from collections import defaultdict
 
 
 def read_jsonl(path):
@@ -55,6 +54,30 @@ def load_runs(log_dir):
     return runs
 
 
+def select_suite_variant(runs, seeds, candidates):
+    """Pick the most complete suite variant from a list of candidate names."""
+    best_suite = None
+    best_vals = []
+    best_missing = list(seeds)
+
+    for suite in candidates:
+        vals = []
+        missing = []
+        for seed in seeds:
+            key = (suite, seed)
+            if key not in runs:
+                missing.append(seed)
+            else:
+                vals.append(runs[key])
+
+        if best_suite is None or len(missing) < len(best_missing):
+            best_suite = suite
+            best_vals = vals
+            best_missing = missing
+
+    return best_suite, best_vals, best_missing
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--seeds", nargs="+", type=int, required=True)
@@ -105,24 +128,44 @@ def main():
     lines.append("\n## Low-shot controls (prompt length 5)\n")
     lines.append("| K-shot | Oracle | KL | Missing (Oracle/KL) |")
     lines.append("|---|---|---|---|")
+    lowshot_sources = {}
     for k in kshots_controls:
-        oracle_vals, oracle_missing = collect(f"vpt_oracle_vit_cifar10_forget0_10shot_prompt5_kshot{k}")
-        kl_vals, kl_missing = collect(f"vpt_resurrect_kl_forget0_10shot_prompt5_kshot{k}")
+        oracle_suite, oracle_vals, oracle_missing = select_suite_variant(
+            runs,
+            seeds,
+            [
+                f"vpt_oracle_vit_cifar10_forget0_10shot_prompt5_kshot{k}",
+                f"vpt_oracle_vit_cifar10_forget0_{k}shot_prompt5",
+            ],
+        )
+        kl_suite, kl_vals, kl_missing = select_suite_variant(
+            runs,
+            seeds,
+            [
+                f"vpt_resurrect_kl_forget0_10shot_prompt5_kshot{k}",
+                f"vpt_resurrect_kl_forget0_{k}shot_prompt5",
+            ],
+        )
         o_mean, o_std = mean_std(oracle_vals)
         k_mean, k_std = mean_std(kl_vals)
         missing = f"{oracle_missing}/{kl_missing}"
+        lowshot_sources[k] = {"oracle": oracle_suite, "kl": kl_suite}
         lines.append(
             f"| {k} | {fmt_pct(o_mean)} +/- {fmt_pct(o_std)} | {fmt_pct(k_mean)} +/- {fmt_pct(k_std)} | {missing} |"
         )
+
+    lines.append("")
+    lines.append("Source note: prompt-length-5 low-shot controls prefer `*_10shot_prompt5_kshot{k}` logs and")
+    lines.append("fall back to legacy `*_{k}shot_prompt5` logs when the newer filenames are incomplete.")
 
     lines.append("\n### Low-shot controls (prompt length 5) per-seed\n")
     lines.append("| Seed | Oracle k=1 | KL k=1 | Oracle k=5 | KL k=5 |")
     lines.append("|---|---|---|---|---|")
     for seed in seeds:
-        o1 = get_val("vpt_oracle_vit_cifar10_forget0_10shot_prompt5_kshot1", seed)
-        k1 = get_val("vpt_resurrect_kl_forget0_10shot_prompt5_kshot1", seed)
-        o5 = get_val("vpt_oracle_vit_cifar10_forget0_10shot_prompt5_kshot5", seed)
-        k5 = get_val("vpt_resurrect_kl_forget0_10shot_prompt5_kshot5", seed)
+        o1 = get_val(lowshot_sources[1]["oracle"], seed)
+        k1 = get_val(lowshot_sources[1]["kl"], seed)
+        o5 = get_val(lowshot_sources[5]["oracle"], seed)
+        k5 = get_val(lowshot_sources[5]["kl"], seed)
         lines.append(
             f"| {seed} | {fmt_pct(o1)} | {fmt_pct(k1)} | {fmt_pct(o5)} | {fmt_pct(k5)} |"
         )

@@ -14,9 +14,15 @@ PATTERNS = {
     },
     "lowshot_controls": {
         "kshots": [1,5],
-        "templates": [
-            "vpt_oracle_vit_cifar10_forget0_10shot_prompt5_kshot{k}_seed_{seed}.jsonl",
-            "vpt_resurrect_kl_forget0_10shot_prompt5_kshot{k}_seed_{seed}.jsonl",
+        "alternatives": [
+            [
+                "vpt_oracle_vit_cifar10_forget0_10shot_prompt5_kshot{k}_seed_{seed}.jsonl",
+                "vpt_oracle_vit_cifar10_forget0_{k}shot_prompt5_seed_{seed}.jsonl",
+            ],
+            [
+                "vpt_resurrect_kl_forget0_10shot_prompt5_kshot{k}_seed_{seed}.jsonl",
+                "vpt_resurrect_kl_forget0_{k}shot_prompt5_seed_{seed}.jsonl",
+            ],
         ],
     },
     "prompt_length_ablation": {
@@ -88,10 +94,10 @@ def find_missing(results_dir, seeds, profile, prompt_seeds=None):
     elif profile == "lowshot_controls":
         for seed in seeds:
             for k in PATTERNS[profile]["kshots"]:
-                for tpl in PATTERNS[profile]["templates"]:
-                    rel = tpl.format(seed=seed, k=k)
-                    if not exists(rel):
-                        missing.append(rel)
+                for alternatives in PATTERNS[profile]["alternatives"]:
+                    rels = [tpl.format(seed=seed, k=k) for tpl in alternatives]
+                    if not any(exists(rel) for rel in rels):
+                        missing.append(" OR ".join(rels))
 
     elif profile == "prompt_length_ablation":
         for seed in (prompt_seeds or seeds):

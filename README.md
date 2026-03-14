@@ -20,7 +20,7 @@ Two attacker data regimes are considered:
 
 - **Full-data** (attacker has the full forget-class training set): VPT reaches about 100% recovery on both the unlearned model and the oracle baseline, so the attack is effectively relearning.
 - **K-shot, default prompt length (10 tokens)**: recovery stays low at k=10-100 (KL 0.43-1.90%; oracle 0.00%). Mean gap across k=10/25/50/100 is +0.81pp (seeds 42/123/456).
-- **Controls (prompt length 5)**: low-shot + label controls expose residual access and variance. Seeds 42/123/456: k=1: 34.17%, k=5: 35.47%, shuffled-label (k=10): 3.90%, random-label (k=10): 4.03% (oracle stays 0.00%). Prompt-length ablation (seeds 42/123, k=10): KL 1/2/5 tokens = 7.05/7.35/7.80% (oracle 0.00%). Class-wise 10-shot gaps are mostly small (0.70-1.13%), with class 9 higher at 6.77%.
+- **Controls (prompt length 5)**: low-shot + label controls expose residual access and variance. In the tracked artifact bundle, seeds 42/123/456 give k=1: 4.27%, k=5: 4.53%, shuffled-label (k=10): 3.90%, random-label (k=10): 4.03% (oracle stays 0.00%). Prompt-length ablation (seeds 42/123, k=10): KL 1/2/5 tokens = 7.05/7.35/7.80% (oracle 0.00%). Class-wise 10-shot gaps are mostly small (0.70-1.13%), with class 9 higher at 6.77%.
 
 **Takeaway:** "0% forget accuracy" alone doesn't say much about security. Oracle-normalized evaluation helps separate *relearning capacity* from *residual knowledge access*, and the gap is sensitive to prompt length and low-shot/label controls.
 
@@ -299,7 +299,7 @@ python scripts/4_adv_evaluate.py --config configs/experiment_suites.yaml --suite
 ### Results at a glance
 
 - Oracle-normalized k-shot recovery is small for k=10/25/50/100 (KL 0.43-1.90%, oracle 0.00%).
-- Low-shot controls (prompt length 5) show large recovery and high variance, so they are treated as stress tests.
+- Low-shot controls (prompt length 5) remain above oracle and show seed variance in the tracked legacy logs (k=1: 4.27%, k=5: 4.53%).
 - Class-wise gaps are mostly small, with class 9 higher than the rest.
 
 ### Clean unlearning baselines (test set)
@@ -392,8 +392,8 @@ Average Oracle-to-VPT gap across k=10/25/50/100 (default prompt length) is +0.81
 *Seeds: 42, 123, 456. Variance is large because seed 456 recovers strongly while seed 123 is near zero.*
 
 **Low-shot + label controls (prompt length 5):**
-- Seeds 42/123/456 mean: k=1: 34.17%, k=5: 35.47%, shuffled-label (k=10): 3.90%, random-label (k=10): 4.03% (oracle 0.00%).
-- These have high variance across seeds; see `results/analysis/kshot_summary.md` for per-seed values.
+- Seeds 42/123/456 mean from the tracked legacy prompt-5 logs: k=1: 4.27%, k=5: 4.53%, shuffled-label (k=10): 3.90%, random-label (k=10): 4.03% (oracle 0.00%).
+- These still show seed variance; see `results/analysis/kshot_summary.md` for the per-seed breakdown and the filename source note.
 
 **Stratified forget set (pilot, seed 42):**
 - High-confidence subset: 12.70% (KL, k=10)
@@ -541,6 +541,7 @@ LoRA-based unlearning creates a surface-level illusion of forgetting: outputs ch
 - Clean baselines come from test-set eval: `eval_paper_baselines_vit_cifar10_forget0`.
 - Reported standard deviations use sample std across seeds (ddof=1).
 - Low-shot controls (k=1/5) use prompt length 5; k=10+ uses default prompt length 10.
+- In the tracked artifact bundle, prompt-length-5 low-shot controls are sourced from legacy filenames `vpt_*_{1,5}shot_prompt5_seed_*`; the newer `vpt_*_10shot_prompt5_kshot*` names are treated as aliases when present.
 - Prompt-length ablation (1/2/5 tokens) aggregates seeds 42/123.
 - Legacy default-prompt k=1/5 logs are archived in `results/logs/legacy_prompt10` to avoid confusion with the prompt-length-5 controls.
 - Full-data recovery values are from VPT training logs; test-set VPT/PGD numbers require `eval_full_vit_cifar10_forget0`.
