@@ -78,6 +78,28 @@ def select_suite_variant(runs, seeds, candidates):
     return best_suite, best_vals, best_missing
 
 
+def collect_suite_union(runs, seeds, candidates):
+    """Collect values by taking the first available candidate for each seed."""
+    vals = []
+    missing = []
+    chosen = {}
+    for seed in seeds:
+        selected_suite = None
+        selected_value = None
+        for suite in candidates:
+            key = (suite, seed)
+            if key in runs:
+                selected_suite = suite
+                selected_value = runs[key]
+                break
+        if selected_suite is None:
+            missing.append(seed)
+        else:
+            vals.append(selected_value)
+            chosen[seed] = selected_suite
+    return vals, missing, chosen
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--seeds", nargs="+", type=int, required=True)
@@ -122,6 +144,46 @@ def main():
         missing = f"{oracle_missing}/{kl_missing}"
         lines.append(
             f"| {k} | {fmt_pct(o_mean)} +/- {fmt_pct(o_std)} | {fmt_pct(k_mean)} +/- {fmt_pct(k_std)} | {missing} |"
+        )
+
+    # SCRUB follow-up (default prompt length)
+    lines.append("\n## SCRUB follow-up (default prompt length)\n")
+    lines.append("| K-shot | Oracle | SCRUB | Missing (Oracle/SCRUB) |")
+    lines.append("|---|---|---|---|")
+    scrub_sources = {}
+    for k in kshots_default:
+        oracle_vals, oracle_missing = collect(f"vpt_oracle_vit_cifar10_forget0_{k}shot")
+        scrub_vals, scrub_missing, chosen_suites = collect_suite_union(
+            runs,
+            seeds,
+            [
+                f"vpt_resurrect_scrub_forget0_{k}shot",
+                f"vpt_resurrect_scrub_forget0_10shot_kshot{k}",
+            ],
+        )
+        o_mean, o_std = mean_std(oracle_vals)
+        s_mean, s_std = mean_std(scrub_vals)
+        missing = f"{oracle_missing}/{scrub_missing}"
+        scrub_sources[k] = chosen_suites
+        lines.append(
+            f"| {k} | {fmt_pct(o_mean)} +/- {fmt_pct(o_std)} | {fmt_pct(s_mean)} +/- {fmt_pct(s_std)} | {missing} |"
+        )
+
+    lines.append("")
+    lines.append("Coverage note: SCRUB follow-up uses tracked logs for seeds 42/123/456 at k=10/25/50/100.")
+    lines.append("For k=25, seed 42 comes from the canonical `vpt_resurrect_scrub_forget0_25shot` log and")
+    lines.append("seeds 123/456 come from `vpt_resurrect_scrub_forget0_10shot_kshot25` override logs.")
+
+    lines.append("\n### SCRUB follow-up per-seed\n")
+    lines.append("| Seed | SCRUB k=10 | SCRUB k=25 | SCRUB k=50 | SCRUB k=100 |")
+    lines.append("|---|---|---|---|---|")
+    for seed in seeds:
+        s10 = get_val(scrub_sources[10].get(seed), seed)
+        s25 = get_val(scrub_sources[25].get(seed), seed)
+        s50 = get_val(scrub_sources[50].get(seed), seed)
+        s100 = get_val(scrub_sources[100].get(seed), seed)
+        lines.append(
+            f"| {seed} | {fmt_pct(s10)} | {fmt_pct(s25)} | {fmt_pct(s50)} | {fmt_pct(s100)} |"
         )
 
     # Low-shot controls (prompt length 5)

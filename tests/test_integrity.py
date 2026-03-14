@@ -136,10 +136,10 @@ def test_eval_metrics_are_finite_and_in_range():
     eval_suites = _get_eval_suites(cfg)
     errors = []
     for suite, suite_cfg in eval_suites.items():
-            for seed in REQUIRED_EVAL_SUITES[suite]:
-                path = _eval_path(suite, seed)
-                if not path.exists():
-                    continue
+        for seed in REQUIRED_EVAL_SUITES[suite]:
+            path = _eval_path(suite, seed)
+            if not path.exists():
+                continue
             data, models, attacks, _metrics = _parse_eval_file(path, suite_cfg)
             for model in models:
                 if model not in data:

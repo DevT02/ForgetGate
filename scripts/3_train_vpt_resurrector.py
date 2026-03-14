@@ -185,6 +185,12 @@ def main():
         default=None,
         help="Optional fraction of forget data to keep after stratification",
     )
+    parser.add_argument(
+        "--num-workers",
+        type=int,
+        default=None,
+        help="Override DataLoader worker count. Defaults to 0 on Windows to avoid CUDA spawn issues.",
+    )
 
     args = parser.parse_args()
 
@@ -378,9 +384,15 @@ def main():
         print(f"Applied label mode '{label_mode}' to forget train data")
 
     # Explicit loaders (preferred): avoids CPU caching/subsampling inside the attack
-    num_workers = 0 if label_mode != "true" else 4
+    if args.num_workers is not None:
+        num_workers = max(int(args.num_workers), 0)
+    elif os.name == "nt":
+        num_workers = 0
+    else:
+        num_workers = 0 if label_mode != "true" else 4
     persistent_workers = num_workers > 0
     prefetch_factor = 4 if num_workers > 0 else None
+    print(f"DataLoader workers: {num_workers}")
     training_params = vpt_params
     if args.k_shot is not None:
         training_params = dict(training_params)

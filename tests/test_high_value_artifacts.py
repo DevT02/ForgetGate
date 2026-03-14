@@ -22,6 +22,43 @@ def _is_finite(val):
     return isinstance(val, (int, float)) and math.isfinite(val)
 
 
+def _load_last_jsonl(path: Path):
+    lines = path.read_text(encoding="utf-8").strip().splitlines()
+    assert lines, f"{path} is empty"
+    return json.loads(lines[-1])
+
+
+def _mean_resurrection_acc(paths):
+    values = [_load_last_jsonl(path)["resurrection_acc"] for path in paths]
+    return round(sum(values) / len(values) * 100.0, 2)
+
+
+def _scrub_log(k: int, seed: int) -> Path:
+    canonical = LOGS / f"vpt_resurrect_scrub_forget0_{k}shot_seed_{seed}.jsonl"
+    override = LOGS / f"vpt_resurrect_scrub_forget0_10shot_kshot{k}_seed_{seed}.jsonl"
+    if canonical.exists():
+        return canonical
+    assert override.exists(), f"Missing SCRUB k={k} log for seed {seed}: {canonical} or {override}"
+    return override
+
+
+def _select_prompt5_variant(prefix: str, k: int):
+    candidates = [
+        [LOGS / f"{prefix}_10shot_prompt5_kshot{k}_seed_{seed}.jsonl" for seed in SEEDS],
+        [LOGS / f"{prefix}_{k}shot_prompt5_seed_{seed}.jsonl" for seed in SEEDS],
+    ]
+    best_paths = None
+    best_missing = None
+    for paths in candidates:
+        missing = [path for path in paths if not path.exists()]
+        if best_paths is None or len(missing) < len(best_missing):
+            best_paths = paths
+            best_missing = missing
+    assert best_paths is not None
+    assert not best_missing, f"Incomplete prompt-length-5 k={k} bundle: {best_missing}"
+    return best_paths
+
+
 def test_benign_relearn_checkpoints_exist():
     missing = []
     for seed in SEEDS:
@@ -207,3 +244,64 @@ def test_vpt_tradeoff_sweep_summaries():
                             errors.append(f"{path} lambda={lam} {k} mismatch vs log")
     assert not missing, "Missing tradeoff sweep summaries:\n" + "\n".join(missing)
     assert not errors, "Tradeoff sweep schema issues:\n" + "\n".join(errors)
+
+
+def test_headline_kshot_claims_match_tracked_logs():
+    expected_default = {10: 0.47, 25: 0.43, 50: 0.43, 100: 1.90}
+    expected_low_shot = {1: 4.27, 5: 4.53}
+
+    for k, expected in expected_default.items():
+        oracle_paths = [LOGS / f"vpt_oracle_vit_cifar10_forget0_{k}shot_seed_{seed}.jsonl" for seed in SEEDS]
+        kl_paths = [LOGS / f"vpt_resurrect_kl_forget0_{k}shot_seed_{seed}.jsonl" for seed in SEEDS]
+        assert _mean_resurrection_acc(oracle_paths) == 0.00
+        assert _mean_resurrection_acc(kl_paths) == expected
+
+    scrub_expected = {}
+    for k in [10, 25, 50, 100]:
+        scrub_paths = []
+        for seed in SEEDS:
+            try:
+                scrub_paths.append(_scrub_log(k, seed))
+            except AssertionError:
+                pass
+        if scrub_paths:
+            scrub_expected[k] = _mean_resurrection_acc(scrub_paths)
+
+    for k, expected in expected_low_shot.items():
+        oracle_paths = _select_prompt5_variant("vpt_oracle_vit_cifar10_forget0", k)
+        kl_paths = _select_prompt5_variant("vpt_resurrect_kl_forget0", k)
+        assert _mean_resurrection_acc(oracle_paths) == 0.00
+        assert _mean_resurrection_acc(kl_paths) == expected
+
+    summary = (ANALYSIS / "kshot_summary.md").read_text(encoding="utf-8")
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    expected_lines = [
+        "| 10 | 0.00% +/- 0.00% | 0.47% +/- 0.64% |",
+        "| 25 | 0.00% +/- 0.00% | 0.43% +/- 0.40% |",
+        "| 50 | 0.00% +/- 0.00% | 0.43% +/- 0.25% |",
+        "| 100 | 0.00% +/- 0.00% | 1.90% +/- 0.75% |",
+        "| 1 | 0.00% +/- 0.00% | 4.27% +/- 7.04% |",
+        "| 5 | 0.00% +/- 0.00% | 4.53% +/- 7.68% |",
+    ]
+    for k, expected in scrub_expected.items():
+        missing = []
+        scrub_paths = []
+        for seed in SEEDS:
+            try:
+                scrub_paths.append(_scrub_log(k, seed))
+            except AssertionError:
+                missing.append(seed)
+        values = [_load_last_jsonl(path)["resurrection_acc"] for path in scrub_paths]
+        if len(values) == 1:
+            std = 0.0
+        else:
+            mean = sum(values) / len(values)
+            std = math.sqrt(sum((v - mean) ** 2 for v in values) / (len(values) - 1))
+        expected_lines.append(
+            f"| {k} | 0.00% +/- 0.00% | {expected:.2f}% +/- {std * 100.0:.2f}% | []/{missing} |"
+        )
+    for text in expected_lines:
+        assert text in summary
+    assert "SCRUB follow-up closes 10-shot recovery to 0.00%" in readme
+    assert "k=1: 4.27%" in readme
+    assert "k=5: 4.53%" in readme

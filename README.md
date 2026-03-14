@@ -230,75 +230,31 @@ ForgetGate/
 
 ---
 
-## 2025-2026 Research Signals (Notes)
+## Contributions
 
-Recent work points out evaluation pitfalls and suggests stronger checks. Here is how we used those ideas:
+- An oracle-normalized evaluation protocol for visual prompt attacks on unlearning, separating relearning capacity from residual recoverability.
+- A compact set of controls that matter in practice: low-shot recovery, label controls, prompt-length ablations, dependency-aware evaluation, and feature-probe leakage.
+- Evidence that LoRA can suppress output-level forget accuracy while leaving recoverable class information in frozen features.
 
-- **Dependency-aware evaluation**: independent forget/retain splits can be misleading. We added patch-based dependency eval v1 (retain+forget cue) and v2 (retain+forget mixed cues).
-- **Multi-criteria evaluation**: MUSE (ICLR 2025) argues against narrow metrics. We use this as a reminder to report more than accuracy.
-- **Certified unlearning via noisy retain finetune**: ICML 2025 proposes guarantees via noisy fine-tuning. We added a noisy retain-only proxy baseline (`objective: noisy_retain` + `grad_noise_std`).
-- **System-aware unlearning**: ICML 2025 formalizes realistic attacker models. Our oracle baseline and dependency evals are closer to that setting than worst-case retraining.
-- **Poisoning removal**: ICLR 2025 shows practical unlearning can fail to remove poisoning effects. This motivates backdoor/trigger evals.
-- **Distillation and self-distillation**: 2025 work suggests distillation can improve robustness. We list student- and self-distillation as future baselines.
-- **Adversarial mixup unlearning**: ICLR 2025 proposes generator-assisted mixup. We list it as a future baseline.
+## Experimental Setup
 
-We focus on vision, but these ideas still map cleanly to evaluation choices here.
+- Primary setting: CIFAR-10, forgetting class 0 (airplane), ViT-Tiny backbone, LoRA-based unlearning, seeds 42/123/456.
+- Secondary model support: ResNet-18 and partial/full finetune baselines for comparison.
+- Attacker: visual prompt tuning with a frozen backbone; headline k-shot tables report the final logged `resurrection_acc` for each run.
+- Controls: full-data VPT as a relearning ceiling, oracle retraining as the counterfactual baseline, plus low-shot, label, and prompt-length sweeps.
 
-**References (external)**
-- CMU ML Blog (2025): LLM unlearning benchmarks are weak measures of progress (https://blog.ml.cmu.edu/2025/04/18/llm-unlearning-benchmarks-are-weak-measures-of-progress/)
-- CMU ML Blog (2025): Unlearning or Obfuscating? Jogging the Memory of Unlearned LLMs via Benign Relearning (https://blog.ml.cmu.edu/2025/05/22/unlearning-or-obfuscating-jogging-the-memory-of-unlearned-llms-via-benign-relearning/)
-- MUSE (2024/2025): Machine Unlearning Six-Way Evaluation for Language Models (https://muse-bench.github.io/ ; https://arxiv.org/abs/2407.06460)
-- Certified Unlearning for Neural Networks (ICML 2025) (https://proceedings.mlr.press/v267/koloskova25a.html)
-- System-Aware Unlearning Algorithms: Use Lesser, Forget Faster (ICML 2025) (https://proceedings.mlr.press/v267/lu25h.html)
-- Machine Unlearning Fails to Remove Data Poisoning Attacks (ICLR 2025) (https://proceedings.iclr.cc/paper_files/paper/2025/hash/7e810b2c75d69be186cadd2fe3febeab-Abstract-Conference.html)
-- Distillation Robustifies Unlearning (arXiv 2025) (https://arxiv.org/abs/2506.06278)
-- UnDIAL: Self-Distillation with Adjusted Logits for Robust Unlearning (NAACL 2025) (https://aclanthology.org/2025.naacl-long.444/)
-- Adversarial Mixup Unlearning (ICLR 2025) (https://proceedings.iclr.cc/paper_files/paper/2025/hash/bd5508e429849637d177603c32169aba-Abstract-Conference.html)
-- Eight Methods to Evaluate Robust Unlearning in LLMs (arXiv 2024) (https://arxiv.org/abs/2402.16835)
+## Context
 
----
+This repo is intentionally narrow. It is not a general unlearning benchmark; it is a controlled audit of whether a tiny prompt can recover a forgotten class beyond what an oracle model can relearn. The closest methodological anchors are SalUn, SCRUB, LoRA, VPT, and recent residual-knowledge stress tests such as RURK. The broader evaluation choices are informed by MUSE-style "don't rely on one metric" thinking, but the evidence here is vision-only.
 
-## Novelty and Positioning
-
-ForgetGate is not just a set of runs. It is a simple diagnostic setup that separates:
-
-1) **Relearning capacity** (what any model can recover with limited data), and
-2) **Residual access** (what remains after unlearning beyond that baseline).
-
-The oracle baseline is the counterfactual model trained without the forget class. Recovery can be interpreted as residual access only when it exceeds oracle recovery. This keeps us honest about the common failure mode: splits that make unlearning look strong without testing dependencies or post-unlearning attacks.
-
-We also include **feature-probe leakage** as a lightweight, model-agnostic check: a linear probe trained on frozen representations to predict forget vs retain. If a shallow probe separates forget samples after "unlearning," residual class information is still present even when output accuracy is low.
-
----
-
-## Benign Relearning Probe (Vision)
-
-Recent work on benign relearning shows that small, loosely related public data can "jog" unlearned LLMs back to forgotten information. We can translate this idea to vision by fine-tuning the unlearned model on a small, public, non-forget subset (or a nearby class) and measuring whether it recovers forget-class accuracy without direct forget-class data.
-
-Suggested implementation (new baseline):
-1) Start from the unlearned model checkpoint.
-2) Fine-tune on a small retain-only slice or "neighbor" class for N epochs.
-3) Re-run `eval_paper_baselines_vit_cifar10_forget0` and compare forget recovery to oracle.
-
-This directly tests the "obfuscation vs forgetting" critique with a vision analog and strengthens the narrative beyond prompt-only attacks.
-
-### Benign relearning probe (run)
-
-Train:
-```
-python scripts/7_benign_relearn.py --config configs/experiment_suites.yaml --suite benign_relearn_vit_cifar10_forget0 --seed 42
-```
-
-Evaluate:
-```
-python scripts/4_adv_evaluate.py --config configs/experiment_suites.yaml --suite eval_benign_relearn_vit_cifar10_forget0 --seed 42
-```
+The benign relearning idea is still useful, but it should be treated as an optional extension rather than a headline result. If you want to run that vision analog, the repo includes `scripts/7_benign_relearn.py` and the matching evaluation suite `eval_benign_relearn_vit_cifar10_forget0`.
 
 ## Results (CIFAR-10, forgetting airplane)
 
 ### Results at a glance
 
 - Oracle-normalized k-shot recovery is small for k=10/25/50/100 (KL 0.43-1.90%, oracle 0.00%).
+- A SCRUB follow-up closes 10-shot recovery to 0.00% on all tracked seeds, but 50/100-shot recovery is highly seed-sensitive (seed 42 high, seeds 123/456 at 0.00%).
 - Low-shot controls (prompt length 5) remain above oracle and show seed variance in the tracked legacy logs (k=1: 4.27%, k=5: 4.53%).
 - Class-wise gaps are mostly small, with class 9 higher than the rest.
 
@@ -361,6 +317,19 @@ Backdoor eval reports attack success rate (ASR) as `forget_acc`. Retain accuracy
 
 Average Oracle-to-VPT gap across k=10/25/50/100 (default prompt length) is +0.81pp (seeds 42/123/456).
 
+### SCRUB follow-up (default prompt length)
+
+| K-shot | Oracle Baseline | SCRUB | Missing Seeds (SCRUB) |
+|--------|-----------------|-------|------------------------|
+| 10 | 0.00 +/- 0.00% | 0.00 +/- 0.00% | [] |
+| 25 | 0.00 +/- 0.00% | 0.00 +/- 0.00% | [] |
+| 50 | 0.00 +/- 0.00% | 26.93 +/- 46.65% | [] |
+| 100 | 0.00 +/- 0.00% | 28.20 +/- 48.84% | [] |
+
+*Tracked logs cover seeds 42/123/456 for k=10/25/50/100. The k=25 row combines the canonical seed-42 log with override logs for seeds 123/456.*
+
+Interpretation: the follow-up weakens any simple "SCRUB fixes it" story. In the tracked artifacts, SCRUB removes 10-shot recovery on all three seeds, but higher-shot recovery is bimodal: seed 42 recovers strongly at k=50/100 while seeds 123/456 stay at 0.00%.
+
 ### Class-wise oracle gap (10-shot, default prompt length)
 
 | Forget Class | Oracle Baseline | Unlearned (KL) | Residual Recov. |
@@ -402,13 +371,11 @@ Average Oracle-to-VPT gap across k=10/25/50/100 (default prompt length) is +0.81
 
 **Dependency-aware eval v1 (retain images patched with forget cue):**
 - Base + unlearned retain stays about 0.87-0.94 across seeds 42/123/456; forget stays 0.00.
-- VPT retain drops sharply on seed 123 (0.361) but stays 0.929 on seed 42. VPT dependency eval is not available for seed 456 (no VPT checkpoint).
+- VPT retain is highly seed-sensitive: 0.929 on seed 42, 0.361 on seed 123, and 0.664 on seed 456.
 
 **Dependency-aware eval v2 (retain+forget mixed cues):**
-- Seed 42 results (dependency_mix_patch):
-  - Base: Forget 0.9420, Retain 0.9404
-  - Unlearn LoRA: Forget 0.7480, Retain 0.9417
-  - VPT: Forget 0.7830, Retain 0.9293
+- Base and unlearned retain stay high across seeds, but VPT again shows strong seed dependence.
+- VPT mixed-cue results: seed 42 = Forget 0.7830 / Retain 0.9293, seed 123 = Forget 1.0000 / Retain 0.3610, seed 456 = Forget 0.9910 / Retain 0.6642.
 
 **Forget-neighborhood eval (mild noise on forget-only samples):**
 
@@ -505,13 +472,13 @@ LoRA unlearning changes the model's **outputs** (forget accuracy drops to 0%) bu
 
 ### What the table shows
 
-1. **LoRA methods leave massive feature remnants.** Every LoRA-based method sits at 96-99% probe accuracy and 0.976-0.996 AUC. The probe can trivially separate forget from retain samples because LoRA's low-rank update cannot overwrite the deep feature representations that encode class identity.
+1. **LoRA methods leave strong feature remnants in this setup.** Every LoRA-based method sits at 96-99% probe accuracy and 0.976-0.996 AUC. In this CIFAR-10/ViT-Tiny setting, a shallow probe still separates forget from retain samples even when output-level forgetting looks clean.
 
-2. **SCRUB is the exception among LoRA methods.** SCRUB achieves 94.4% / 0.958 AUC, close to oracle (93.8% / 0.947). This is because SCRUB uses teacher-student distillation which explicitly aligns the student's feature distribution with the teacher's, disrupting the original class-specific feature structure.
+2. **SCRUB is the closest LoRA method to oracle.** SCRUB achieves 94.4% / 0.958 AUC, close to oracle (93.8% / 0.947). That is consistent with its teacher-student distillation objective putting more pressure on the representation than plain ascent-style LoRA objectives.
 
-3. **Full fine-tuning is necessary for feature-level privacy.** All Full FT defenses (91-91.4% accuracy, 0.943-0.958 AUC) approach or match oracle levels. Full FT has enough capacity to actually overwrite the feature representations, unlike LoRA which operates in a constrained subspace.
+3. **Full fine-tuning gets closest to oracle-level probe scores in this setting.** All Full FT defenses (91-91.4% accuracy, 0.943-0.958 AUC) approach or match oracle levels. The simplest read is that full finetuning has enough capacity to move the backbone features more substantially than low-rank adaptation.
 
-4. **Imposter defense achieves oracle-level probe resistance.** The imposter approach (mapping forget features to random retain samples) reaches AUC 0.943 -- at or below the oracle's 0.947. This means the probe finds it no easier to detect the forgotten class than in a model that never saw it.
+4. **The imposter defense reaches the lowest probe AUC among tested defenses.** The imposter approach (mapping forget features to random retain samples) reaches AUC 0.943, slightly below the oracle's 0.947 on this seed.
 
 ### Defense methods tested
 
@@ -543,6 +510,7 @@ LoRA-based unlearning creates a surface-level illusion of forgetting: outputs ch
 - Low-shot controls (k=1/5) use prompt length 5; k=10+ uses default prompt length 10.
 - In the tracked artifact bundle, prompt-length-5 low-shot controls are sourced from legacy filenames `vpt_*_{1,5}shot_prompt5_seed_*`; the newer `vpt_*_10shot_prompt5_kshot*` names are treated as aliases when present.
 - Prompt-length ablation (1/2/5 tokens) aggregates seeds 42/123.
+- SCRUB follow-up logs cover seeds 42/123/456 for k=10/25/50/100; the k=25 row combines canonical and override log names.
 - Legacy default-prompt k=1/5 logs are archived in `results/logs/legacy_prompt10` to avoid confusion with the prompt-length-5 controls.
 - Full-data recovery values are from VPT training logs; test-set VPT/PGD numbers require `eval_full_vit_cifar10_forget0`.
 - Clean baselines table is generated from `results/logs/eval_paper_baselines_vit_cifar10_forget0_seed_*_evaluation.json` (see `results/analysis/clean_baselines_summary.md`).
@@ -598,10 +566,10 @@ Attacker capabilities assumed:
 
 ## Next Steps (Recommended)
 
-1) **Dependency-aware eval v2**: run `eval_dependency_mix_vit_cifar10_forget0` to test mixed-cue leakage.
-2) **Prune-then-unlearn baseline**: run `unlearn_prune_kl_vit_cifar10_forget0` and compare recovery vs standard KL.
-3) **Class-wise + prompt-length**: repeat prompt-length ablation for forget classes 1/2/5/9.
-4) **Certified-style proxy**: run `unlearn_noisy_retain_vit_cifar10_forget0` with a nonzero `grad_noise_std` and compare to KL.
+1) **Prune-then-unlearn baseline**: run `unlearn_prune_kl_vit_cifar10_forget0` and compare recovery vs standard KL.
+2) **Class-wise + prompt-length**: repeat prompt-length ablation for forget classes 1/2/5/9.
+3) **Certified-style proxy**: run `unlearn_noisy_retain_vit_cifar10_forget0` with a nonzero `grad_noise_std` and compare to KL.
+4) **Method breadth**: add the remaining optional SalUn VPT follow-up if you want a second non-KL attack curve in the artifact bundle.
 
 ## Follow-ups (If You Want More Rigor)
 
@@ -696,53 +664,11 @@ MIT.
 - **LoRA** (Hu et al., ICLR 2022): https://arxiv.org/abs/2106.09685
 - **VPT** (Jia et al., ECCV 2022): https://arxiv.org/abs/2203.12119
 - **AutoAttack** (Croce & Hein, ICML 2020): https://arxiv.org/abs/2003.01690
-- **Certified MU via Noisy SGD** (NeurIPS 2024): https://papers.nips.cc/paper/2024/hash/448abd486677165ceedfa790e9a61802-Abstract-Conference.html
-- **Langevin Unlearning** (NeurIPS 2024): https://arxiv.org/pdf/2401.10371
-- **RUM Meta-Algorithm / Forget-Set Factors** (Zhao et al., 2024): https://arxiv.org/abs/2406.01257
-- **Prune-First Then Unlearn** (NeurIPS 2023): https://arxiv.org/abs/2304.04934
 - **Residual Knowledge under Perturbed Samples (RURK)** (Hsu et al., 2026): https://arxiv.org/abs/2601.22359
-- **Statistical MIA for Unlearning Auditing** (Sun et al., 2026): https://arxiv.org/abs/2602.01150
-- **Forgetting Similar Samples / Neighborhood Effect** (Xu et al., 2026): https://arxiv.org/abs/2601.06938
-- **BalDRO (Hard-Sample Reweighting for Unlearning)** (Shao et al., 2026): https://arxiv.org/abs/2601.09172
-- **Behemoth (Synthetic Unlearning Benchmark)** (Iofinova & Alistarh, 2026): https://arxiv.org/abs/2601.23153
-- **FaLW (Long-Tailed Unlearning)** (Yu et al., 2026): https://arxiv.org/abs/2601.18650
-- **Regularized Divergence Kernel Tests (Audit)** (Ribero et al., 2026): https://arxiv.org/abs/2601.19755
-- **EvoMU (Evolutionary Machine Unlearning)** (Batorski & Swoboda, 2026): https://arxiv.org/abs/2602.02139
-- **AGT (Adversarial Gating + Adaptive Orthogonality)** (Li et al., 2026): https://arxiv.org/abs/2602.01703
-- **Sparsity-Aware Unlearning (LLMs)** (Wang et al., 2026): https://arxiv.org/abs/2602.00577
-- **Orthogonal Entropy Unlearning (QNNs)** (Zhang et al., 2026): https://arxiv.org/abs/2602.00567
-- **ReLAPSe (Prompt Search for Diffusion Unlearning)** (Kolton et al., 2026): https://arxiv.org/abs/2602.00350
-- **Illusion of Forgetting (Latent Optimization Attack)** (Li et al., 2026): https://arxiv.org/abs/2602.00175
-- **GUDA (Group Attribution via Unlearning)** (Murata et al., 2026): https://arxiv.org/abs/2601.22651
-- **Lethe (Persistent Federated Unlearning)** (Tan et al., 2026): https://arxiv.org/abs/2601.22601
-- **FedCARE (Conflict-Aware FU)** (Li et al., 2026): https://arxiv.org/abs/2601.22589
-- **LOFT (Low-Dimensional Subspace Unlearning)** (Fang et al., 2026): https://arxiv.org/abs/2601.22456
-- **PerTA (Per-Parameter Task Arithmetic)** (Cai et al., 2026): https://arxiv.org/abs/2601.22030
-- **CLReg (Contrastive Latent Unlearning)** (Tang & Khanna, 2026): https://arxiv.org/abs/2601.22028
-- **ViKeR (Visual-Guided Key-Token Regularization)** (Cai et al., 2026): https://arxiv.org/abs/2601.22020
-- **UnlearnShield (Inversion Defense)** (Xue et al., 2026): https://arxiv.org/abs/2601.20325
-- **Representation Unlearning (Info Compression)** (Almudevar & Ortega, 2026): https://arxiv.org/abs/2601.21564
-- **FIT (Continual LLM Unlearning)** (Xu et al., 2026): https://arxiv.org/abs/2601.21682
-- **KIF (Activation-Signature Erasure)** (Mahmood et al., 2026): https://arxiv.org/abs/2601.10566
-- **Circuit-Guided Difficulty Metric** (Cheng et al., 2026): https://arxiv.org/abs/2601.09624
-- **Certified Unlearning under Distribution Shift** (Guo & Cao, 2026): https://arxiv.org/abs/2601.06967
-- **Sequential Subspace Noise (Certified)** (Dolgova & Stich, 2026): https://arxiv.org/abs/2601.05134
-- **Erasure Illusion / PSG Stress-Test** (Jia et al., 2025): https://arxiv.org/abs/2512.19025
-- **Selective Forgetting Privacy Benchmark** (Qian et al., 2025): https://arxiv.org/abs/2512.18035
-- **Dual-View Inference Attack (DVIA)** (Xue et al., 2025): https://arxiv.org/abs/2512.16126
-- **Teleportation Defenses (WARP)** (Maheri et al., 2025): https://arxiv.org/abs/2512.00272
-- **Leak@ (Probabilistic Decoding Leakage)** (Reisizadeh et al., 2025): https://arxiv.org/abs/2511.04934
-- **REMIND (Residual Memorization Auditor)** (Cohen et al., 2025): https://arxiv.org/abs/2511.04228
-- **Knowledge Holes in Unlearned LLMs** (Ko et al., 2025): https://arxiv.org/abs/2511.00030
-- **Single-Seed Evaluation Limits** (Lanyon et al., 2025): https://arxiv.org/abs/2510.26714
-- **Geometric-Disentanglement Unlearning (GU)** (Zhou et al., 2025): https://arxiv.org/abs/2511.17100
 - **Smoothed Gradient Ascent (SGA)** (Pang et al., 2025): https://arxiv.org/abs/2510.22376
-- **Implicit Gradient Surgery (EUPMU)** (Zhou et al., 2025): https://arxiv.org/abs/2510.22124
-- **LLM Unlearning with LLM Beliefs** (Li et al., 2025): https://arxiv.org/abs/2510.19422
-- **Forgetting-MarI (Marginal Info Regularization)** (Xu et al., 2025): https://arxiv.org/abs/2511.11914
-- **KUnBR (Knowledge Density + Block Reinsertion)** (Guo et al., 2025): https://arxiv.org/abs/2511.11667
-- **SGTM (Knowledge Localization)** (Shilov et al., 2025): https://arxiv.org/abs/2512.05648
-- **ModHiFi-U (Data-Free Class Unlearning)** (Kashyap et al., 2025): https://arxiv.org/abs/2511.19566
-- **POUR (Representation-Level Unlearning)** (Le et al., 2025): https://arxiv.org/abs/2511.19339
-- **GFOES (Few-shot Zero-Glance Unlearning)** (Song et al., 2025): https://arxiv.org/abs/2511.13116
-- **Hubble (Memorization Testbed)** (Wei et al., 2025): https://arxiv.org/abs/2510.19811
+- **BalDRO (Hard-Sample Reweighting for Unlearning)** (Shao et al., 2026): https://arxiv.org/abs/2601.09172
+- **FaLW (Long-Tailed Unlearning)** (Yu et al., 2026): https://arxiv.org/abs/2601.18650
+- **Langevin Unlearning** (Shi et al., NeurIPS 2024): https://arxiv.org/abs/2401.10371
+- **MUSE** (Machine Unlearning Six-Way Evaluation): https://arxiv.org/abs/2407.06460
+- **Certified Unlearning for Neural Networks** (Koloskova et al., ICML 2025): https://proceedings.mlr.press/v267/koloskova25a.html
+- **Benign Relearning / Jogging the Memory** (CMU ML Blog, 2025): https://blog.ml.cmu.edu/2025/05/22/unlearning-or-obfuscating-jogging-the-memory-of-unlearned-llms-via-benign-relearning/
