@@ -4,20 +4,36 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-ForgetGate studies one narrow question:
+ForgetGate is a machine learning research project about a simple question:
 
-> If an attacker can train a tiny visual prompt, do "forgotten" classes come back because of residual knowledge, or because the attacker is just relearning?
+> When a model says it has "forgotten" a class, is that information really gone, or is it still recoverable?
 
-The project uses visual prompt tuning (VPT) to attack unlearned vision models and compares recovery against an oracle model retrained from scratch without the forget class.
+I study that question in vision models by unlearning a class, attacking the model with a tiny learned visual prompt, and comparing the result against an oracle model retrained from scratch without the forgotten class.
+
+## Why This Matters
+
+Many unlearning results focus on one surface metric: the model stops predicting the forgotten class. That can look convincing while still leaving recoverable information inside the model. This project is about testing whether the forgetting is real or just hidden.
+
+## Project Snapshot
+
+- End-to-end PyTorch pipeline for training, unlearning, attacking, and auditing vision models.
+- Main setup: ViT-Tiny and ResNet-18, LoRA-based unlearning, oracle retraining, VPT resurrection attacks, and adversarial evaluation.
+- Main finding: low forget-class accuracy alone is not enough to claim secure unlearning. Small prompt attacks can still recover class information beyond what an oracle model can relearn.
+
+## My Contribution
+
+- Designed the evaluation setup around an oracle baseline, so recovery can be separated into ordinary relearning versus residual information left behind after unlearning.
+- Built the experiment pipeline, attack code, result summarizers, and resume-safe scripts used to run and audit the project.
+- Ran a broader set of controls than a single headline metric: k-shot recovery, prompt-length stress tests, label controls, stronger baselines such as SCRUB, and artifact-auditing utilities.
 
 ## Branches
 
 - `main`: lightweight code and docs branch. It keeps the training and evaluation pipeline, but does not ship the large checkpoint/log bundle.
 - `prompt-ablation-classgap`: full artifact branch with tracked logs, checkpoints, extended analyses, and the complete paper-facing result tables.
 
-If you want the exact tracked results, use `prompt-ablation-classgap`. If you want the core codebase without large artifacts, stay on `main`.
+The exact tracked results live on `prompt-ablation-classgap`. The lightweight codebase remains on `main`.
 
-## Headline Result
+## Core Result
 
 The tracked artifact branch reports three simple takeaways:
 
@@ -25,7 +41,29 @@ The tracked artifact branch reports three simple takeaways:
 - Default k-shot recovery is small but nonzero when normalized against the oracle.
 - Stronger controls and follow-up methods show the problem is unstable rather than solved: low-shot recovery, prompt-length changes, and higher-shot SCRUB runs can still expose residual access or seed sensitivity.
 
-This repo is intentionally about auditing that gap, not about claiming a universal unlearning benchmark.
+This repo is intentionally an audit of post-unlearning recoverability, not a claim that one new method solves unlearning in general.
+
+## Full Artifact Highlights
+
+The richer project story is documented on [`prompt-ablation-classgap`](https://github.com/DevT02/ForgetGate/tree/prompt-ablation-classgap). The main tracked results from that branch are:
+
+### Selected Results
+
+- Default oracle-normalized KL recovery stays small at k=10/25/50/100: 0.47, 0.43, 0.43, and 1.90 percent, while the oracle stays at 0.00 percent.
+- Prompt-length-5 stress tests are much harsher than the default k-shot table: k=1 is 4.27 percent, k=5 is 4.53 percent, shuffled-label is 3.90 percent, and random-label is 4.03 percent.
+- The SCRUB follow-up is mixed rather than cleanly stronger: 0.00 percent at 10-shot and 25-shot across seeds 42/123/456, but 50-shot and 100-shot become highly seed-sensitive because seed 42 recovers strongly while seeds 123 and 456 stay at 0.00 percent.
+- The artifact branch also includes the broader diagnostic side of the project: dependency-aware evaluation, feature-probe leakage, neighborhood sweeps, class-wise gaps, prompt-length ablations, and the larger checkpoint/log bundle behind those tables.
+
+| Setting | Result |
+|---|---|
+| KL, default prompt, 10-shot | 0.47% recovery vs 0.00% oracle |
+| KL, default prompt, 100-shot | 1.90% recovery vs 0.00% oracle |
+| KL, prompt-length-5 stress test, k=1 | 4.27% recovery vs 0.00% oracle |
+| KL, prompt-length-5 stress test, k=5 | 4.53% recovery vs 0.00% oracle |
+| SCRUB, 10-shot / 25-shot | 0.00% across tracked seeds |
+| SCRUB, 50-shot / 100-shot | high seed sensitivity rather than stable robustness |
+
+So the short version is not just "KL is weak." It is closer to: low clean forget accuracy does not reliably imply resistance to recovery, and that weakness depends heavily on the attacker setup and the seed.
 
 ## What Ships On Main
 
@@ -37,6 +75,13 @@ This repo is intentionally about auditing that gap, not about claiming a univers
   - `scripts/3_train_vpt_resurrector.py` defaults to `num_workers=0` on Windows unless you override it, which avoids CUDA worker spawn failures.
 
 Extended feature-probe analyses, neighborhood sweeps, benign relearning runs, and the large tracked result bundle remain on `prompt-ablation-classgap`.
+
+## Engineering Highlights
+
+- Suite-driven experiment pipeline for base training, oracle retraining, LoRA unlearning, prompt attacks, and evaluation.
+- Resume-safe helpers for longer experiment batches on Windows and conda-based setups.
+- Lightweight result-auditing scripts to summarize k-shot runs and check which expected artifacts are missing.
+- Reliability fixes that make the repo easier to run on real machines, especially Windows CUDA setups and CIFAR-10 environments with broken extracted data trees.
 
 ## Quick Setup
 
