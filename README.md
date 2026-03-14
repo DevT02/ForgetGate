@@ -436,7 +436,7 @@ Full-data VPT runs reach near-complete recovery in `results/logs/vpt_resurrect_*
 
 **Oracle control (full-data)**: VPT on the oracle baseline also reaches about 100% recovery with full data, indicating the full-data attack is effectively relearning rather than accessing residual knowledge. See `results/logs/oracle_vpt_control_class0_seed_42.jsonl` and `results/logs/oracle_vpt_control_class0_seed_123.jsonl`.
 
-**AutoAttack (seeds 42/123/456)**: full AutoAttack drives both forget and retain accuracy to about 0 on base/unlearned models for all seeds. VPT AutoAttack is available for seeds 42 and 123 (see `results/logs/eval_autoattack_vit_cifar10_forget0_seed_{42,123,456}_evaluation.json`).
+**AutoAttack (seeds 42/123/456)**: full AutoAttack drives both forget and retain accuracy to about 0 on base/unlearned models for all seeds. VPT AutoAttack coverage is tracked for seeds 42, 123, and 456 in `results/logs/eval_autoattack_vit_cifar10_forget0_seed_{42,123,456}_evaluation.json`.
 
 ---
 
@@ -666,5 +666,3 @@ MIT.
 - **FaLW (Long-Tailed Unlearning)** (Yu et al., 2026): https://arxiv.org/abs/2601.18650
 - **Langevin Unlearning** (Shi et al., NeurIPS 2024): https://arxiv.org/abs/2401.10371
 - **MUSE** (Machine Unlearning Six-Way Evaluation): https://arxiv.org/abs/2407.06460
-- **Certified Unlearning for Neural Networks** (Koloskova et al., ICML 2025): https://proceedings.mlr.press/v267/koloskova25a.html
-- **Benign Relearning / Jogging the Memory** (CMU ML Blog, 2025): https://blog.ml.cmu.edu/2025/05/22/unlearning-or-obfuscating-jogging-the-memory-of-unlearned-llms-via-benign-relearning/
