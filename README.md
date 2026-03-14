@@ -564,19 +564,15 @@ Attacker capabilities assumed:
 - Stratify forget sets by difficulty (RUM-style) and report recovery gaps per subset.
 - Dependency-aware evaluations: add mixed-cue or patched-retain tests to reduce benchmark fragility.
 
-## Next Steps (Recommended)
+## Possible Extensions
 
-1) **Prune-then-unlearn baseline**: run `unlearn_prune_kl_vit_cifar10_forget0` and compare recovery vs standard KL.
-2) **Class-wise + prompt-length**: repeat prompt-length ablation for forget classes 1/2/5/9.
-3) **Certified-style proxy**: run `unlearn_noisy_retain_vit_cifar10_forget0` with a nonzero `grad_noise_std` and compare to KL.
-4) **Method breadth**: add the remaining optional SalUn VPT follow-up if you want a second non-KL attack curve in the artifact bundle.
+The core audit in this branch is complete. If you want to extend it further, these are the highest-value directions:
 
-## Follow-ups (If You Want More Rigor)
-
-- Add additional seeds beyond 456 for tighter confidence intervals.
-- Run AutoAttack for seed 123/456 to reduce variance in robustness claims.
-- Report k-shot recovery on a fixed, deterministic split for even tighter comparisons.
-- Add RUM-style stratified forget subsets (high/low confidence) and compare recovery curves.
+1) **More forget classes**: repeat the class-wise and prompt-length analyses for classes 1/2/5/9 so the control story is not centered only on class 0.
+2) **More seeds**: add seeds beyond 456 if you want tighter confidence intervals on the seed-sensitive behaviors, especially for higher-shot SCRUB runs.
+3) **Deterministic evaluation split**: evaluate k-shot recovery on a fixed split to reduce transform and sampling noise in close comparisons.
+4) **Richer stratified analysis**: expand the current pilot high/mid/low-confidence subset analysis beyond seed 42.
+5) **Optional method breadth**: add the remaining SalUn VPT follow-up if you want one more non-KL, non-SCRUB attack curve in the artifact bundle.
 
 ---
 
