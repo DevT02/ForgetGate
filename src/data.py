@@ -12,6 +12,8 @@ from PIL import Image
 from typing import Dict, List, Optional, Tuple, Union
 import yaml
 import os
+import tarfile
+import pickle
 from itertools import cycle
 
 
@@ -52,6 +54,51 @@ class ClassFilteredDataset(Dataset):
     def __getitem__(self, idx):
         actual_idx = self.valid_indices[idx]
         return self.base_dataset[actual_idx]
+
+
+class CIFAR10TarDataset(Dataset):
+    """Fallback CIFAR-10 reader that loads directly from the local tar archive."""
+
+    train_files = [
+        "cifar-10-batches-py/data_batch_1",
+        "cifar-10-batches-py/data_batch_2",
+        "cifar-10-batches-py/data_batch_3",
+        "cifar-10-batches-py/data_batch_4",
+        "cifar-10-batches-py/data_batch_5",
+    ]
+    test_files = ["cifar-10-batches-py/test_batch"]
+
+    def __init__(self, archive_path: str, train: bool, transform=None):
+        self.archive_path = archive_path
+        self.train = train
+        self.transform = transform
+        self.data = []
+        self.targets = []
+        self._load_from_archive()
+
+    def _load_from_archive(self):
+        members = self.train_files if self.train else self.test_files
+        with tarfile.open(self.archive_path, "r:gz") as tf:
+            for member_name in members:
+                extracted = tf.extractfile(member_name)
+                if extracted is None:
+                    raise FileNotFoundError(f"Missing CIFAR member in archive: {member_name}")
+                blob = pickle.load(extracted, encoding="latin1")
+                self.data.append(blob["data"])
+                self.targets.extend(blob["labels"])
+
+        self.data = np.concatenate(self.data, axis=0).reshape(-1, 3, 32, 32)
+        self.data = np.transpose(self.data, (0, 2, 3, 1))
+
+    def __len__(self):
+        return len(self.targets)
+
+    def __getitem__(self, idx):
+        image = Image.fromarray(self.data[idx])
+        label = int(self.targets[idx])
+        if self.transform is not None:
+            image = self.transform(image)
+        return image, label
 
 
 class DataManager:
@@ -175,12 +222,17 @@ class DataManager:
         transform = self.get_transforms(dataset_name, split, use_pretrained, apply_imagenet_norm)
 
         if dataset_name == "cifar10":
-            if split == "train":
+            train_mode = split == "train"
+            try:
                 dataset = torchvision.datasets.CIFAR10(
-                    root=self.data_dir, train=True, download=True, transform=transform)
-            else:
-                dataset = torchvision.datasets.CIFAR10(
-                    root=self.data_dir, train=False, download=True, transform=transform)
+                    root=self.data_dir, train=train_mode, download=False, transform=transform)
+            except RuntimeError:
+                archive_path = os.path.join(self.data_dir, "cifar-10-python.tar.gz")
+                if os.path.exists(archive_path):
+                    dataset = CIFAR10TarDataset(archive_path, train=train_mode, transform=transform)
+                else:
+                    dataset = torchvision.datasets.CIFAR10(
+                        root=self.data_dir, train=train_mode, download=True, transform=transform)
 
         elif dataset_name == "mnist":
             if split == "train":
