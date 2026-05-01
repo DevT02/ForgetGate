@@ -1,0 +1,13 @@
+{
+  "suite": "unlearn_rurk_vit_cifar10_forget0_smoke",
+  "seed": 42,
+  "eps": 0.0001,
+  "steps": 20,
+  "samples": 500,
+  "clean_forget_acc": 0.073,
+  "clean_retain_acc": 0.9412222222222222,
+  "pert_forget_acc": 0.165,
+  "pert_retain_acc": 0.9417777777777778,
+  "recovery_gap": 0.09200000000000001,
+  "timestamp": "2026-04-22T00:18:54.237252Z"
+}

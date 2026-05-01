@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "seed": 123,
+    "split": "test",
+    "dataset": "cifar10",
+    "model": "vit_tiny",
+    "forget_class": 0,
+    "model_suites": [
+      "unlearn_salun_fullft_feature_subspace_stage2_vit_cifar10_forget0_proto"
+    ],
+    "norm": "l_inf",
+    "eps_max": 0.03137254901960784,
+    "steps": 2,
+    "restarts": 1,
+    "search_steps": 6,
+    "attack_loss": "adam_margin",
+    "oracle_feature_weight": 0.5,
+    "apgd_rho": 0.5,
+    "apgd_momentum": 0.75,
+    "bundle_margin_gate": -3.0,
+    "debug_attack_geometry": false,
+    "debug_max_samples": 2,
+    "debug_max_steps": 20,
+    "debug_topk": 5
+  },
+  "forget_recovery": {
+    "unlearn_salun_fullft_feature_subspace_stage2_vit_cifar10_forget0_proto": {
+      "summary": {
+        "n_samples": 4,
+        "success_rate": 1.0,
+        "clean_success_rate": 0.0,
+        "median_radius": 0.0015931372763589025,
+        "mean_radius": 0.001294424058869481,
+        "min_radius": 0.00030637255986221135,
+        "max_radius": 0.0016544117825105786,
+        "p25_radius": 0.0012714461190626025,
+        "p75_radius": 0.0016314338427037,
+        "mean_target_prob_gain": 0.32003796100616455,
+        "median_target_prob_gain": 0.2982497215270996
+      },
+      "per_sample": [
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0015931372549019608,
+          "actual_delta": 0.0015931427478790283,
+          "clean_target_prob": 0.010880024172365665,
+          "adv_target_prob": 0.3091297447681427,
+          "adv_pred": 0,
+          "sample_index": 0
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0016544117647058823,
+          "actual_delta": 0.0016544163227081299,
+          "clean_target_prob": 0.0011503107380121946,
+          "adv_target_prob": 0.3735698461532593,
+          "adv_pred": 0,
+          "sample_index": 1
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0016237745098039214,
+          "actual_delta": 0.001623779535293579,
+          "clean_target_prob": 0.05644931271672249,
+          "adv_target_prob": 0.474927693605423,
+          "adv_pred": 0,
+          "sample_index": 2
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00030637254901960784,
+          "actual_delta": 0.00030637532472610474,
+          "clean_target_prob": 0.10689520835876465,
+          "adv_target_prob": 0.2978994846343994,
+          "adv_pred": 0,
+          "sample_index": 3
+        }
+      ]
+    }
+  },
+  "retain_control": {
+    "unlearn_salun_fullft_feature_subspace_stage2_vit_cifar10_forget0_proto": {
+      "summary": {
+        "n_samples": 4,
+        "success_rate": 0.25,
+        "clean_success_rate": 0.0,
+        "median_radius": 0.0033088235650211573,
+        "mean_radius": 0.0033088235650211573,
+        "min_radius": 0.0033088235650211573,
+        "max_radius": 0.0033088235650211573,
+        "p25_radius": 0.0033088235650211573,
+        "p75_radius": 0.0033088235650211573,
+        "mean_target_prob_gain": 0.16662780940532684,
+        "median_target_prob_gain": 0.012797500938177109
+      },
+      "per_sample": [
+        {
+          "success": false,
+          "clean_success": false,
+          "radius": null,
+          "actual_delta": 0.03137257695198059,
+          "clean_target_prob": 1.2455919000224636e-13,
+          "adv_target_prob": 0.012797500938177109,
+          "adv_pred": 1,
+          "sample_index": 0
+        },
+        {
+          "success": false,
+          "clean_success": false,
+          "radius": null,
+          "actual_delta": 0.03137257695198059,
+          "clean_target_prob": 3.1255072485691926e-07,
+          "adv_target_prob": 0.16564726829528809,
+          "adv_pred": 1,
+          "sample_index": 1
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0033088235294117647,
+          "actual_delta": 0.0033088326454162598,
+          "clean_target_prob": 1.0095522156916559e-05,
+          "adv_target_prob": 0.4880327880382538,
+          "adv_pred": 0,
+          "sample_index": 2
+        },
+        {
+          "success": false,
+          "clean_success": false,
+          "radius": null,
+          "actual_delta": 0.03137257695198059,
+          "clean_target_prob": 3.023357712026627e-17,
+          "adv_target_prob": 4.411990084918216e-05,
+          "adv_pred": 6,
+          "sample_index": 3
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "suite": "unlearn_orbit_vit_cifar10_forget0",
+  "seed": 42,
+  "eps": 0.001,
+  "steps": 10,
+  "samples": 500,
+  "clean_forget_acc": 0.003,
+  "clean_retain_acc": 0.9446666666666667,
+  "pert_forget_acc": 0.845,
+  "pert_retain_acc": 0.9394444444444444,
+  "recovery_gap": 0.842,
+  "timestamp": "2026-04-22T00:10:04.285159Z"
+}

@@ -1,0 +1,671 @@
+{
+  "rows": [
+    {
+      "seed": 42,
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "label": "ORBIT",
+      "group": "non_robust",
+      "history_path": "results\\logs\\unlearn_orbit_vit_cifar10_forget0_seed_42_history.json",
+      "val_acc": 0.8527,
+      "retain_acc": 0.947,
+      "forget_acc": 0.004,
+      "epoch": 20,
+      "best_attack": "adam_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_orbit.json",
+      "forget_success_rate": 1.0,
+      "forget_median_radius": 0.0034007353242486715,
+      "retain_success_rate": 1.0,
+      "retain_median_radius": 0.006433823611587286,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_orbit.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 1.0,
+          "forget_median_radius": 0.0034007353242486715,
+          "retain_success_rate": 1.0,
+          "retain_median_radius": 0.006433823611587286,
+          "n_forget": 32,
+          "n_retain": 32
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_orbit__rurk.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 1.0,
+          "forget_median_radius": 0.003155637299641967,
+          "retain_success_rate": 1.0,
+          "retain_median_radius": 0.006433823611587286,
+          "n_forget": 16,
+          "n_retain": 16
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_apgd_margin_orbit__salun.json",
+          "attack": "apgd_margin",
+          "attack_loss": "apgd_margin",
+          "forget_success_rate": 1.0,
+          "forget_median_radius": 0.008210784755647182,
+          "retain_success_rate": 1.0,
+          "retain_median_radius": 0.015563725493848324,
+          "n_forget": 32,
+          "n_retain": 32
+        }
+      ]
+    },
+    {
+      "seed": 42,
+      "suite": "unlearn_salun_vit_cifar10_forget0",
+      "label": "SalUn",
+      "group": "non_robust",
+      "history_path": "results\\logs\\unlearn_salun_vit_cifar10_forget0_seed_42_history.json",
+      "val_acc": 0.8547,
+      "retain_acc": 0.9492222222222222,
+      "forget_acc": 0.004,
+      "epoch": 33,
+      "best_attack": "adam_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_salun.json",
+      "forget_success_rate": 1.0,
+      "forget_median_radius": 0.002512254985049367,
+      "retain_success_rate": 1.0,
+      "retain_median_radius": 0.005637255031615496,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_salun.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 1.0,
+          "forget_median_radius": 0.002512254985049367,
+          "retain_success_rate": 1.0,
+          "retain_median_radius": 0.005637255031615496,
+          "n_forget": 32,
+          "n_retain": 32
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_apgd_margin_orbit__salun.json",
+          "attack": "apgd_margin",
+          "attack_loss": "apgd_margin",
+          "forget_success_rate": 1.0,
+          "forget_median_radius": 0.004350490402430296,
+          "retain_success_rate": 1.0,
+          "retain_median_radius": 0.007720588240772486,
+          "n_forget": 32,
+          "n_retain": 32
+        }
+      ]
+    },
+    {
+      "seed": 42,
+      "suite": "unlearn_baldro_vit_cifar10_forget0_smoke",
+      "label": "BalDRO",
+      "group": "non_robust",
+      "history_path": "results\\logs\\unlearn_baldro_vit_cifar10_forget0_smoke_seed_42_history.json",
+      "val_acc": 0.8517,
+      "retain_acc": 0.9457777777777778,
+      "forget_acc": 0.005,
+      "epoch": 4,
+      "best_attack": "apgd_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_apgd_margin_baldro.json",
+      "forget_success_rate": 1.0,
+      "forget_median_radius": 0.0049019609577953815,
+      "retain_success_rate": 1.0,
+      "retain_median_radius": 0.011029412038624287,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_apgd_margin_baldro.json",
+          "attack": "apgd_margin",
+          "attack_loss": "apgd_margin",
+          "forget_success_rate": 1.0,
+          "forget_median_radius": 0.0049019609577953815,
+          "retain_success_rate": 1.0,
+          "retain_median_radius": 0.011029412038624287,
+          "n_forget": 64,
+          "n_retain": 64
+        }
+      ]
+    },
+    {
+      "seed": 42,
+      "suite": "unlearn_rurk_vit_cifar10_forget0_smoke",
+      "label": "RURK",
+      "group": "non_robust",
+      "history_path": "results\\logs\\unlearn_rurk_vit_cifar10_forget0_smoke_seed_42_history.json",
+      "val_acc": 0.8477,
+      "retain_acc": 0.9418888888888889,
+      "forget_acc": 0.0,
+      "epoch": 4,
+      "best_attack": "apgd_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_apgd_margin_rurk.json",
+      "forget_success_rate": 1.0,
+      "forget_median_radius": 0.0020220589358359575,
+      "retain_success_rate": 1.0,
+      "retain_median_radius": 0.006740196142345667,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_orbit__rurk.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 1.0,
+          "forget_median_radius": 0.0015931372763589025,
+          "retain_success_rate": 1.0,
+          "retain_median_radius": 0.005392157007008791,
+          "n_forget": 16,
+          "n_retain": 16
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_apgd_margin_rurk.json",
+          "attack": "apgd_margin",
+          "attack_loss": "apgd_margin",
+          "forget_success_rate": 1.0,
+          "forget_median_radius": 0.0020220589358359575,
+          "retain_success_rate": 1.0,
+          "retain_median_radius": 0.006740196142345667,
+          "n_forget": 64,
+          "n_retain": 64
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_apgd_margin_rurk__orthoreg.json",
+          "attack": "apgd_margin",
+          "attack_loss": "apgd_margin",
+          "forget_success_rate": 1.0,
+          "forget_median_radius": 0.0017156862886622548,
+          "retain_success_rate": 1.0,
+          "retain_median_radius": 0.006678921636193991,
+          "n_forget": 32,
+          "n_retain": 32
+        }
+      ]
+    },
+    {
+      "seed": 42,
+      "suite": "unlearn_salun_robust_base_forget0_smoke",
+      "label": "SalUn + Robust Base (smoke)",
+      "group": "robust_base",
+      "history_path": "results\\logs\\unlearn_salun_robust_base_forget0_smoke_seed_42_history.json",
+      "val_acc": 0.4875,
+      "retain_acc": 0.5416666666666666,
+      "forget_acc": 0.0,
+      "epoch": 17,
+      "best_attack": "adam_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_salun-robust-base-forget0-smoke.json",
+      "forget_success_rate": 0.0,
+      "forget_median_radius": NaN,
+      "retain_success_rate": 0.0,
+      "retain_median_radius": NaN,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_salun-robust-base-forget0-smoke.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 0.0,
+          "forget_median_radius": NaN,
+          "retain_success_rate": 0.0,
+          "retain_median_radius": NaN,
+          "n_forget": 32,
+          "n_retain": 32
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_salun-robust-base-forget0-smoke.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 0.0,
+          "forget_median_radius": NaN,
+          "retain_success_rate": 0.0,
+          "retain_median_radius": NaN,
+          "n_forget": 32,
+          "n_retain": 32
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_apgd_margin_salun-robust-base-forget0-smoke.json",
+          "attack": "apgd_margin",
+          "attack_loss": "apgd_margin",
+          "forget_success_rate": 0.0,
+          "forget_median_radius": NaN,
+          "retain_success_rate": 0.0,
+          "retain_median_radius": NaN,
+          "n_forget": 32,
+          "n_retain": 32
+        }
+      ]
+    },
+    {
+      "seed": 42,
+      "suite": "unlearn_salun_robust_base_forget0_mid",
+      "label": "SalUn + Robust Base (mid)",
+      "group": "robust_base",
+      "history_path": "results\\logs\\unlearn_salun_robust_base_forget0_mid_seed_42_history.json",
+      "val_acc": 0.5285,
+      "retain_acc": 0.5872222222222222,
+      "forget_acc": 0.0,
+      "epoch": 19,
+      "best_attack": "adam_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_salun-robust-base-forget0-mid.json",
+      "forget_success_rate": 0.03125,
+      "forget_median_radius": 0.026838235557079315,
+      "retain_success_rate": 0.0,
+      "retain_median_radius": NaN,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_salun-robust-base-forget0-mid.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 0.03125,
+          "forget_median_radius": 0.026838235557079315,
+          "retain_success_rate": 0.0,
+          "retain_median_radius": NaN,
+          "n_forget": 32,
+          "n_retain": 32
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_salun-robust-base-forget0-mid.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 0.03125,
+          "forget_median_radius": 0.027450980618596077,
+          "retain_success_rate": 0.0,
+          "retain_median_radius": NaN,
+          "n_forget": 32,
+          "n_retain": 32
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_apgd_margin_salun-robust-base-forget0-mid.json",
+          "attack": "apgd_margin",
+          "attack_loss": "apgd_margin",
+          "forget_success_rate": 0.0,
+          "forget_median_radius": NaN,
+          "retain_success_rate": 0.0,
+          "retain_median_radius": NaN,
+          "n_forget": 32,
+          "n_retain": 32
+        }
+      ]
+    },
+    {
+      "seed": 42,
+      "suite": "unlearn_salun_robust_base_forget0_high",
+      "label": "SalUn + Robust Base (high)",
+      "group": "robust_base",
+      "history_path": "results\\logs\\unlearn_salun_robust_base_forget0_high_seed_42_history.json",
+      "val_acc": 0.5631,
+      "retain_acc": 0.6256666666666667,
+      "forget_acc": 0.0,
+      "epoch": 19,
+      "best_attack": "adam_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_salun-robust-base-forget0-high.json",
+      "forget_success_rate": 0.1875,
+      "forget_median_radius": 0.02181372605264187,
+      "retain_success_rate": 0.09375,
+      "retain_median_radius": 0.023039216175675392,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_salun-robust-base-forget0-high.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 0.1875,
+          "forget_median_radius": 0.02181372605264187,
+          "retain_success_rate": 0.09375,
+          "retain_median_radius": 0.023039216175675392,
+          "n_forget": 32,
+          "n_retain": 32
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_salun-robust-base-forget0-high.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 0.1875,
+          "forget_median_radius": 0.022303922101855278,
+          "retain_success_rate": 0.0625,
+          "retain_median_radius": 0.022794118151068687,
+          "n_forget": 32,
+          "n_retain": 32
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_apgd_margin_salun-robust-base-forget0-high.json",
+          "attack": "apgd_margin",
+          "attack_loss": "apgd_margin",
+          "forget_success_rate": 0.125,
+          "forget_median_radius": 0.02340686321258545,
+          "retain_success_rate": 0.125,
+          "retain_median_radius": 0.025245098397135735,
+          "n_forget": 32,
+          "n_retain": 32
+        }
+      ]
+    },
+    {
+      "seed": 42,
+      "suite": "unlearn_salun_robust_base_forget0_ultra",
+      "label": "SalUn + Robust Base (ultra)",
+      "group": "robust_base",
+      "history_path": "results\\logs\\unlearn_salun_robust_base_forget0_ultra_seed_42_history.json",
+      "val_acc": 0.5766,
+      "retain_acc": 0.6402222222222222,
+      "forget_acc": 0.004,
+      "epoch": 19,
+      "best_attack": "adam_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_salun-robust-base-forget0-ultra.json",
+      "forget_success_rate": 0.28125,
+      "forget_median_radius": 0.02450980432331562,
+      "retain_success_rate": 0.0625,
+      "retain_median_radius": 0.027450980618596077,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_salun-robust-base-forget0-ultra.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 0.28125,
+          "forget_median_radius": 0.02450980432331562,
+          "retain_success_rate": 0.0625,
+          "retain_median_radius": 0.027450980618596077,
+          "n_forget": 32,
+          "n_retain": 32
+        }
+      ]
+    },
+    {
+      "seed": 123,
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "label": "ORBIT",
+      "group": "non_robust",
+      "history_path": "results\\logs\\unlearn_orbit_vit_cifar10_forget0_seed_123_history.json",
+      "val_acc": 0.8563,
+      "retain_acc": 0.9504444444444444,
+      "forget_acc": 0.009,
+      "epoch": 17,
+      "best_attack": "apgd_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_apgd_margin_orbit__salun.json",
+      "forget_success_rate": 1.0,
+      "forget_median_radius": 0.007781862746924162,
+      "retain_success_rate": 1.0,
+      "retain_median_radius": 0.012132353149354458,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_apgd_margin_orbit__salun.json",
+          "attack": "apgd_margin",
+          "attack_loss": "apgd_margin",
+          "forget_success_rate": 1.0,
+          "forget_median_radius": 0.007781862746924162,
+          "retain_success_rate": 1.0,
+          "retain_median_radius": 0.012132353149354458,
+          "n_forget": 32,
+          "n_retain": 32
+        }
+      ]
+    },
+    {
+      "seed": 123,
+      "suite": "unlearn_salun_vit_cifar10_forget0",
+      "label": "SalUn",
+      "group": "non_robust",
+      "history_path": "results\\logs\\unlearn_salun_vit_cifar10_forget0_seed_123_history.json",
+      "val_acc": 0.8577,
+      "retain_acc": 0.9527777777777777,
+      "forget_acc": 0.002,
+      "epoch": 49,
+      "best_attack": "apgd_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_apgd_margin_orbit__salun.json",
+      "forget_success_rate": 1.0,
+      "forget_median_radius": 0.004779411945492029,
+      "retain_success_rate": 1.0,
+      "retain_median_radius": 0.006495098117738962,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_apgd_margin_orbit__salun.json",
+          "attack": "apgd_margin",
+          "attack_loss": "apgd_margin",
+          "forget_success_rate": 1.0,
+          "forget_median_radius": 0.004779411945492029,
+          "retain_success_rate": 1.0,
+          "retain_median_radius": 0.006495098117738962,
+          "n_forget": 32,
+          "n_retain": 32
+        }
+      ]
+    },
+    {
+      "seed": 123,
+      "suite": "unlearn_baldro_vit_cifar10_forget0_smoke",
+      "label": "BalDRO",
+      "group": "non_robust",
+      "history_path": "results\\logs\\unlearn_baldro_vit_cifar10_forget0_smoke_seed_123_history.json",
+      "val_acc": 0.8545,
+      "retain_acc": 0.9485555555555556,
+      "forget_acc": 0.008,
+      "epoch": 4,
+      "best_attack": "apgd_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_apgd_margin_baldro__orthoreg.json",
+      "forget_success_rate": 1.0,
+      "forget_median_radius": 0.005453431513160467,
+      "retain_success_rate": 1.0,
+      "retain_median_radius": 0.008210784755647182,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_apgd_margin_baldro__orthoreg.json",
+          "attack": "apgd_margin",
+          "attack_loss": "apgd_margin",
+          "forget_success_rate": 1.0,
+          "forget_median_radius": 0.005453431513160467,
+          "retain_success_rate": 1.0,
+          "retain_median_radius": 0.008210784755647182,
+          "n_forget": 32,
+          "n_retain": 32
+        }
+      ]
+    },
+    {
+      "seed": 123,
+      "suite": "unlearn_rurk_vit_cifar10_forget0_smoke",
+      "label": "RURK",
+      "group": "non_robust",
+      "history_path": "results\\logs\\unlearn_rurk_vit_cifar10_forget0_smoke_seed_123_history.json",
+      "val_acc": 0.853,
+      "retain_acc": 0.9477777777777778,
+      "forget_acc": 0.0,
+      "epoch": 4,
+      "best_attack": "apgd_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_apgd_margin_rurk.json",
+      "forget_success_rate": 1.0,
+      "forget_median_radius": 0.007352941203862429,
+      "retain_success_rate": 1.0,
+      "retain_median_radius": 0.008455882780253887,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_apgd_margin_rurk.json",
+          "attack": "apgd_margin",
+          "attack_loss": "apgd_margin",
+          "forget_success_rate": 1.0,
+          "forget_median_radius": 0.007352941203862429,
+          "retain_success_rate": 1.0,
+          "retain_median_radius": 0.008455882780253887,
+          "n_forget": 32,
+          "n_retain": 32
+        }
+      ]
+    },
+    {
+      "seed": 123,
+      "suite": "unlearn_salun_robust_base_forget0_smoke",
+      "label": "SalUn + Robust Base (smoke)",
+      "group": "robust_base",
+      "history_path": "results\\logs\\unlearn_salun_robust_base_forget0_smoke_seed_123_history.json",
+      "val_acc": 0.492,
+      "retain_acc": 0.5466666666666666,
+      "forget_acc": 0.0,
+      "epoch": 17,
+      "best_attack": "adam_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_adam_margin_ar0p2_salun-robust-base-forget0-smoke.json",
+      "forget_success_rate": 0.0,
+      "forget_median_radius": NaN,
+      "retain_success_rate": 0.03125,
+      "retain_median_radius": 0.02659313753247261,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_adam_margin_ar0p2_salun-robust-base-forget0-smoke.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 0.0,
+          "forget_median_radius": NaN,
+          "retain_success_rate": 0.03125,
+          "retain_median_radius": 0.02659313753247261,
+          "n_forget": 32,
+          "n_retain": 32
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_adam_margin_salun-robust-base-forget0-smoke.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 0.0,
+          "forget_median_radius": NaN,
+          "retain_success_rate": 0.03125,
+          "retain_median_radius": 0.02916666679084301,
+          "n_forget": 32,
+          "n_retain": 32
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_apgd_margin_salun-robust-base-forget0-smoke.json",
+          "attack": "apgd_margin",
+          "attack_loss": "apgd_margin",
+          "forget_success_rate": 0.0,
+          "forget_median_radius": NaN,
+          "retain_success_rate": 0.0,
+          "retain_median_radius": NaN,
+          "n_forget": 32,
+          "n_retain": 32
+        }
+      ]
+    },
+    {
+      "seed": 123,
+      "suite": "unlearn_salun_robust_base_forget0_mid",
+      "label": "SalUn + Robust Base (mid)",
+      "group": "robust_base",
+      "history_path": "results\\logs\\unlearn_salun_robust_base_forget0_mid_seed_123_history.json",
+      "val_acc": 0.5299,
+      "retain_acc": 0.5887777777777777,
+      "forget_acc": 0.0,
+      "epoch": 19,
+      "best_attack": "adam_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_adam_margin_ar0p2_salun-robust-base-forget0-mid.json",
+      "forget_success_rate": 0.03125,
+      "forget_median_radius": 0.03075980395078659,
+      "retain_success_rate": 0.0,
+      "retain_median_radius": NaN,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_adam_margin_ar0p2_salun-robust-base-forget0-mid.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 0.03125,
+          "forget_median_radius": 0.03075980395078659,
+          "retain_success_rate": 0.0,
+          "retain_median_radius": NaN,
+          "n_forget": 32,
+          "n_retain": 32
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_adam_margin_salun-robust-base-forget0-mid.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 0.0,
+          "forget_median_radius": NaN,
+          "retain_success_rate": 0.0,
+          "retain_median_radius": NaN,
+          "n_forget": 32,
+          "n_retain": 32
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_apgd_margin_salun-robust-base-forget0-mid.json",
+          "attack": "apgd_margin",
+          "attack_loss": "apgd_margin",
+          "forget_success_rate": 0.0,
+          "forget_median_radius": NaN,
+          "retain_success_rate": 0.0,
+          "retain_median_radius": NaN,
+          "n_forget": 32,
+          "n_retain": 32
+        }
+      ]
+    },
+    {
+      "seed": 123,
+      "suite": "unlearn_salun_robust_base_forget0_high",
+      "label": "SalUn + Robust Base (high)",
+      "group": "robust_base",
+      "history_path": "results\\logs\\unlearn_salun_robust_base_forget0_high_seed_123_history.json",
+      "val_acc": 0.5585,
+      "retain_acc": 0.6203333333333333,
+      "forget_acc": 0.002,
+      "epoch": 19,
+      "best_attack": "adam_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_adam_margin_ar0p2_salun-robust-base-forget0-high.json",
+      "forget_success_rate": 0.1875,
+      "forget_median_radius": 0.023651961237192154,
+      "retain_success_rate": 0.0625,
+      "retain_median_radius": 0.02757352963089943,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_adam_margin_ar0p2_salun-robust-base-forget0-high.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 0.1875,
+          "forget_median_radius": 0.023651961237192154,
+          "retain_success_rate": 0.0625,
+          "retain_median_radius": 0.02757352963089943,
+          "n_forget": 32,
+          "n_retain": 32
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_adam_margin_salun-robust-base-forget0-high.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 0.1875,
+          "forget_median_radius": 0.02549019642174244,
+          "retain_success_rate": 0.0625,
+          "retain_median_radius": 0.030637254938483238,
+          "n_forget": 32,
+          "n_retain": 32
+        },
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_apgd_margin_salun-robust-base-forget0-high.json",
+          "attack": "apgd_margin",
+          "attack_loss": "apgd_margin",
+          "forget_success_rate": 0.125,
+          "forget_median_radius": 0.01936274580657482,
+          "retain_success_rate": 0.0,
+          "retain_median_radius": NaN,
+          "n_forget": 32,
+          "n_retain": 32
+        }
+      ]
+    },
+    {
+      "seed": 123,
+      "suite": "unlearn_salun_robust_base_forget0_ultra",
+      "label": "SalUn + Robust Base (ultra)",
+      "group": "robust_base",
+      "history_path": "results\\logs\\unlearn_salun_robust_base_forget0_ultra_seed_123_history.json",
+      "val_acc": 0.5465,
+      "retain_acc": 0.6057777777777777,
+      "forget_acc": 0.013,
+      "epoch": 14,
+      "best_attack": "adam_margin",
+      "attack_path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_adam_margin_salun-robust-base-forget0-ultra.json",
+      "forget_success_rate": 0.34375,
+      "forget_median_radius": 0.024264706298708916,
+      "retain_success_rate": 0.0625,
+      "retain_median_radius": 0.019607843831181526,
+      "candidate_attacks": [
+        {
+          "path": "results\\analysis\\recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_adam_margin_salun-robust-base-forget0-ultra.json",
+          "attack": "adam_margin",
+          "attack_loss": "adam_margin",
+          "forget_success_rate": 0.34375,
+          "forget_median_radius": 0.024264706298708916,
+          "retain_success_rate": 0.0625,
+          "retain_median_radius": 0.019607843831181526,
+          "n_forget": 32,
+          "n_retain": 32
+        }
+      ]
+    }
+  ]
+}

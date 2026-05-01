@@ -1,0 +1,42 @@
+{
+  "seed": 42,
+  "forget_class": 0,
+  "timestamp": "2026-02-07T17:54:51.337086Z",
+  "models": {
+    "base": {
+      "inter_class_cosine": -0.17396727204322815,
+      "forget_variance": 22.54970359802246,
+      "retain_variance": 89.12139129638672
+    },
+    "oracle": {
+      "inter_class_cosine": 0.9355902075767517,
+      "forget_variance": 35.42086410522461,
+      "retain_variance": 71.18843078613281,
+      "cka_vs_base": 0.8223066926002502
+    },
+    "scrub": {
+      "inter_class_cosine": 0.9722453951835632,
+      "forget_variance": 13.859211921691895,
+      "retain_variance": 56.17817687988281,
+      "cka_vs_base": 0.9276870489120483
+    },
+    "kl": {
+      "inter_class_cosine": -0.009081065654754639,
+      "forget_variance": 4.878700256347656,
+      "retain_variance": 42.8239860534668,
+      "cka_vs_base": 0.9513946175575256
+    },
+    "sga": {
+      "inter_class_cosine": 0.9749575257301331,
+      "forget_variance": 8.023972511291504,
+      "retain_variance": 49.043113708496094,
+      "cka_vs_base": 0.9210414886474609
+    },
+    "baldro": {
+      "inter_class_cosine": 0.9427172541618347,
+      "forget_variance": 22.35445213317871,
+      "retain_variance": 56.75609588623047,
+      "cka_vs_base": 0.9348475337028503
+    }
+  }
+}

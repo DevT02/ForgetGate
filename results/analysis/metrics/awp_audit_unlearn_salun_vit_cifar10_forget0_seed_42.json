@@ -1,0 +1,13 @@
+{
+  "suite": "unlearn_salun_vit_cifar10_forget0",
+  "seed": 42,
+  "eps": 0.001,
+  "steps": 10,
+  "samples": 500,
+  "clean_forget_acc": 0.015,
+  "clean_retain_acc": 0.9447777777777778,
+  "pert_forget_acc": 0.951,
+  "pert_retain_acc": 0.9376666666666666,
+  "recovery_gap": 0.9359999999999999,
+  "timestamp": "2026-04-22T00:14:56.742374Z"
+}

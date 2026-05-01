@@ -1,0 +1,260 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{caption}
+\usepackage{xcolor}
+
+\title{\textbf{Multi-Regime Red Teaming of Machine Unlearning}}
+\author{
+  Devansh Tayal\thanks{Now at Columbia University.}\\
+  \normalsize Michigan State University\\
+  \normalsize \texttt{dt2932@columbia.edu}
+}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Machine unlearning methods are typically evaluated under a single attack regime, making it difficult to distinguish true forgetting from method-specific fragility. We present a multi-regime red-team study of machine unlearning robustness on a controlled CIFAR-10 benchmark using ViT-Tiny checkpoints and a mix of LoRA-based and full-finetune unlearning implementations. Across eight methods---SalUn, SCRUB, RURK, CE-U, SGA, BalDRO, ORBIT, and robust-base SalUn---we evaluate four attack families: universal perturbations, strong per-example conditional recovery, conditional local-delivery attacks (single patch, border frame, multi-patch), and amortized short-budget attacks. Our main findings are three. First, per-example conditional recovery is the dominant broad threat: non-robust methods remain conditionally recoverable even when universal perturbations largely fail. Second, local-delivery robustness is not a single property: patch-aware stage-2 defenses that reduce 32$\times$32 conditional patch recovery on ORBIT (78.1\%$\to$31.2\%) and CE-U (68.8\%$\to$43.8\%) fail to transfer to border-frame and multi-patch delivery surfaces, establishing local-delivery transfer as an open problem. Third, defenses are partial and method-specific: feature-subspace stage-2 provides the first consistent improvement to recovery radii on BalDRO, SalUn, and ORBIT without collapsing clean accuracy, while RURK resists both attack families and SCRUB exhibits generic adversarial fragility rather than selective forgetting leakage. Robust-base SalUn defines a utility-vs-recovery frontier rather than a fixed robust point. Our benchmark protocol, attack stack, and checkpoints are fully reproducible and publicly available at \url{https://github.com/DevT02/ForgetGate}.
+\end{abstract}
+
+\section{Introduction}
+Machine unlearning aims to remove information associated with a forget set while preserving performance on retained data. In practice, many evaluations still rely on clean forget accuracy or a narrow family of post-hoc probes. That is not enough. Our experiments indicate that different unlearning methods fail under different threat models: some admit strong per-example conditional recovery, some expose local conditional patch channels, some only resist attack by moving to a low-utility operating point, and some collapse into generic adversarial fragility that is not especially informative about forgetting.
+
+This paper therefore takes a multi-regime red-team view. The contribution is not ``one attack breaks everything.'' Instead, the contribution is a structured empirical map of where different methods fail, a partial new amortized attack for short-budget settings, and a modest but reproducible defense family based on stage-2 feature-subspace suppression. The headline findings are straightforward: strong per-example conditional recovery remains the main broad threat to non-robust unlearning methods, universal perturbations are mostly weak on the stronger checkpoints, robust-base training changes the utility-vs-recovery frontier rather than eliminating leakage outright, and a feature-subspace stage-2 defense modestly improves recovery radii on BalDRO, SalUn, and the repo-defined ORBIT row without collapsing clean accuracy. The newer delivery-surface checks also show that one-patch robustness does not imply robustness to border-frame or multi-patch delivery.
+
+Concretely, the paper makes four decisions that determine the rest of the manuscript. First, the main benchmark set is restricted to literature anchors (SalUn~\cite{fan2024salun}, SCRUB~\cite{kurmanji2023scrub}), newer literature methods (RURK~\cite{hsu2025rurk}, CE-U~\cite{yang2025ceu}), adapted recent methods (SGA~\cite{pang2025sga}, BalDRO~\cite{shao2026baldro}), and one repo-defined benchmark row (ORBIT), with robust-base SalUn treated as a defense frontier rather than as a separate method family. Second, strong per-example conditional recovery is treated as the primary attack regime, while patch, frame, and multi-patch delivery are used to test local-delivery transfer. Third, only qualified defense wins stay in the main text: feature-subspace stage-2 on BalDRO, SalUn, and the repo-defined ORBIT row; teacher-guided stochastic CVaR on the repo-defined ORBIT row; and CE-U patch-aware stage-2 as a partial patch-regime win (68.8\%$\to$43.8\% at 32$\times$32, seed 42). Fourth, proxy, bridge, and negative-control rows are kept, but moved to supporting roles rather than headline claims.
+
+Our benchmark philosophy is deliberate: this repository is a controlled robustness microscope, not a production-faithful industry benchmark. The goal is to expose residual recoverability and defense transfer gaps under a fixed, reproducible setup, not to claim that CIFAR-10 class-forgetting exactly mirrors real deletion workflows in deployed systems. That controlled design is a strength for failure-mode discovery, even though it limits direct real-world coverage.
+
+\section{Threat Models and Attack Regimes}
+\subsection{Universal perturbations}
+Our first regime includes Fourier, tile, warp, and codebook-style universal perturbations. These attacks are useful primarily as a negative result: on stronger methods, the residual vulnerability is not well-compressed into one shared low-complexity direction.
+
+\subsection{Per-example conditional recovery}
+The main broad attack optimizes the forgotten-class target margin
+\begin{equation}
+  m_t(x) = z_t(x) - \max_{j \neq t} z_j(x),
+\end{equation}
+using strong first-order optimizers such as \texttt{adam\_margin} and \texttt{apgd\_margin}. This regime asks whether a forgotten behavior is locally recoverable by a targeted per-example perturbation inside a fixed norm budget.
+
+\subsection{Adversarial weight perturbation (AWP)}
+Unlike input-space attacks, AWP audits the geometric robustness of the model parameters themselves. We freeze the inputs and optimize an adversarial perturbation directly on the model weights, $\theta_{unlearned} \rightarrow \theta_{unlearned} + \delta$, constrained by an extremely tight $L_\infty$ bound ($\epsilon=10^{-3}$). This regime proves whether the unlearned concept was genuinely destroyed, or merely shifted into an orthogonal, highly unstable ``loss basin.'' 
+
+\subsection{Membership Inference Attacks (MIA)}
+While AWP tests topological defense, MIA tests strict statistical data memorization. By thresholding likelihood ratios and predictive entropy against a held-out unseen dataset, we measure the Area Under the Curve (AUC) of an attacker guessing whether a given forget-class image was historically present in the training set. A mathematically sound unlearning algorithm must drive this AUC down toward $0.50$ (random guessing).
+
+\subsection{Amortized short-budget attacks}
+We additionally study a learned image-conditional perturbation generator trained from short Adam teacher trajectories and refined with a tiny local budget. This attack family is not a universal win, but it improves matched low-step attacks on ORBIT and SalUn.
+
+\subsection{Conditional patches}
+We also study a conditional small-area patch regime in which both patch content and placement depend on the input. This is a patch-based regime, not a universal trigger claim.
+
+\subsection{Additional local delivery surfaces}
+To test whether patch-aware defenses generalize beyond one square patch, we also study conditional border-frame attacks and conditional multi-patch attacks. These are stronger local-delivery checks than a single-patch evaluation because they alter geometry while preserving the same selective red-team objective.
+
+\section{Related Work}
+Our experiments sit at the intersection of machine unlearning, adversarial robustness, and parameter-efficient adaptation. We build directly on SalUn~\cite{fan2024salun}, SCRUB~\cite{kurmanji2023scrub}, LoRA~\cite{hu2022lora}, VPT~\cite{jia2022vpt}, and AutoAttack~\cite{croce2020autoattack}, and we treat recent 2025--2026 methods such as RURK~\cite{hsu2025rurk} and CE-U~\cite{yang2025ceu} as newer literature baselines. We additionally include adapted recent objectives such as SGA~\cite{pang2025sga} and BalDRO~\cite{shao2026baldro} as cross-domain benchmark rows, and one repo-defined internal row, ORBIT, as a useful stress-test target rather than as an external literature anchor. We also keep several additional repository rows, including FaLW-~\cite{yu2026falw} and Langevin-style~\cite{chien2024langevin} variants, only as proxy or supporting comparisons when they help define regime boundaries. We use Langevin Unlearning~\cite{chien2024langevin} as a theoretical anchor for principled privacy-certified evaluation and MUSE~\cite{shi2024muse} as an evaluation-oriented benchmark perspective to motivate our emphasis on multi-regime testing rather than single-metric forgetting claims.
+
+\section{Experimental Setup}
+\subsection{Models and data}
+All experiments in this draft use CIFAR-10 with 224x224 inputs and ViT-tiny-based checkpoints. The main benchmark rows in the paper are SalUn and SCRUB as literature anchors, RURK and CE-U as newer literature methods, SGA and BalDRO as adapted recent methods, and ORBIT as a repo-defined internal benchmark row, together with robust-base SalUn as a defense frontier. We also retain several appendix-only proxy, bridge, and negative-control rows already present in the repository.
+
+\input{method_classification_table}
+
+\subsection{ORBIT: repo-defined benchmark method}
+ORBIT (oracle-aligned, representation-dispersive unlearning) is a method defined in this repository, used as a stress-test target rather than as an external literature contribution. Its objective combines four terms: (1) a hinge-margin loss suppressing the forget-class logit below the maximum non-forget logit; (2) masked dark-knowledge distillation from a frozen oracle on non-forget classes, with the forget dimension excluded from the KL target; (3) a feature alignment term pulling forget-input representations toward the oracle's feature space; and (4) a dispersion penalty pushing forget features apart to weaken prototype and linear recovery channels. The motivation is that suppressing a single output logit is insufficient when the underlying representation still encodes the forgotten concept---alignment and dispersion together target the representational substrate rather than only the output layer. ORBIT is the strongest patch-positive case in our benchmark, making it the primary vehicle for studying local-delivery attacks and patch-aware defenses.
+
+\subsection{Why LoRA is in the stack but not the story}
+The repository originated as a LoRA-centered audit, and many of the stored checkpoints remain LoRA adapters for comparability and fast stage-2 iteration. That implementation choice is useful experimentally, but it is not the main scientific claim of the paper. The paper is about unlearning robustness under multiple attack regimes. We therefore treat LoRA primarily as part of the benchmark substrate, while using selected full-finetune and cross-architecture rows to verify that the resulting story is not purely an artifact of one parameter-efficient adaptation scheme.
+
+\subsection{Baseline checkpoint quality}
+The clean baseline summary shows that unlearning methods can appear successful on clean metrics while still exposing recovery channels. Across seeds 42, 123, and 456, clean retain accuracy stays in the low 90s for the main baselines, while forget accuracy varies dramatically by method. The base model sits at 91.83 $\pm$ 4.36 forget and 91.80 $\pm$ 3.77 retain. Uniform KL, CE Ascent, SalUn, and SCRUB all preserve similar retain performance, but their forget-side variance is extremely large, which already suggests that clean-point forgetting is an unstable proxy for actual robustness. These clean baselines therefore motivate attack-based evaluation rather than one-number forgetting claims.
+
+\subsection{Recovery metric}
+For each forget or retain-control sample, we search for the minimum perturbation that causes the unlearned model to predict the forgotten class. We report the median successful radius and clean-success rate under a matched audit battery.
+
+\input{protocol_table}
+
+\section{Core Conditional Recovery Results}
+\input{multiregime_results_section}
+
+\section{Short-Budget and Auxiliary Regimes}
+\subsection{Amortized short-budget attack}
+The learned distilled short-budget attacker is a real but target-dependent contribution. It improves matched low-step Adam on the repo-defined ORBIT row across both seeds and also helps on SalUn, but it does not preserve a clean forget/retain Pareto on RURK. We therefore position it as an amortized attack regime rather than a universal attack method.
+
+\input{short_budget_table}
+
+\subsection{Earlier prompt/probe regime}
+An earlier prompt-style red-team branch found a strong effect on Uniform KL under an oracle-contrastive probe, but not on the stronger methods. In particular, the strongest earlier prompt result moved Uniform KL seed 42 from 12.70\% forget to 21.10\% forget with only a 0.36pp retain drop, while SalUn, SCRUB, and the repo-defined ORBIT row remained in the resistant bucket under that family. We treat this as supporting evidence for regime sensitivity rather than as the core attack result.
+
+\subsection{Uniform KL as a bridge target}
+Uniform KL also remains useful under the newer conditional-recovery regime. A fast matched pilot with 2-step \texttt{adam\_margin} on seed 42 recovers all sampled forget examples with median radius 0.00147 while succeeding on only one of eight sampled retain controls. The same pilot on seed 123 is completely flat. This makes Uniform KL a bridge target between the older probe story and the newer conditional-optimization story: it is not only probe-vulnerable, but also locally recoverable on the vulnerable seed. A conditional 32x32 patch on seed 42 also yields a weak but nontrivial patch result (15.6\% forget recovery and 0\% retain-to-forget success), which is enough to show that KL is patch-accessible without making it a flagship patch case.
+
+\subsection{Additional auxiliary targets}
+SGA is another useful auxiliary target from the recent related-work list. It is clearly conditional under the main audit, but its behavior is strongly seed-dependent: seed 42 shows a meaningful forget-vs-retain gap, whereas seeds 123 and 456 drift toward generic adversarial fragility. A matched 32x32 conditional patch is dead on seed 42, and a lightweight feature-subspace stage-2 pilot only helps slightly under a matched fast pilot. We therefore treat both Uniform KL and SGA as auxiliary regime-defining targets rather than as the main methods around which to build the defense story.
+
+\input{auxiliary_targets_table}
+
+\section{Defense Discussion}
+\subsection{Feature-subspace stage-2}
+The first defense family that consistently helps is a post-unlearning feature-subspace stage-2 finetune. Instead of modifying the full unlearning objective from epoch 0, we begin from an already-unlearned adapter and suppress attacked forget-sample features inside a learned recovery subspace. This avoids the instability of earlier logit-margin and teacher-distillation defenses on BalDRO.
+
+\subsection{Why the gains are small}
+The absolute changes in reported radii are numerically small because the benchmark itself is small: CIFAR-10 under an $L_\infty$ budget on 224x224 inputs yields radii on the order of a few thousandths. The right question is therefore relative: does the defense move the forget-vs-retain frontier without collapsing clean utility? On BalDRO, SalUn, and the repo-defined ORBIT row, the answer is yes, though modestly.
+
+\subsection{What does not generalize}
+The defense is not universal. RURK remains a hard case under both attack and defense. SCRUB behaves like generic adversarial fragility rather than a clean forgetting-leak regime, so stronger attacks on SCRUB do not necessarily imply a meaningful unlearning failure mode. The newer delivery-surface results make this sharper: patch-aware defenses often fail to transfer to border-frame or multi-patch delivery, and the mixed-surface stage-2 branch does not reliably fix that.
+
+\section{Proposed Defense Objective}
+The experiments suggest that clean-point forgetting is too weak a training target. A more principled direction is targeted-margin adversarial unlearning:
+\begin{equation}
+\min_{\theta}
+\mathbb{E}_{x \in R} L_{\text{retain}}(x;\theta)
+ + \lambda_f \mathbb{E}_{x \in F} L_{\text{forget}}(x;\theta)
+ + \lambda_m \mathbb{E}_{x \in F} \max\!\left(0,\; m_t(x + \delta^*(x)) + \gamma \right),
+\end{equation}
+where $F$ is the forget set, $R$ is the retain set, $m_t$ is the forgotten-class target margin, $\delta^*(x)$ is an inner-loop or amortized attack, and $\gamma$ is a safety margin. Our implemented feature-subspace stage-2 defense can be viewed as a computationally cheaper approximation to this idea: defend against locally recoverable targeted behavior, not just against clean forget accuracy.
+
+\section{Discussion}
+The strongest framing of this work is a multi-regime red-team study rather than a single-method attack paper. The evidence does not support a universal ``magic'' attack or defense. Strong per-example conditional recovery is the main general threat; universal perturbations are mostly weak on the stronger checkpoints; conditional patches expose an additional local attack surface on some methods; border-frame and multi-patch delivery show that local-delivery transfer is a separate problem; robust-base methods define a utility-vs-recovery frontier rather than a binary robust point; and feature-subspace stage-2 provides the first modest defense gains on several targets. Later defense branches remain method-specific: teacher-guided stochastic CVaR helps the repo-defined ORBIT row slightly but not CE-U, while patch-aware stage-2 gives the first clearly positive CE-U result in the patch regime (68.8\%$\to$43.8\% at 32$\times$32, seed 42) with no retain-side failure, though it does not help on the full-image conditional attack. Mixed-surface stage-2 is informative precisely because it fails: even explicit delivery-surface-aware training does not reliably generalize across one-patch, frame, and multi-patch attacks. Uniform KL reinforces this framing: seed 42 is vulnerable under both the older prompt/probe family and the newer conditional audit, while seed 123 stays flat under the same fast conditional attack. That multifaceted pattern is scientifically stronger than forcing all methods into one attack or defense family.
+
+A standard paper version of this story therefore has a clear hierarchy. The main text should emphasize literature anchors, newer or adapted benchmark rows, broad conditional recovery, the robust-base frontier, and delivery-surface transfer. Appendix material should carry bridge rows, cross-architecture checks, proxy methods, repo-defined instrumentation that is not central to the claim, and failed defense branches unless they sharpen a specific claim already made in the core results. This separation makes the paper easier to read and keeps the evidence aligned with the strength of the claims.
+
+\section{Limitations}
+We do not claim a universally stronger new optimizer than strong first-order attacks such as \texttt{adam\_margin} or \texttt{apgd\_margin}. The amortized short-budget attack is partial and target-dependent. The defense gains are modest and currently demonstrated on a benchmark that is intentionally controlled rather than broad: mostly CIFAR-10 ViT checkpoints, often with LoRA-based unlearning implementations, plus a smaller number of full-finetune and cross-architecture checks. This makes the benchmark useful for discovering failure modes and transfer gaps, but not yet a direct proxy for most industry deletion settings. Finally, some regimes are better understood as negatives or controls than as headline wins.
+
+\appendix
+
+\section{Appendix: Seed Variance and Baseline Stability}
+The clean baseline regime itself is highly variable across seeds for several unlearning methods, especially on forget accuracy. Figure~\ref{fig:seed-variance} summarizes this instability. This is one reason our paper emphasizes attack-conditioned evaluation rather than clean forget accuracy alone.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.92\linewidth]{baseline_seed_variance.png}
+  \caption{Seed variance of clean baselines. Forget-side variance is large for several methods even when retain-side variance remains small.}
+  \label{fig:seed-variance}
+\end{figure}
+
+\section{Appendix: Robust-Base Frontier}
+Figure~\ref{fig:robust-frontier} summarizes the robust-base SalUn operating-point story. At low utility, recovery can be suppressed strongly or disappear on the sampled audit. As retain accuracy increases, conditional recovery re-emerges. This makes robust-base training a frontier choice rather than a single robust point.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.92\linewidth]{robust_base_frontier.png}
+  \caption{Robust-base SalUn operating-point frontier. Conditional recovery re-emerges as retain accuracy rises, confirming that robust-base training shifts the frontier rather than eliminating leakage.}
+  \label{fig:robust-frontier-app}
+\end{figure}
+
+\section{Appendix: Conditional Patch Regime}
+The patch regime is method-dependent. The repo-defined ORBIT row is the flagship positive case with a 32x32 conditional patch covering 2.04\% of the image, strong forget recovery, 0\% retain-to-forget success, and limited retain accuracy drop. SalUn is patch-vulnerable only at a larger 48x48 patch budget. BalDRO is effectively negative at the tested budgets. Figure~\ref{fig:patch-regime} summarizes the patch success rates across methods and seeds.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.92\linewidth]{conditional_patch_regime.png}
+  \caption{Conditional patch recovery rates across methods. ORBIT is the strongest patch-positive case; BalDRO and robust-base SalUn are effectively negative at 32$\times$32.}
+  \label{fig:patch-regime-app}
+\end{figure}
+
+\section{Appendix: Delivery-Surface Transfer}
+The later delivery-surface checks separate one-patch wins from broader local-delivery robustness. Under the conditional frame attack, the ORBIT patch-stage2 row and CE-U combined stage-2 both become easier to recover, and CE-U also incurs retain-side failure. Under conditional multi-patch delivery, the ORBIT patch-stage2 row transfers only weakly, while CE-U combined stage-2 and faithful full-ft SalUn patch-stage2 become easier to recover. Mixed-surface stage-2 was designed to fix this transfer problem, but in practice it only gives narrow gains and often worsens frame or multi-patch robustness. We therefore treat delivery-surface transfer as an open defense problem rather than as solved by the current stage-2 families.
+
+\section{Appendix: Negative and Hard Cases}
+RURK remains a hard case for both the amortized attack family and the feature-subspace defense. SCRUB is useful as a negative control: strong conditional attacks succeed, but forget and retain-control radii are almost identical, which suggests generic adversarial fragility rather than a clean forgetting-leak mechanism. Several later defense branches also belong in this bucket: mixed-surface stage-2, frame-transfer failures, and the faithful full-ft SalUn mixed-surface row are all informative mainly because they show what does not transfer.
+
+\section{Appendix: Reproducibility Artifacts}
+The paper draws from repository summaries and generated figures in:
+\begin{itemize}[leftmargin=1.5em]
+  \item \texttt{results/analysis/feature\_subspace\_tradeoff.md}
+  \item \texttt{results/analysis/recovery\_tradeoff\_summary.md}
+  \item \texttt{results/analysis/conditional\_patch\_summary.md}
+  \item \texttt{results/analysis/paper\_results\_outline.md}
+  \item \texttt{results/analysis/figures/}
+\end{itemize}
+
+The stored integrity checks also indicate that the repo-level artifact coverage is strong: the manifest tracks 275 logs with no missing entries in the major experimental buckets, and the integrity report finds no JSON decode errors or non-finite metrics in the tracked analyses, though some legacy evaluation files still miss individual model entries or attack fields. We therefore treat the current paper figures as being drawn from a reproducible but evolving experiment archive rather than from a frozen benchmark release.
+
+\section{Appendix: Low-Shot Controls}
+The lower-shot prompt controls help separate real recovery from trivial prompt memorization. Figure~\ref{fig:kshot-controls} summarizes two useful trends: oracle controls remain flat near zero across the tracked shot counts, while KL and SCRUB can become vulnerable only in specific low-shot or high-shot regimes.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.92\linewidth]{kshot_controls.png}
+  \caption{K-shot prompt controls. Oracle stays flat, KL remains weakly vulnerable, and SCRUB only becomes unstable in the larger-shot follow-up.}
+  \label{fig:kshot-controls}
+\end{figure}
+
+\begin{thebibliography}{99}
+
+\bibitem{kurmanji2023scrub}
+Meghdad Kurmanji, Peter Triantafillou, Jamie Hayes, and Eleni Triantafillou.
+\newblock Towards unbounded machine unlearning.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2023.
+
+\bibitem{fan2024salun}
+Chongyu Fan, Jiancheng Liu, Yihua Zhang, Eric Wong, Dennis Wei, and Sijia Liu.
+\newblock {SalUn}: Empowering machine unlearning via gradient-based weight saliency in both image classification and generation.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2024.
+
+\bibitem{hu2022lora}
+Edward J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu Chen.
+\newblock {LoRA}: Low-rank adaptation of large language models.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2022.
+
+\bibitem{croce2020autoattack}
+Francesco Croce and Matthias Hein.
+\newblock Reliable evaluation of adversarial robustness with an ensemble of diverse parameter-free attacks.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2020.
+
+\bibitem{jia2022vpt}
+Menglin Jia, Luming Tang, Bor-Chun Chen, Claire Cardie, Serge Belongie, Bharath Hariharan, and Ser-Nam Lim.
+\newblock Visual prompt tuning.
+\newblock In \emph{European Conference on Computer Vision (ECCV)}, 2022.
+
+\bibitem{hsu2025rurk}
+Hsiang Hsu, Pradeep Niroula, Zichang He, Ivan Brugere, Freddy Lecue, and Chun-Fu Chen.
+\newblock The unseen threat: Residual knowledge in machine unlearning under perturbed samples.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2025.
+
+\bibitem{shi2024muse}
+Weijia Shi, Jaechan Lee, Yangsibo Huang, Sadhika Malladi, Jieyu Zhao, Ari Holtzman, Daogao Liu, Luke Zettlemoyer, Noah A. Smith, and Chiyuan Zhang.
+\newblock {MUSE}: Machine unlearning six-way evaluation for language models.
+\newblock \emph{arXiv preprint arXiv:2407.06460}, 2024.
+
+\bibitem{pang2025sga}
+Zirui Pang, Hao Zheng, Zhijie Deng, Ling Li, Zixin Zhong, and Jiaheng Wei.
+\newblock Label smoothing improves gradient ascent in {LLM} unlearning.
+\newblock \emph{arXiv preprint arXiv:2510.22376}, 2025.
+
+\bibitem{shao2026baldro}
+Pengyang Shao, Naixin Zhai, Lei Chen, Yonghui Yang, Fengbin Zhu, Xun Yang, and Meng Wang.
+\newblock {BalDRO}: A distributionally robust optimization based framework for large language model unlearning.
+\newblock \emph{arXiv preprint arXiv:2601.09172}, 2026.
+
+\bibitem{chien2024langevin}
+Eli Chien, Haoyu Wang, Ziang Chen, and Pan Li.
+\newblock Langevin unlearning: A new perspective of noisy gradient descent for machine unlearning.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2024.
+
+\bibitem{yang2025ceu}
+Bo Yang.
+\newblock {CE-U}: Cross entropy unlearning.
+\newblock \emph{arXiv preprint arXiv:2503.01224}, 2025.
+
+\bibitem{yu2026falw}
+Liheng Yu, Zhe Zhao, Yuxuan Wang, Pengkun Wang, Xiaofeng Cao, Binwu Wang, and Yang Wang.
+\newblock {FaLW}: A forgetting-aware loss reweighting for long-tailed unlearning.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2026.
+
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,40 @@
+# Phase 2 CIFAR-100 Baselines
+base_resnet18_cifar100:
+  algorithm: "base"
+  dataset: "cifar100"
+  model: "resnet18"
+  seed: 42
+  lora: false
+  epochs: 100
+  description: "Phase 2 standard ResNet18 training on CIFAR-100"
+
+base_vit_small_cifar100:
+  algorithm: "base"
+  dataset: "cifar100"
+  model: "vit_small"
+  seed: 42
+  lora: false
+  epochs: 100
+  description: "Phase 2 ViT-Small training on CIFAR-100"
+
+unlearn_salun_resnet18_cifar100_forget0:
+  algorithm: "salun"
+  dataset: "cifar100"
+  model: "resnet18"
+  seed: 42
+  lora: false
+  forget_class: 0
+  epochs: 10
+  base_model_suite: "base_resnet18_cifar100"
+  description: "Phase 2 SalUn unlearning on CIFAR-100 (ResNet18)"
+  
+unlearn_rurk_vit_small_cifar100_forget0:
+  algorithm: "rurk"
+  dataset: "cifar100"
+  model: "vit_small"
+  seed: 42
+  lora: true
+  forget_class: 0
+  epochs: 10
+  base_model_suite: "base_vit_small_cifar100"
+  description: "Phase 2 RURK unlearning on CIFAR-100 (ViT-Small)"

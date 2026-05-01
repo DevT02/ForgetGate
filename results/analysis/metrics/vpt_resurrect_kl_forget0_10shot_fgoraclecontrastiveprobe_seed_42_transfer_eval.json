@@ -1,0 +1,231 @@
+{
+  "prompt_dir": "checkpoints/vpt_resurrector/vpt_resurrect_kl_forget0_10shot_fgoraclecontrastiveprobe_seed_42",
+  "prompt_seed": 42,
+  "prompt_info": {
+    "forget_class": 0,
+    "prompt_config": {
+      "prompt_type": "prefix",
+      "prompt_length": 10,
+      "init_strategy": "random",
+      "dropout": 0.1
+    },
+    "attack_history": [
+      {
+        "train_loss": 6.7614922523498535,
+        "loss_forget": 2.854001998901367,
+        "loss_retain": 0.02254425548017025,
+        "loss_feature": 3.88494610786438,
+        "feature_target_probe_score": -3.0926153659820557,
+        "feature_oracle_probe_score": -3.281398057937622,
+        "feature_contrast_gap": 0.18878291547298431,
+        "feature_oracle_penalty": 0.04045865684747696,
+        "resurrection_acc": 0.152,
+        "resurrection_loss": 2.7204033732414246,
+        "epoch": 0
+      },
+      {
+        "train_loss": 4.847649097442627,
+        "loss_forget": 1.8711769580841064,
+        "loss_retain": 0.01280268095433712,
+        "loss_feature": 2.963669538497925,
+        "feature_target_probe_score": -2.4748148918151855,
+        "feature_oracle_probe_score": -3.5271975994110107,
+        "feature_contrast_gap": 1.0523828268051147,
+        "feature_oracle_penalty": 0.03442571312189102,
+        "resurrection_acc": 0.156,
+        "resurrection_loss": 2.6624497175216675,
+        "epoch": 10
+      },
+      {
+        "train_loss": 5.405584335327148,
+        "loss_forget": 2.393754720687866,
+        "loss_retain": 0.03293747827410698,
+        "loss_feature": 2.9788918495178223,
+        "feature_target_probe_score": -2.506054162979126,
+        "feature_oracle_probe_score": -3.6350772380828857,
+        "feature_contrast_gap": 1.1290234327316284,
+        "feature_oracle_penalty": 0.02910010889172554,
+        "resurrection_acc": 0.165,
+        "resurrection_loss": 2.6043525338172913,
+        "epoch": 20
+      },
+      {
+        "train_loss": 5.196948528289795,
+        "loss_forget": 1.9977973699569702,
+        "loss_retain": 0.009119000285863876,
+        "loss_feature": 3.1900322437286377,
+        "feature_target_probe_score": -2.6016693115234375,
+        "feature_oracle_probe_score": -3.534510374069214,
+        "feature_contrast_gap": 0.9328411221504211,
+        "feature_oracle_penalty": 0.03444104269146919,
+        "resurrection_acc": 0.172,
+        "resurrection_loss": 2.5421772599220276,
+        "epoch": 30
+      },
+      {
+        "train_loss": 5.55242919921875,
+        "loss_forget": 2.277988910675049,
+        "loss_retain": 0.011501803994178772,
+        "loss_feature": 3.2629384994506836,
+        "feature_target_probe_score": -2.706171989440918,
+        "feature_oracle_probe_score": -3.5700435638427734,
+        "feature_contrast_gap": 0.8638715744018555,
+        "feature_oracle_penalty": 0.0339679978787899,
+        "resurrection_acc": 0.185,
+        "resurrection_loss": 2.4742261171340942,
+        "epoch": 40
+      },
+      {
+        "train_loss": 6.194123268127441,
+        "loss_forget": 2.979691982269287,
+        "loss_retain": 0.011732332408428192,
+        "loss_feature": 3.2026987075805664,
+        "feature_target_probe_score": -2.659268856048584,
+        "feature_oracle_probe_score": -3.6040656566619873,
+        "feature_contrast_gap": 0.9447970390319824,
+        "feature_oracle_penalty": 0.029825473204255104,
+        "resurrection_acc": 0.197,
+        "resurrection_loss": 2.405183970928192,
+        "epoch": 50
+      },
+      {
+        "train_loss": 3.965925693511963,
+        "loss_forget": 1.2462223768234253,
+        "loss_retain": 0.020283039659261703,
+        "loss_feature": 2.69942045211792,
+        "feature_target_probe_score": -2.187631368637085,
+        "feature_oracle_probe_score": -3.4503860473632812,
+        "feature_contrast_gap": 1.2627545595169067,
+        "feature_oracle_penalty": 0.03883705288171768,
+        "resurrection_acc": 0.22,
+        "resurrection_loss": 2.3280017971992493,
+        "epoch": 60
+      },
+      {
+        "train_loss": 5.472370147705078,
+        "loss_forget": 2.240417957305908,
+        "loss_retain": 0.00699214730411768,
+        "loss_feature": 3.2249598503112793,
+        "feature_target_probe_score": -2.6542587280273438,
+        "feature_oracle_probe_score": -3.6604042053222656,
+        "feature_contrast_gap": 1.006145715713501,
+        "feature_oracle_penalty": 0.033869337290525436,
+        "resurrection_acc": 0.237,
+        "resurrection_loss": 2.244938552379608,
+        "epoch": 70
+      },
+      {
+        "train_loss": 3.6534876823425293,
+        "loss_forget": 0.8058544993400574,
+        "loss_retain": 0.010268153622746468,
+        "loss_feature": 2.837364912033081,
+        "feature_target_probe_score": -2.267878293991089,
+        "feature_oracle_probe_score": -3.3419747352600098,
+        "feature_contrast_gap": 1.0740965604782104,
+        "feature_oracle_penalty": 0.0369054339826107,
+        "resurrection_acc": 0.274,
+        "resurrection_loss": 2.1509169936180115,
+        "epoch": 80
+      },
+      {
+        "train_loss": 4.563424110412598,
+        "loss_forget": 1.7104095220565796,
+        "loss_retain": 0.005728809162974358,
+        "loss_feature": 2.8472859859466553,
+        "feature_target_probe_score": -2.4690253734588623,
+        "feature_oracle_probe_score": -3.8660004138946533,
+        "feature_contrast_gap": 1.3969752788543701,
+        "feature_oracle_penalty": 0.024365568533539772,
+        "resurrection_acc": 0.294,
+        "resurrection_loss": 2.0640271306037903,
+        "epoch": 90
+      },
+      {
+        "train_loss": 4.563424110412598,
+        "loss_forget": 1.7104095220565796,
+        "loss_retain": 0.005728809162974358,
+        "loss_feature": 2.8472859859466553,
+        "feature_target_probe_score": -2.4690253734588623,
+        "feature_oracle_probe_score": -3.8660004138946533,
+        "feature_contrast_gap": 1.3969752788543701,
+        "feature_oracle_penalty": 0.024365568533539772,
+        "resurrection_acc": 0.294,
+        "resurrection_loss": 2.0640271306037903,
+        "epoch": 90.0,
+        "restored_best": 1.0
+      }
+    ],
+    "prompt_param_names": [
+      "prompt_embeddings"
+    ],
+    "feature_guidance": {
+      "mode": "oracle_contrastive_probe",
+      "normalize": true,
+      "max_forget_samples": 2000,
+      "max_retain_samples": 4000,
+      "probe_epochs": 200,
+      "probe_lr": 0.01,
+      "target_probe_train_acc": 0.9975062012672424,
+      "oracle_probe_train_acc": 0.9975062012672424,
+      "contrast_weight": 1.0,
+      "contrast_margin": 0.0
+    }
+  },
+  "targets": {
+    "unlearn_kl_vit_cifar10_forget0": {
+      "target_clean_overall_acc": 0.8618,
+      "target_clean_forget_acc": 0.127,
+      "target_clean_retain_acc": 0.9434444444444444,
+      "prompted_clean_overall_acc": 0.867,
+      "prompted_clean_forget_acc": 0.211,
+      "prompted_clean_retain_acc": 0.9398888888888889,
+      "forget_gain_vs_target": 0.08399999999999999,
+      "retain_drop_vs_target": 0.003555555555555534,
+      "overall_drop_vs_target": -0.005199999999999982
+    },
+    "unlearn_salun_vit_cifar10_forget0": {
+      "target_clean_overall_acc": 0.8507,
+      "target_clean_forget_acc": 0.0,
+      "target_clean_retain_acc": 0.9452222222222222,
+      "prompted_clean_overall_acc": 0.8465,
+      "prompted_clean_forget_acc": 0.0,
+      "prompted_clean_retain_acc": 0.9405555555555556,
+      "forget_gain_vs_target": 0.0,
+      "retain_drop_vs_target": 0.004666666666666597,
+      "overall_drop_vs_target": 0.0041999999999999815
+    },
+    "unlearn_scrub_distill_vit_cifar10_forget0": {
+      "target_clean_overall_acc": 0.8466,
+      "target_clean_forget_acc": 0.0,
+      "target_clean_retain_acc": 0.9406666666666667,
+      "prompted_clean_overall_acc": 0.8411,
+      "prompted_clean_forget_acc": 0.0,
+      "prompted_clean_retain_acc": 0.9345555555555556,
+      "forget_gain_vs_target": 0.0,
+      "retain_drop_vs_target": 0.006111111111111067,
+      "overall_drop_vs_target": 0.00550000000000006
+    },
+    "unlearn_orbit_vit_cifar10_forget0": {
+      "target_clean_overall_acc": 0.8506,
+      "target_clean_forget_acc": 0.003,
+      "target_clean_retain_acc": 0.9447777777777778,
+      "prompted_clean_overall_acc": 0.8478,
+      "prompted_clean_forget_acc": 0.003,
+      "prompted_clean_retain_acc": 0.9416666666666667,
+      "forget_gain_vs_target": 0.0,
+      "retain_drop_vs_target": 0.0031111111111111756,
+      "overall_drop_vs_target": 0.0028000000000000247
+    },
+    "oracle_vit_cifar10_forget0": {
+      "target_clean_overall_acc": 0.7931,
+      "target_clean_forget_acc": 0.0,
+      "target_clean_retain_acc": 0.8812222222222222,
+      "prompted_clean_overall_acc": 0.7834,
+      "prompted_clean_forget_acc": 0.0,
+      "prompted_clean_retain_acc": 0.8704444444444445,
+      "forget_gain_vs_target": 0.0,
+      "retain_drop_vs_target": 0.010777777777777775,
+      "overall_drop_vs_target": 0.009700000000000042
+    }
+  }
+}

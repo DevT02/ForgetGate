@@ -1,0 +1,222 @@
+{
+  "patch_dir": "checkpoints/universal_patch/patch_resurrect_kl_forget0_10shot_seed_42",
+  "patch_seed": 42,
+  "patch_info": {
+    "artifact_type": "universal_patch",
+    "forget_class": 0,
+    "patch_config": {
+      "patch_size": 32,
+      "position": "bottom_right",
+      "opacity": 1.0,
+      "init_strategy": "random",
+      "init_scale": 0.01,
+      "epochs": 100,
+      "lr": 0.05,
+      "batch_size": 64,
+      "eval_batch_size": 256,
+      "target_class": 0,
+      "k_shot": 10,
+      "lambda_retain": 1.0,
+      "T": 1.0,
+      "eval_every": 10,
+      "oracle_contrast_weight": 1.0
+    },
+    "attack_history": [
+      {
+        "train_loss": 3.515734910964966,
+        "loss_forget": 3.4752585887908936,
+        "loss_retain": 0.04047635197639465,
+        "loss_oracle": 6.070811908731599e-11,
+        "target_forget_prob": 0.09429576247930527,
+        "oracle_forget_prob": 6.070811908731599e-11,
+        "oracle_contrast_gap": 0.09429576241859715,
+        "resurrection_acc": 0.165,
+        "resurrection_loss": 2.718551278114319,
+        "epoch": 0.0
+      },
+      {
+        "train_loss": 2.5287652015686035,
+        "loss_forget": 2.3445940017700195,
+        "loss_retain": 0.18417125940322876,
+        "loss_oracle": 7.253916911587055e-10,
+        "target_forget_prob": 0.13452613353729248,
+        "oracle_forget_prob": 7.253916911587055e-10,
+        "oracle_contrast_gap": 0.1345261328119008,
+        "resurrection_acc": 0.277,
+        "resurrection_loss": 2.0576849579811096,
+        "epoch": 10.0
+      },
+      {
+        "train_loss": 1.803040623664856,
+        "loss_forget": 1.611506700515747,
+        "loss_retain": 0.1915338784456253,
+        "loss_oracle": 9.754569596509555e-09,
+        "target_forget_prob": 0.2636745870113373,
+        "oracle_forget_prob": 9.754569596509555e-09,
+        "oracle_contrast_gap": 0.2636745772567677,
+        "resurrection_acc": 0.479,
+        "resurrection_loss": 1.5075842440128326,
+        "epoch": 20.0
+      },
+      {
+        "train_loss": 1.7183067798614502,
+        "loss_forget": 1.4981298446655273,
+        "loss_retain": 0.22017687559127808,
+        "loss_oracle": 3.1795049232341555e-11,
+        "target_forget_prob": 0.36203452944755554,
+        "oracle_forget_prob": 3.1795049232341555e-11,
+        "oracle_contrast_gap": 0.3620345294157605,
+        "resurrection_acc": 0.571,
+        "resurrection_loss": 1.2681127190589905,
+        "epoch": 30.0
+      },
+      {
+        "train_loss": 1.2760618925094604,
+        "loss_forget": 0.9886524081230164,
+        "loss_retain": 0.2874095141887665,
+        "loss_oracle": 2.455989404903658e-11,
+        "target_forget_prob": 0.4584457576274872,
+        "oracle_forget_prob": 2.455989404903658e-11,
+        "oracle_contrast_gap": 0.4584457576029273,
+        "resurrection_acc": 0.633,
+        "resurrection_loss": 1.0986894071102142,
+        "epoch": 40.0
+      },
+      {
+        "train_loss": 1.1491296291351318,
+        "loss_forget": 1.0568517446517944,
+        "loss_retain": 0.09227786213159561,
+        "loss_oracle": 3.362577993826221e-10,
+        "target_forget_prob": 0.38694730401039124,
+        "oracle_forget_prob": 3.362577993826221e-10,
+        "oracle_contrast_gap": 0.38694730367413344,
+        "resurrection_acc": 0.681,
+        "resurrection_loss": 0.98804871737957,
+        "epoch": 50.0
+      },
+      {
+        "train_loss": 1.071199893951416,
+        "loss_forget": 0.8861165046691895,
+        "loss_retain": 0.18508338928222656,
+        "loss_oracle": 8.384772320901845e-10,
+        "target_forget_prob": 0.482103168964386,
+        "oracle_forget_prob": 8.384772320901845e-10,
+        "oracle_contrast_gap": 0.48210316812590875,
+        "resurrection_acc": 0.744,
+        "resurrection_loss": 0.8291943222284317,
+        "epoch": 60.0
+      },
+      {
+        "train_loss": 1.0867880582809448,
+        "loss_forget": 0.7254123687744141,
+        "loss_retain": 0.36137568950653076,
+        "loss_oracle": 4.182350910042487e-09,
+        "target_forget_prob": 0.5467932820320129,
+        "oracle_forget_prob": 4.182350910042487e-09,
+        "oracle_contrast_gap": 0.546793277849662,
+        "resurrection_acc": 0.785,
+        "resurrection_loss": 0.7215002477169037,
+        "epoch": 70.0
+      },
+      {
+        "train_loss": 0.7109940648078918,
+        "loss_forget": 0.5197509527206421,
+        "loss_retain": 0.19124311208724976,
+        "loss_oracle": 5.2535999855995996e-11,
+        "target_forget_prob": 0.6381251811981201,
+        "oracle_forget_prob": 5.2535999855995996e-11,
+        "oracle_contrast_gap": 0.6381251811455841,
+        "resurrection_acc": 0.805,
+        "resurrection_loss": 0.6746920347213745,
+        "epoch": 80.0
+      },
+      {
+        "train_loss": 0.7649135589599609,
+        "loss_forget": 0.4368061125278473,
+        "loss_retain": 0.32810741662979126,
+        "loss_oracle": 3.013481131297624e-11,
+        "target_forget_prob": 0.6969419717788696,
+        "oracle_forget_prob": 3.013481131297624e-11,
+        "oracle_contrast_gap": 0.6969419717487348,
+        "resurrection_acc": 0.835,
+        "resurrection_loss": 0.5945784151554108,
+        "epoch": 90.0
+      },
+      {
+        "train_loss": 0.6804348826408386,
+        "loss_forget": 0.3610801696777344,
+        "loss_retain": 0.31935471296310425,
+        "loss_oracle": 4.061533401267248e-11,
+        "target_forget_prob": 0.7330434918403625,
+        "oracle_forget_prob": 4.061533401267248e-11,
+        "oracle_contrast_gap": 0.7330434917997473,
+        "resurrection_acc": 0.849,
+        "resurrection_loss": 0.5665729343891144,
+        "epoch": 99.0
+      },
+      {
+        "resurrection_acc": 0.849,
+        "resurrection_loss": 0.5665729343891144,
+        "epoch": 99.0,
+        "restored_best": 1.0
+      }
+    ]
+  },
+  "targets": {
+    "unlearn_kl_vit_cifar10_forget0": {
+      "target_clean_overall_acc": 0.8618,
+      "target_clean_forget_acc": 0.127,
+      "target_clean_retain_acc": 0.9434444444444444,
+      "patched_clean_overall_acc": 0.9022,
+      "patched_clean_forget_acc": 0.718,
+      "patched_clean_retain_acc": 0.9226666666666666,
+      "forget_gain_vs_target": 0.591,
+      "retain_drop_vs_target": 0.020777777777777784,
+      "overall_drop_vs_target": -0.04039999999999999
+    },
+    "unlearn_salun_vit_cifar10_forget0": {
+      "target_clean_overall_acc": 0.8507,
+      "target_clean_forget_acc": 0.0,
+      "target_clean_retain_acc": 0.9452222222222222,
+      "patched_clean_overall_acc": 0.8322,
+      "patched_clean_forget_acc": 0.006,
+      "patched_clean_retain_acc": 0.924,
+      "forget_gain_vs_target": 0.006,
+      "retain_drop_vs_target": 0.021222222222222142,
+      "overall_drop_vs_target": 0.01849999999999996
+    },
+    "unlearn_scrub_distill_vit_cifar10_forget0": {
+      "target_clean_overall_acc": 0.8466,
+      "target_clean_forget_acc": 0.0,
+      "target_clean_retain_acc": 0.9406666666666667,
+      "patched_clean_overall_acc": 0.8354,
+      "patched_clean_forget_acc": 0.0,
+      "patched_clean_retain_acc": 0.9282222222222222,
+      "forget_gain_vs_target": 0.0,
+      "retain_drop_vs_target": 0.01244444444444448,
+      "overall_drop_vs_target": 0.011199999999999988
+    },
+    "unlearn_orbit_vit_cifar10_forget0": {
+      "target_clean_overall_acc": 0.8506,
+      "target_clean_forget_acc": 0.003,
+      "target_clean_retain_acc": 0.9447777777777778,
+      "patched_clean_overall_acc": 0.8439,
+      "patched_clean_forget_acc": 0.084,
+      "patched_clean_retain_acc": 0.9283333333333333,
+      "forget_gain_vs_target": 0.081,
+      "retain_drop_vs_target": 0.016444444444444484,
+      "overall_drop_vs_target": 0.006700000000000039
+    },
+    "oracle_vit_cifar10_forget0": {
+      "target_clean_overall_acc": 0.7931,
+      "target_clean_forget_acc": 0.0,
+      "target_clean_retain_acc": 0.8812222222222222,
+      "patched_clean_overall_acc": 0.7712,
+      "patched_clean_forget_acc": 0.0,
+      "patched_clean_retain_acc": 0.8568888888888889,
+      "forget_gain_vs_target": 0.0,
+      "retain_drop_vs_target": 0.024333333333333318,
+      "overall_drop_vs_target": 0.02190000000000003
+    }
+  }
+}

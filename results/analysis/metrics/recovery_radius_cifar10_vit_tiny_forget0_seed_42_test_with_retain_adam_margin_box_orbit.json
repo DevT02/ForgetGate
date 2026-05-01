@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "seed": 42,
+    "split": "test",
+    "dataset": "cifar10",
+    "model": "vit_tiny",
+    "forget_class": 0,
+    "model_suites": [
+      "unlearn_orbit_vit_cifar10_forget0"
+    ],
+    "norm": "l_inf",
+    "eps_max": 0.03137254901960784,
+    "steps": 20,
+    "restarts": 2,
+    "search_steps": 6,
+    "attack_loss": "adam_margin_box",
+    "oracle_feature_weight": 0.5,
+    "apgd_rho": 0.5,
+    "apgd_momentum": 0.75,
+    "bundle_margin_gate": -3.0,
+    "debug_attack_geometry": false,
+    "debug_max_samples": 2,
+    "debug_max_steps": 20,
+    "debug_topk": 5
+  },
+  "forget_recovery": {
+    "unlearn_orbit_vit_cifar10_forget0": {
+      "summary": {
+        "n_samples": 4,
+        "success_rate": 1.0,
+        "clean_success_rate": 0.0,
+        "median_radius": 0.0034620098304003477,
+        "mean_radius": 0.005606617778539658,
+        "min_radius": 0.002910539275035262,
+        "max_radius": 0.009313725866377354,
+        "p25_radius": 0.0033241421915590763,
+        "p75_radius": 0.007383578456938267,
+        "mean_target_prob_gain": 0.2829977571964264,
+        "median_target_prob_gain": 0.19892311096191406
+      },
+      "per_sample": [
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.009313725490196078,
+          "actual_delta": 0.00931374728679657,
+          "clean_target_prob": 0.0008726023370400071,
+          "adv_target_prob": 0.21766670048236847,
+          "adv_pred": 0,
+          "sample_index": 0
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0034620098039215685,
+          "actual_delta": 0.0034620463848114014,
+          "clean_target_prob": 0.00014861481031402946,
+          "adv_target_prob": 0.16227351129055023,
+          "adv_pred": 0,
+          "sample_index": 1
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.006740196078431373,
+          "actual_delta": 0.006740212440490723,
+          "clean_target_prob": 8.997413715405855e-06,
+          "adv_target_prob": 0.5541579127311707,
+          "adv_pred": 0,
+          "sample_index": 2
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0029105392156862746,
+          "actual_delta": 0.0029105544090270996,
+          "clean_target_prob": 0.004359430633485317,
+          "adv_target_prob": 0.20328253507614136,
+          "adv_pred": 0,
+          "sample_index": 3
+        }
+      ]
+    }
+  },
+  "retain_control": {
+    "unlearn_orbit_vit_cifar10_forget0": {
+      "summary": {
+        "n_samples": 4,
+        "success_rate": 1.0,
+        "clean_success_rate": 0.0,
+        "median_radius": 0.010049019940197468,
+        "mean_radius": 0.015073530375957489,
+        "min_radius": 0.005759804043918848,
+        "max_radius": 0.0313725508749485,
+        "p25_radius": 0.008976715616881847,
+        "p75_radius": 0.01767769642174244,
+        "mean_target_prob_gain": 0.21354487538337708,
+        "median_target_prob_gain": 0.1950075775384903
+      },
+      "per_sample": [
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.010049019607843136,
+          "actual_delta": 0.010049045085906982,
+          "clean_target_prob": 2.5853402196309404e-15,
+          "adv_target_prob": 0.1486368626356125,
+          "adv_pred": 0,
+          "sample_index": 0
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.013112745098039214,
+          "actual_delta": 0.013112753629684448,
+          "clean_target_prob": 7.776833343964284e-11,
+          "adv_target_prob": 0.2684701979160309,
+          "adv_pred": 0,
+          "sample_index": 1
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.005759803921568628,
+          "actual_delta": 0.005759820342063904,
+          "clean_target_prob": 2.1292113672188862e-07,
+          "adv_target_prob": 0.24206511676311493,
+          "adv_pred": 0,
+          "sample_index": 2
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.03137254901960784,
+          "actual_delta": 0.03137257695198059,
+          "clean_target_prob": 1.8163005838521583e-15,
+          "adv_target_prob": 0.1950075775384903,
+          "adv_pred": 0,
+          "sample_index": 3
+        }
+      ]
+    }
+  }
+}

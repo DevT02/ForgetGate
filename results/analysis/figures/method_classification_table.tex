@@ -1,0 +1,30 @@
+\begin{table}[t]
+  \centering
+  \small
+  \resizebox{\linewidth}{!}{%
+  \begin{tabular}{l l l l}
+    \toprule
+    Method / Row & Fidelity & Paper Role & Current Read \\
+    \midrule
+    SalUn (faithful full-ft) & faithful & main text & core literature anchor \\
+    SCRUB distill & reasonably faithful & main text & literature baseline; hard negative / generic fragility \\
+    ORBIT & repo-defined & main text & internal benchmark row; best later defense row \\
+    RURK & reasonably faithful & main text & recent method; hard negative / resistant case \\
+    SGA & adapted recent method & main text & auxiliary cross-domain benchmark row \\
+    BalDRO & adapted recent method & main text & main cross-domain benchmark row \\
+    CE-U & reasonably faithful & main text & recent related-work addition \\
+    robust-base SalUn & faithful frontier & main text & utility-vs-recovery frontier \\
+    Uniform KL & bridge / supporting & appendix & seed-sensitive bridge target \\
+    Prune+KL & supporting & appendix & auxiliary clean-forgetting row \\
+    CNN cross-checks & supporting & appendix & architecture sanity checks \\
+    legacy manifold/imposter & supporting & appendix & older harder-than-baseline branch \\
+    LoRA SalUn & proxy & appendix & PEFT-side approximation only \\
+    FaLW variants & proxy or invalid & appendix & not usable under current benchmark \\
+    Langevin variants & proxy or invalid & appendix & not valid forgetting rows yet \\
+    OrthoReg / noisy\_retain & proxy & appendix & repo-side approximations only \\
+    \bottomrule
+  \end{tabular}
+  }
+  \caption{Method classification used in this draft. This table fixes the distinction between literature anchors, recent or adapted benchmark rows, appendix-only supporting rows, and proxy or invalid rows so that the paper does not mix benchmark evidence with convenience artifacts.}
+  \label{tab:method-classification}
+\end{table}

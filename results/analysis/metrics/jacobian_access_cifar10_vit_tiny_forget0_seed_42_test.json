@@ -1,0 +1,2700 @@
+{
+  "meta": {
+    "seed": 42,
+    "split": "test",
+    "dataset": "cifar10",
+    "model": "vit_tiny",
+    "forget_class": 0,
+    "oracle_suite": "oracle_vit_cifar10_forget0",
+    "model_suites": [
+      "unlearn_kl_vit_cifar10_forget0",
+      "unlearn_salun_vit_cifar10_forget0",
+      "unlearn_scrub_distill_vit_cifar10_forget0",
+      "unlearn_orbit_vit_cifar10_forget0"
+    ],
+    "representations": [
+      "feature",
+      "logit"
+    ],
+    "max_forget_samples": 8,
+    "max_retain_samples": 8
+  },
+  "splits": {
+    "forget": {
+      "unlearn_kl_vit_cifar10_forget0": {
+        "feature": {
+          "summary": {
+            "gap_norm": {
+              "mean": 1.136707067489624,
+              "median": 1.1336500644683838,
+              "min": 1.0526639223098755,
+              "max": 1.2856701612472534,
+              "p25": 1.0753488540649414,
+              "p75": 1.1624324321746826
+            },
+            "projected_gap_norm": {
+              "mean": 0.9306854605674744,
+              "median": 0.932371199131012,
+              "min": 0.8939135670661926,
+              "max": 0.9829575419425964,
+              "p25": 0.9049414396286011,
+              "p75": 0.9443967342376709
+            },
+            "accessible_energy_ratio": {
+              "mean": 0.6735876798629761,
+              "median": 0.675343930721283,
+              "min": 0.5845348238945007,
+              "max": 0.7211266756057739,
+              "p25": 0.6601271629333496,
+              "p75": 0.7081857919692993
+            },
+            "residual_energy_ratio": {
+              "mean": 0.3264123797416687,
+              "median": 0.323574960231781,
+              "min": 0.2788733243942261,
+              "max": 0.41546517610549927,
+              "p25": 0.2918141782283783,
+              "p75": 0.3398727774620056
+            },
+            "input_jacobian_rank": {
+              "mean": 190.0,
+              "median": 190.0,
+              "min": 190.0,
+              "max": 190.0,
+              "p25": 190.0,
+              "p75": 190.0
+            },
+            "input_jacobian_trace": {
+              "mean": 7.256763458251953,
+              "median": 6.864815711975098,
+              "min": 1.3030130863189697,
+              "max": 12.014947891235352,
+              "p25": 5.191468238830566,
+              "p75": 10.769869804382324
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.14025233685970306,
+              "median": 0.13294968008995056,
+              "min": 0.1023038774728775,
+              "max": 0.1860864758491516,
+              "p25": 0.1202114000916481,
+              "p75": 0.15694616734981537
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.3677547872066498,
+              "median": 0.3751832842826843,
+              "min": 0.30397191643714905,
+              "max": 0.4182688295841217,
+              "p25": 0.344948410987854,
+              "p75": 0.3934905230998993
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 22.023658752441406,
+              "median": 17.190977096557617,
+              "min": 13.072491645812988,
+              "max": 48.73670196533203,
+              "p25": 14.933738708496094,
+              "p75": 22.942771911621094
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 1.1370958089828491,
+              "projected_gap_norm": 0.9344576001167297,
+              "accessible_energy_ratio": 0.6753439540373076,
+              "residual_energy_ratio": 0.3246560459626924,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 10.746720314025879,
+              "input_jacobian_top1_ratio": 0.13294968008995056,
+              "input_jacobian_top4_ratio": 0.3795470595359802,
+              "min_delta_norm_for_projection": 15.542307549865605
+            },
+            {
+              "gap_norm": 1.1818790435791016,
+              "projected_gap_norm": 0.9517433643341064,
+              "accessible_energy_ratio": 0.6484755573018472,
+              "residual_energy_ratio": 0.3515244426981527,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 8.033639907836914,
+              "input_jacobian_top1_ratio": 0.1023038774728775,
+              "input_jacobian_top4_ratio": 0.30397191643714905,
+              "min_delta_norm_for_projection": 17.190977986173262
+            },
+            {
+              "gap_norm": 1.1336500644683838,
+              "projected_gap_norm": 0.932371199131012,
+              "accessible_energy_ratio": 0.6764250248870113,
+              "residual_energy_ratio": 0.3235749751129887,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 1.3030130863189697,
+              "input_jacobian_top1_ratio": 0.10952719300985336,
+              "input_jacobian_top4_ratio": 0.32244250178337097,
+              "min_delta_norm_for_projection": 48.736701912226785
+            },
+            {
+              "gap_norm": 1.0526639223098755,
+              "projected_gap_norm": 0.8939135670661926,
+              "accessible_energy_ratio": 0.7211266657113583,
+              "residual_energy_ratio": 0.2788733342886417,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 12.014947891235352,
+              "input_jacobian_top1_ratio": 0.1860864758491516,
+              "input_jacobian_top4_ratio": 0.4182688295841217,
+              "min_delta_norm_for_projection": 13.072491926408508
+            },
+            {
+              "gap_norm": 1.2856701612472534,
+              "projected_gap_norm": 0.9829575419425964,
+              "accessible_energy_ratio": 0.5845348152580007,
+              "residual_energy_ratio": 0.41546518474199934,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 1.9945446252822876,
+              "input_jacobian_top1_ratio": 0.12377279996871948,
+              "input_jacobian_top4_ratio": 0.3524504005908966,
+              "min_delta_norm_for_projection": 30.57048719762248
+            },
+            {
+              "gap_norm": 1.1559503078460693,
+              "projected_gap_norm": 0.9419478178024292,
+              "accessible_energy_ratio": 0.6640110857000625,
+              "residual_energy_ratio": 0.3359889142999375,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 6.864815711975098,
+              "input_jacobian_top1_ratio": 0.15339790284633636,
+              "input_jacobian_top4_ratio": 0.3982802927494049,
+              "min_delta_norm_for_projection": 20.40019979940071
+            },
+            {
+              "gap_norm": 1.0694226026535034,
+              "projected_gap_norm": 0.9022557735443115,
+              "accessible_energy_ratio": 0.7118043677167457,
+              "residual_energy_ratio": 0.2881956322832543,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 10.839319229125977,
+              "input_jacobian_top1_ratio": 0.14638982713222504,
+              "input_jacobian_top4_ratio": 0.3751832842826843,
+              "min_delta_norm_for_projection": 13.10803288533588
+            },
+            {
+              "gap_norm": 1.0773242712020874,
+              "projected_gap_norm": 0.9058366417884827,
+              "accessible_energy_ratio": 0.7069796272615692,
+              "residual_energy_ratio": 0.2930203727384309,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 6.257109642028809,
+              "input_jacobian_top1_ratio": 0.16759096086025238,
+              "input_jacobian_top4_ratio": 0.3918939232826233,
+              "min_delta_norm_for_projection": 17.56806482955561
+            }
+          ]
+        },
+        "logit": {
+          "summary": {
+            "gap_norm": {
+              "mean": 28.014131546020508,
+              "median": 29.235427856445312,
+              "min": 22.22842788696289,
+              "max": 32.870849609375,
+              "p25": 24.19316864013672,
+              "p75": 31.00902557373047
+            },
+            "projected_gap_norm": {
+              "mean": 28.014122009277344,
+              "median": 29.235427856445312,
+              "min": 22.228422164916992,
+              "max": 32.87084197998047,
+              "p25": 24.193172454833984,
+              "p75": 31.009008407592773
+            },
+            "accessible_energy_ratio": {
+              "mean": 0.9999992251396179,
+              "median": 0.9999995231628418,
+              "min": 0.9999926686286926,
+              "max": 1.0000025033950806,
+              "p25": 0.9999990463256836,
+              "p75": 1.0000004768371582
+            },
+            "residual_energy_ratio": {
+              "mean": 1.3120675248501357e-06,
+              "median": 7.141034075175412e-08,
+              "min": 0.0,
+              "max": 7.360728886851575e-06,
+              "p25": 0.0,
+              "p75": 9.61941623245366e-07
+            },
+            "input_jacobian_rank": {
+              "mean": 10.0,
+              "median": 10.0,
+              "min": 10.0,
+              "max": 10.0,
+              "p25": 10.0,
+              "p75": 10.0
+            },
+            "input_jacobian_trace": {
+              "mean": 448.526123046875,
+              "median": 257.9417724609375,
+              "min": 81.22349548339844,
+              "max": 1114.9468994140625,
+              "p25": 194.67919921875,
+              "p75": 677.710205078125
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.31488218903541565,
+              "median": 0.30659300088882446,
+              "min": 0.258084237575531,
+              "max": 0.38533809781074524,
+              "p25": 0.28990232944488525,
+              "p75": 0.3314536511898041
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.7313272953033447,
+              "median": 0.7272589206695557,
+              "min": 0.6875879764556885,
+              "max": 0.7687373757362366,
+              "p25": 0.7160179615020752,
+              "p75": 0.7532125115394592
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 12.044230461120605,
+              "median": 7.300594329833984,
+              "min": 5.504352569580078,
+              "max": 25.729537963867188,
+              "p25": 6.888714790344238,
+              "p75": 15.059915542602539
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 24.578670501708984,
+              "projected_gap_norm": 24.578702926635742,
+              "accessible_energy_ratio": 1.0000025258250456,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 386.0921630859375,
+              "input_jacobian_top1_ratio": 0.30659300088882446,
+              "input_jacobian_top4_ratio": 0.7520787119865417,
+              "min_delta_norm_for_projection": 8.838082050758382
+            },
+            {
+              "gap_norm": 31.64373779296875,
+              "projected_gap_norm": 31.643753051757812,
+              "accessible_energy_ratio": 1.0000007924061645,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 231.96839904785156,
+              "input_jacobian_top1_ratio": 0.28243979811668396,
+              "input_jacobian_top4_ratio": 0.7132871150970459,
+              "min_delta_norm_for_projection": 12.51662956330497
+            },
+            {
+              "gap_norm": 32.870849609375,
+              "projected_gap_norm": 32.87084197998047,
+              "accessible_energy_ratio": 0.9999995480938826,
+              "residual_energy_ratio": 4.519061174079207e-07,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 81.22349548339844,
+              "input_jacobian_top1_ratio": 0.33071303367614746,
+              "input_jacobian_top4_ratio": 0.7281264066696167,
+              "min_delta_norm_for_projection": 25.72953857482558
+            },
+            {
+              "gap_norm": 22.22842788696289,
+              "projected_gap_norm": 22.228422164916992,
+              "accessible_energy_ratio": 0.9999993823639969,
+              "residual_energy_ratio": 6.176360031390733e-07,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 638.80810546875,
+              "input_jacobian_top1_ratio": 0.292389839887619,
+              "input_jacobian_top4_ratio": 0.7687373757362366,
+              "min_delta_norm_for_projection": 7.300594451947502
+            },
+            {
+              "gap_norm": 30.797454833984375,
+              "projected_gap_norm": 30.797426223754883,
+              "accessible_energy_ratio": 0.9999980051415867,
+              "residual_energy_ratio": 1.994858413315358e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 82.81157684326172,
+              "input_jacobian_top1_ratio": 0.32982414960861206,
+              "input_jacobian_top4_ratio": 0.716928243637085,
+              "min_delta_norm_for_projection": 22.689775841430762
+            },
+            {
+              "gap_norm": 23.036664962768555,
+              "projected_gap_norm": 23.03658103942871,
+              "accessible_energy_ratio": 0.9999926392710302,
+              "residual_energy_ratio": 7.360728969793523e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 1114.9468994140625,
+              "input_jacobian_top1_ratio": 0.3336755037307739,
+              "input_jacobian_top4_ratio": 0.7272589206695557,
+              "min_delta_norm_for_projection": 5.504352408005737
+            },
+            {
+              "gap_norm": 29.721811294555664,
+              "projected_gap_norm": 29.721818923950195,
+              "accessible_energy_ratio": 1.000000345461329,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 794.4166259765625,
+              "input_jacobian_top1_ratio": 0.258084237575531,
+              "input_jacobian_top4_ratio": 0.6875879764556885,
+              "min_delta_norm_for_projection": 6.889997458049156
+            },
+            {
+              "gap_norm": 29.235427856445312,
+              "projected_gap_norm": 29.235427856445312,
+              "accessible_energy_ratio": 0.9999999285896586,
+              "residual_energy_ratio": 7.141034138856266e-08,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 257.9417724609375,
+              "input_jacobian_top1_ratio": 0.38533809781074524,
+              "input_jacobian_top4_ratio": 0.7566139698028564,
+              "min_delta_norm_for_projection": 6.884866743495011
+            }
+          ]
+        }
+      },
+      "unlearn_salun_vit_cifar10_forget0": {
+        "feature": {
+          "summary": {
+            "gap_norm": {
+              "mean": 1.2189120054244995,
+              "median": 1.202108383178711,
+              "min": 1.1288496255874634,
+              "max": 1.3310743570327759,
+              "p25": 1.1861869096755981,
+              "p75": 1.2389999628067017
+            },
+            "projected_gap_norm": {
+              "mean": 0.9624595642089844,
+              "median": 0.9593358635902405,
+              "min": 0.9306052327156067,
+              "max": 0.9914325475692749,
+              "p25": 0.9533026218414307,
+              "p75": 0.9705318212509155
+            },
+            "accessible_energy_ratio": {
+              "mean": 0.62562495470047,
+              "median": 0.6248380541801453,
+              "min": 0.5547811388969421,
+              "max": 0.6796084642410278,
+              "p25": 0.6137704253196716,
+              "p75": 0.6458873748779297
+            },
+            "residual_energy_ratio": {
+              "mean": 0.3743751049041748,
+              "median": 0.363125205039978,
+              "min": 0.32039153575897217,
+              "max": 0.4452188313007355,
+              "p25": 0.3541126251220703,
+              "p75": 0.38622957468032837
+            },
+            "input_jacobian_rank": {
+              "mean": 190.0,
+              "median": 190.0,
+              "min": 190.0,
+              "max": 190.0,
+              "p25": 190.0,
+              "p75": 190.0
+            },
+            "input_jacobian_trace": {
+              "mean": 7.07273006439209,
+              "median": 7.308816432952881,
+              "min": 1.5573761463165283,
+              "max": 11.130687713623047,
+              "p25": 5.15733528137207,
+              "p75": 9.34239387512207
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.1366889774799347,
+              "median": 0.11850328743457794,
+              "min": 0.10273910313844681,
+              "max": 0.19990400969982147,
+              "p25": 0.1117626279592514,
+              "p75": 0.15519174933433533
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.353193074464798,
+              "median": 0.3452330231666565,
+              "min": 0.30426812171936035,
+              "max": 0.4119645059108734,
+              "p25": 0.33401167392730713,
+              "p75": 0.3698978126049042
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 21.64620590209961,
+              "median": 16.719816207885742,
+              "min": 12.77407455444336,
+              "max": 45.301090240478516,
+              "p25": 15.754655838012695,
+              "p75": 22.99273681640625
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 1.2685596942901611,
+              "projected_gap_norm": 0.9795334935188293,
+              "accessible_energy_ratio": 0.5962338986310272,
+              "residual_energy_ratio": 0.40376610136897284,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 8.780031204223633,
+              "input_jacobian_top1_ratio": 0.12274866551160812,
+              "input_jacobian_top4_ratio": 0.3508527874946594,
+              "min_delta_norm_for_projection": 16.6505838744284
+            },
+            {
+              "gap_norm": 1.2213190793991089,
+              "projected_gap_norm": 0.9654123783111572,
+              "accessible_energy_ratio": 0.6248380734421904,
+              "residual_energy_ratio": 0.3751619265578096,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 8.660293579101562,
+              "input_jacobian_top1_ratio": 0.11232666671276093,
+              "input_jacobian_top4_ratio": 0.30720576643943787,
+              "min_delta_norm_for_projection": 16.719815970690288
+            },
+            {
+              "gap_norm": 1.1829837560653687,
+              "projected_gap_norm": 0.9521334171295166,
+              "accessible_energy_ratio": 0.6477957259130608,
+              "residual_energy_ratio": 0.3522042740869392,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 1.5573761463165283,
+              "input_jacobian_top1_ratio": 0.11850328743457794,
+              "input_jacobian_top4_ratio": 0.34294697642326355,
+              "min_delta_norm_for_projection": 45.30108961938029
+            },
+            {
+              "gap_norm": 1.1288496255874634,
+              "projected_gap_norm": 0.9306052327156067,
+              "accessible_energy_ratio": 0.6796084630168193,
+              "residual_energy_ratio": 0.3203915369831807,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 11.130687713623047,
+              "input_jacobian_top1_ratio": 0.19990400969982147,
+              "input_jacobian_top4_ratio": 0.40481463074684143,
+              "min_delta_norm_for_projection": 13.066871605128823
+            },
+            {
+              "gap_norm": 1.3310743570327759,
+              "projected_gap_norm": 0.9914325475692749,
+              "accessible_energy_ratio": 0.5547811579568355,
+              "residual_energy_ratio": 0.4452188420431645,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 1.8580594062805176,
+              "input_jacobian_top1_ratio": 0.10273910313844681,
+              "input_jacobian_top4_ratio": 0.30426812171936035,
+              "min_delta_norm_for_projection": 30.85810915125269
+            },
+            {
+              "gap_norm": 1.202108383178711,
+              "projected_gap_norm": 0.9593358635902405,
+              "accessible_energy_ratio": 0.6368747959302701,
+              "residual_energy_ratio": 0.3631252040697299,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 7.308816432952881,
+              "input_jacobian_top1_ratio": 0.1804458349943161,
+              "input_jacobian_top4_ratio": 0.4119645059108734,
+              "min_delta_norm_for_projection": 20.37094506477378
+            },
+            {
+              "gap_norm": 1.1872546672821045,
+              "projected_gap_norm": 0.9536923766136169,
+              "accessible_energy_ratio": 0.6452512440419609,
+              "residual_energy_ratio": 0.3547487559580392,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 11.02947998046875,
+              "input_jacobian_top1_ratio": 0.11007049679756165,
+              "input_jacobian_top4_ratio": 0.3452330231666565,
+              "min_delta_norm_for_projection": 12.774074190936378
+            },
+            {
+              "gap_norm": 1.2291467189788818,
+              "projected_gap_norm": 0.9675312638282776,
+              "accessible_energy_ratio": 0.6196159110611943,
+              "residual_energy_ratio": 0.3803840889388057,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 6.257093906402588,
+              "input_jacobian_top1_ratio": 0.14677371084690094,
+              "input_jacobian_top4_ratio": 0.3582588732242584,
+              "min_delta_norm_for_projection": 17.42815189615999
+            }
+          ]
+        },
+        "logit": {
+          "summary": {
+            "gap_norm": {
+              "mean": 26.741758346557617,
+              "median": 28.336910247802734,
+              "min": 20.214597702026367,
+              "max": 30.679950714111328,
+              "p25": 22.478097915649414,
+              "p75": 30.235523223876953
+            },
+            "projected_gap_norm": {
+              "mean": 26.741790771484375,
+              "median": 28.336946487426758,
+              "min": 20.214521408081055,
+              "max": 30.679967880249023,
+              "p25": 22.478208541870117,
+              "p75": 30.23554229736328
+            },
+            "accessible_energy_ratio": {
+              "mean": 1.000002145767212,
+              "median": 1.000001072883606,
+              "min": 0.9999924302101135,
+              "max": 1.0000113248825073,
+              "p25": 1.0,
+              "p75": 1.000004768371582
+            },
+            "residual_energy_ratio": {
+              "mean": 1.0348502428314532e-06,
+              "median": 0.0,
+              "min": 0.0,
+              "max": 7.5429497883305885e-06,
+              "p25": 0.0,
+              "p75": 1.8396308121282345e-07
+            },
+            "input_jacobian_rank": {
+              "mean": 10.0,
+              "median": 10.0,
+              "min": 10.0,
+              "max": 10.0,
+              "p25": 10.0,
+              "p75": 10.0
+            },
+            "input_jacobian_trace": {
+              "mean": 345.1212158203125,
+              "median": 217.26815795898438,
+              "min": 66.31423950195312,
+              "max": 914.2679443359375,
+              "p25": 162.0415802001953,
+              "p75": 496.2529602050781
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.29497072100639343,
+              "median": 0.30466774106025696,
+              "min": 0.21708707511425018,
+              "max": 0.36539289355278015,
+              "p25": 0.26295608282089233,
+              "p75": 0.3185167610645294
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.7235278487205505,
+              "median": 0.7181364297866821,
+              "min": 0.6817280054092407,
+              "max": 0.7631973028182983,
+              "p25": 0.7003529071807861,
+              "p75": 0.740157961845398
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 12.244826316833496,
+              "median": 8.235495567321777,
+              "min": 5.735288143157959,
+              "max": 24.76433753967285,
+              "p25": 7.876984596252441,
+              "p75": 14.421967506408691
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 22.923917770385742,
+              "projected_gap_norm": 22.92405128479004,
+              "accessible_energy_ratio": 1.000011382257917,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 249.5373077392578,
+              "input_jacobian_top1_ratio": 0.30466774106025696,
+              "input_jacobian_top4_ratio": 0.7334784865379333,
+              "min_delta_norm_for_projection": 9.858674279898333
+            },
+            {
+              "gap_norm": 30.205848693847656,
+              "projected_gap_norm": 30.20583724975586,
+              "accessible_energy_ratio": 0.999999264147697,
+              "residual_energy_ratio": 7.358523029367464e-07,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 217.26815795898438,
+              "input_jacobian_top1_ratio": 0.24859994649887085,
+              "input_jacobian_top4_ratio": 0.6817280054092407,
+              "min_delta_norm_for_projection": 11.831246492009518
+            },
+            {
+              "gap_norm": 30.679950714111328,
+              "projected_gap_norm": 30.679967880249023,
+              "accessible_energy_ratio": 1.0000011023504511,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 80.70636749267578,
+              "input_jacobian_top1_ratio": 0.26774144172668457,
+              "input_jacobian_top4_ratio": 0.7335686087608337,
+              "min_delta_norm_for_projection": 24.76433725950169
+            },
+            {
+              "gap_norm": 20.214597702026367,
+              "projected_gap_norm": 20.214521408081055,
+              "accessible_energy_ratio": 0.9999924570501824,
+              "residual_energy_ratio": 7.542949817651055e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 470.6446533203125,
+              "input_jacobian_top1_ratio": 0.3371882736682892,
+              "input_jacobian_top4_ratio": 0.7631973028182983,
+              "min_delta_norm_for_projection": 8.084249805001573
+            },
+            {
+              "gap_norm": 30.32454490661621,
+              "projected_gap_norm": 30.324655532836914,
+              "accessible_energy_ratio": 1.0000073010301687,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 66.31423950195312,
+              "input_jacobian_top1_ratio": 0.3067956566810608,
+              "input_jacobian_top4_ratio": 0.7016122341156006,
+              "min_delta_norm_for_projection": 22.19413069385371
+            },
+            {
+              "gap_norm": 21.140640258789062,
+              "projected_gap_norm": 21.14068031311035,
+              "accessible_energy_ratio": 1.000003892142052,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 914.2679443359375,
+              "input_jacobian_top1_ratio": 0.3122929334640503,
+              "input_jacobian_top4_ratio": 0.7181364297866821,
+              "min_delta_norm_for_projection": 5.73528829260713
+            },
+            {
+              "gap_norm": 28.336910247802734,
+              "projected_gap_norm": 28.336946487426758,
+              "accessible_energy_ratio": 1.0000023563334024,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 573.077880859375,
+              "input_jacobian_top1_ratio": 0.21708707511425018,
+              "input_jacobian_top4_ratio": 0.6965750455856323,
+              "min_delta_norm_for_projection": 7.255189813908375
+            },
+            {
+              "gap_norm": 30.107656478881836,
+              "projected_gap_norm": 30.107656478881836,
+              "accessible_energy_ratio": 1.000000201998193,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 189.1533203125,
+              "input_jacobian_top1_ratio": 0.36539289355278015,
+              "input_jacobian_top4_ratio": 0.7599261403083801,
+              "min_delta_norm_for_projection": 8.23549509845046
+            }
+          ]
+        }
+      },
+      "unlearn_scrub_distill_vit_cifar10_forget0": {
+        "feature": {
+          "summary": {
+            "gap_norm": {
+              "mean": 1.2237157821655273,
+              "median": 1.1889195442199707,
+              "min": 1.0618211030960083,
+              "max": 1.3674675226211548,
+              "p25": 1.1755902767181396,
+              "p75": 1.291031837463379
+            },
+            "projected_gap_norm": {
+              "mean": 0.9591670036315918,
+              "median": 0.9538166522979736,
+              "min": 0.8976601362228394,
+              "max": 0.9949721693992615,
+              "p25": 0.9481463432312012,
+              "p75": 0.9826174378395081
+            },
+            "accessible_energy_ratio": {
+              "mean": 0.619737982749939,
+              "median": 0.6098964810371399,
+              "min": 0.5294048190116882,
+              "max": 0.7146956324577332,
+              "p25": 0.5793740749359131,
+              "p75": 0.6506075263023376
+            },
+            "residual_energy_ratio": {
+              "mean": 0.38026201725006104,
+              "median": 0.35638681054115295,
+              "min": 0.28530436754226685,
+              "max": 0.47059521079063416,
+              "p25": 0.34939244389533997,
+              "p75": 0.4206259250640869
+            },
+            "input_jacobian_rank": {
+              "mean": 190.0,
+              "median": 190.0,
+              "min": 190.0,
+              "max": 190.0,
+              "p25": 190.0,
+              "p75": 190.0
+            },
+            "input_jacobian_trace": {
+              "mean": 3.051659345626831,
+              "median": 2.6049399375915527,
+              "min": 0.6014132499694824,
+              "max": 5.2770233154296875,
+              "p25": 1.6226409673690796,
+              "p75": 4.807723045349121
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.21743807196617126,
+              "median": 0.19844840466976166,
+              "min": 0.15658476948738098,
+              "max": 0.2936577796936035,
+              "p25": 0.19183126091957092,
+              "p75": 0.23834121227264404
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.5109230279922485,
+              "median": 0.5111241340637207,
+              "min": 0.4466991722583771,
+              "max": 0.5739384293556213,
+              "p25": 0.4788457751274109,
+              "p75": 0.534690797328949
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 42.152191162109375,
+              "median": 40.63514709472656,
+              "min": 22.943513870239258,
+              "max": 81.18171691894531,
+              "p25": 30.218978881835938,
+              "p75": 44.73255157470703
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 1.3092058897018433,
+              "projected_gap_norm": 0.9853068590164185,
+              "accessible_energy_ratio": 0.5664049796345089,
+              "residual_energy_ratio": 0.4335950203654911,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 2.6049399375915527,
+              "input_jacobian_top1_ratio": 0.23073413968086243,
+              "input_jacobian_top4_ratio": 0.5321642160415649,
+              "min_delta_norm_for_projection": 43.679943910220395
+            },
+            {
+              "gap_norm": 1.1889195442199707,
+              "projected_gap_norm": 0.9538166522979736,
+              "accessible_energy_ratio": 0.6436132015522606,
+              "residual_energy_ratio": 0.3563867984477394,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 3.0423483848571777,
+              "input_jacobian_top1_ratio": 0.24477635324001312,
+              "input_jacobian_top4_ratio": 0.5422704815864563,
+              "min_delta_norm_for_projection": 40.63514747064341
+            },
+            {
+              "gap_norm": 1.0618211030960083,
+              "projected_gap_norm": 0.8976601362228394,
+              "accessible_energy_ratio": 0.7146956456093221,
+              "residual_energy_ratio": 0.28530435439067797,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 0.6014132499694824,
+              "input_jacobian_top1_ratio": 0.1849980503320694,
+              "input_jacobian_top4_ratio": 0.47457462549209595,
+              "min_delta_norm_for_projection": 81.1817171006271
+            },
+            {
+              "gap_norm": 1.1841069459915161,
+              "projected_gap_norm": 0.9518033862113953,
+              "accessible_energy_ratio": 0.6461192444011062,
+              "residual_energy_ratio": 0.3538807555988938,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 5.2770233154296875,
+              "input_jacobian_top1_ratio": 0.19844840466976166,
+              "input_jacobian_top4_ratio": 0.48026949167251587,
+              "min_delta_norm_for_projection": 22.9435129210034
+            },
+            {
+              "gap_norm": 1.2849738597869873,
+              "projected_gap_norm": 0.9817209839820862,
+              "accessible_energy_ratio": 0.5836970998885561,
+              "residual_energy_ratio": 0.4163029001114439,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 1.4004970788955688,
+              "input_jacobian_top1_ratio": 0.15658476948738098,
+              "input_jacobian_top4_ratio": 0.4466991722583771,
+              "min_delta_norm_for_projection": 42.54836832900808
+            },
+            {
+              "gap_norm": 1.1500403881072998,
+              "projected_gap_norm": 0.9371752738952637,
+              "accessible_energy_ratio": 0.6640724730779426,
+              "residual_energy_ratio": 0.3359275269220574,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 4.720263481140137,
+              "input_jacobian_top1_ratio": 0.1941089928150177,
+              "input_jacobian_top4_ratio": 0.5111241340637207,
+              "min_delta_norm_for_projection": 27.069751076429274
+            },
+            {
+              "gap_norm": 1.2431905269622803,
+              "projected_gap_norm": 0.9708804488182068,
+              "accessible_energy_ratio": 0.6098964703152787,
+              "residual_energy_ratio": 0.39010352968472134,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 5.070100784301758,
+              "input_jacobian_top1_ratio": 0.23619617521762848,
+              "input_jacobian_top4_ratio": 0.5739384293556213,
+              "min_delta_norm_for_projection": 31.268720954913555
+            },
+            {
+              "gap_norm": 1.3674675226211548,
+              "projected_gap_norm": 0.9949721693992615,
+              "accessible_energy_ratio": 0.5294047935214289,
+              "residual_energy_ratio": 0.47059520647857106,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 1.6966888904571533,
+              "input_jacobian_top1_ratio": 0.2936577796936035,
+              "input_jacobian_top4_ratio": 0.5263439416885376,
+              "min_delta_norm_for_projection": 47.8903828501219
+            }
+          ]
+        },
+        "logit": {
+          "summary": {
+            "gap_norm": {
+              "mean": 18.070354461669922,
+              "median": 17.234752655029297,
+              "min": 9.56668758392334,
+              "max": 24.50904083251953,
+              "p25": 15.898795127868652,
+              "p75": 21.289966583251953
+            },
+            "projected_gap_norm": {
+              "mean": 18.07038688659668,
+              "median": 17.234716415405273,
+              "min": 9.566664695739746,
+              "max": 24.50899887084961,
+              "p25": 15.898812294006348,
+              "p75": 21.290023803710938
+            },
+            "accessible_energy_ratio": {
+              "mean": 1.000002384185791,
+              "median": 0.9999966621398926,
+              "min": 0.999995231628418,
+              "max": 1.0000191926956177,
+              "p25": 0.9999964237213135,
+              "p75": 1.0000056028366089
+            },
+            "residual_energy_ratio": {
+              "mean": 1.9493622858135495e-06,
+              "median": 0.0,
+              "min": 0.0,
+              "max": 4.751620508613996e-06,
+              "p25": 0.0,
+              "p75": 3.5628613659355324e-06
+            },
+            "input_jacobian_rank": {
+              "mean": 10.0,
+              "median": 10.0,
+              "min": 10.0,
+              "max": 10.0,
+              "p25": 10.0,
+              "p75": 10.0
+            },
+            "input_jacobian_trace": {
+              "mean": 2481.5771484375,
+              "median": 2214.330322265625,
+              "min": 397.5988464355469,
+              "max": 5310.04638671875,
+              "p25": 1332.6082763671875,
+              "p75": 3504.444580078125
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.3173064589500427,
+              "median": 0.2932816445827484,
+              "min": 0.27293431758880615,
+              "max": 0.4687979221343994,
+              "p25": 0.28557777404785156,
+              "p75": 0.3123601973056793
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.7599526643753052,
+              "median": 0.7577722668647766,
+              "min": 0.7316755056381226,
+              "max": 0.7841672301292419,
+              "p25": 0.7528588175773621,
+              "p75": 0.7676023244857788
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 5.655023574829102,
+              "median": 4.570889472961426,
+              "min": 3.0525858402252197,
+              "max": 11.873037338256836,
+              "p25": 3.795896291732788,
+              "p75": 6.4106926918029785
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 22.111351013183594,
+              "projected_gap_norm": 22.111562728881836,
+              "accessible_energy_ratio": 1.0000192251730922,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 2214.330322265625,
+              "input_jacobian_top1_ratio": 0.30426448583602905,
+              "input_jacobian_top4_ratio": 0.7503843903541565,
+              "min_delta_norm_for_projection": 6.392710599566858
+            },
+            {
+              "gap_norm": 17.234752655029297,
+              "projected_gap_norm": 17.234716415405273,
+              "accessible_energy_ratio": 0.9999958903960405,
+              "residual_energy_ratio": 4.109603959521223e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 2427.858154296875,
+              "input_jacobian_top1_ratio": 0.2932816445827484,
+              "input_jacobian_top4_ratio": 0.7792673707008362,
+              "min_delta_norm_for_projection": 5.716376807572463
+            },
+            {
+              "gap_norm": 9.56668758392334,
+              "projected_gap_norm": 9.566664695739746,
+              "accessible_energy_ratio": 0.9999952483796974,
+              "residual_energy_ratio": 4.75162030252316e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 397.5988464355469,
+              "input_jacobian_top1_ratio": 0.27293431758880615,
+              "input_jacobian_top4_ratio": 0.7589570879936218,
+              "min_delta_norm_for_projection": 11.873037075635454
+            },
+            {
+              "gap_norm": 12.20447826385498,
+              "projected_gap_norm": 12.20445728302002,
+              "accessible_energy_ratio": 0.9999966193862219,
+              "residual_energy_ratio": 3.38061377809098e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 3641.384765625,
+              "input_jacobian_top1_ratio": 0.3190653324127197,
+              "input_jacobian_top4_ratio": 0.7577722668647766,
+              "min_delta_norm_for_projection": 3.0525858251704796
+            },
+            {
+              "gap_norm": 21.016170501708984,
+              "projected_gap_norm": 21.016176223754883,
+              "accessible_energy_ratio": 1.0000006218497266,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 938.68798828125,
+              "input_jacobian_top1_ratio": 0.2838185429573059,
+              "input_jacobian_top4_ratio": 0.7316755056381226,
+              "min_delta_norm_for_projection": 6.4646384030831285
+            },
+            {
+              "gap_norm": 17.130233764648438,
+              "projected_gap_norm": 17.130264282226562,
+              "accessible_energy_ratio": 1.0000037439153575,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 3458.7978515625,
+              "input_jacobian_top1_ratio": 0.28616419434547424,
+              "input_jacobian_top4_ratio": 0.7536836266517639,
+              "min_delta_norm_for_projection": 4.006817015515582
+            },
+            {
+              "gap_norm": 20.790132522583008,
+              "projected_gap_norm": 20.790250778198242,
+              "accessible_energy_ratio": 1.0000113674073132,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 5310.04638671875,
+              "input_jacobian_top1_ratio": 0.3101251423358917,
+              "input_jacobian_top4_ratio": 0.7637139558792114,
+              "min_delta_norm_for_projection": 3.1631344788263647
+            },
+            {
+              "gap_norm": 24.50904083251953,
+              "projected_gap_norm": 24.50899887084961,
+              "accessible_energy_ratio": 0.999996646939494,
+              "residual_energy_ratio": 3.3530605059768305e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 1463.9150390625,
+              "input_jacobian_top1_ratio": 0.4687979221343994,
+              "input_jacobian_top4_ratio": 0.7841672301292419,
+              "min_delta_norm_for_projection": 4.57088963703726
+            }
+          ]
+        }
+      },
+      "unlearn_orbit_vit_cifar10_forget0": {
+        "feature": {
+          "summary": {
+            "gap_norm": {
+              "mean": 0.9864093065261841,
+              "median": 0.9505136013031006,
+              "min": 0.920698344707489,
+              "max": 1.1403497457504272,
+              "p25": 0.9359374642372131,
+              "p75": 1.0130733251571655
+            },
+            "projected_gap_norm": {
+              "mean": 0.8542475700378418,
+              "median": 0.8350384831428528,
+              "min": 0.816343367099762,
+              "max": 0.935096800327301,
+              "p25": 0.8260166645050049,
+              "p75": 0.8719817399978638
+            },
+            "accessible_energy_ratio": {
+              "mean": 0.7533360719680786,
+              "median": 0.7698628902435303,
+              "min": 0.6724143624305725,
+              "max": 0.7861600518226624,
+              "p25": 0.7414565682411194,
+              "p75": 0.7789459228515625
+            },
+            "residual_energy_ratio": {
+              "mean": 0.2466638833284378,
+              "median": 0.22821511328220367,
+              "min": 0.21383997797966003,
+              "max": 0.3275856375694275,
+              "p25": 0.22105403244495392,
+              "p75": 0.25854337215423584
+            },
+            "input_jacobian_rank": {
+              "mean": 190.0,
+              "median": 190.0,
+              "min": 190.0,
+              "max": 190.0,
+              "p25": 190.0,
+              "p75": 190.0
+            },
+            "input_jacobian_trace": {
+              "mean": 4.693708419799805,
+              "median": 5.309475898742676,
+              "min": 0.6405719518661499,
+              "max": 8.457953453063965,
+              "p25": 2.7269582748413086,
+              "p75": 6.2025465965271
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.15942518413066864,
+              "median": 0.14578300714492798,
+              "min": 0.13107772171497345,
+              "max": 0.19267724454402924,
+              "p25": 0.14450865983963013,
+              "p75": 0.17990608513355255
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.40635785460472107,
+              "median": 0.41131535172462463,
+              "min": 0.34338057041168213,
+              "max": 0.4498094916343689,
+              "p25": 0.3886549472808838,
+              "p75": 0.4293997883796692
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 25.407119750976562,
+              "median": 20.468421936035156,
+              "min": 14.991199493408203,
+              "max": 57.75645065307617,
+              "p25": 16.914365768432617,
+              "p75": 25.720718383789062
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 0.9950265884399414,
+              "projected_gap_norm": 0.8622564673423767,
+              "accessible_energy_ratio": 0.750937073882877,
+              "residual_energy_ratio": 0.24906292611712294,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 6.130856037139893,
+              "input_jacobian_top1_ratio": 0.18449470400810242,
+              "input_jacobian_top4_ratio": 0.42453595995903015,
+              "min_delta_norm_for_projection": 17.30555955054392
+            },
+            {
+              "gap_norm": 0.9210237264633179,
+              "projected_gap_norm": 0.8164861798286438,
+              "accessible_energy_ratio": 0.7858797595871908,
+              "residual_energy_ratio": 0.2141202404128092,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 5.309475898742676,
+              "input_jacobian_top1_ratio": 0.13107772171497345,
+              "input_jacobian_top4_ratio": 0.3627226650714874,
+              "min_delta_norm_for_projection": 21.456585720957126
+            },
+            {
+              "gap_norm": 0.920698344707489,
+              "projected_gap_norm": 0.816343367099762,
+              "accessible_energy_ratio": 0.7861600248576077,
+              "residual_energy_ratio": 0.21383997514239228,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 0.6405719518661499,
+              "input_jacobian_top1_ratio": 0.1414564996957779,
+              "input_jacobian_top4_ratio": 0.34338057041168213,
+              "min_delta_norm_for_projection": 57.75645087076854
+            },
+            {
+              "gap_norm": 0.9555398225784302,
+              "projected_gap_norm": 0.8384081125259399,
+              "accessible_energy_ratio": 0.769862919086827,
+              "residual_energy_ratio": 0.23013708091317295,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 8.457953453063965,
+              "input_jacobian_top1_ratio": 0.14578300714492798,
+              "input_jacobian_top4_ratio": 0.4339001178741455,
+              "min_delta_norm_for_projection": 14.991199200424123
+            },
+            {
+              "gap_norm": 1.067213535308838,
+              "projected_gap_norm": 0.9011574983596802,
+              "accessible_energy_ratio": 0.7130152205950079,
+              "residual_energy_ratio": 0.2869847794049922,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 1.6328903436660767,
+              "input_jacobian_top1_ratio": 0.14552605152130127,
+              "input_jacobian_top4_ratio": 0.39729905128479004,
+              "min_delta_norm_for_projection": 31.86548954320528
+            },
+            {
+              "gap_norm": 1.1403497457504272,
+              "projected_gap_norm": 0.935096800327301,
+              "accessible_energy_ratio": 0.6724143573568051,
+              "residual_energy_ratio": 0.3275856426431949,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 5.868653774261475,
+              "input_jacobian_top1_ratio": 0.17837654054164886,
+              "input_jacobian_top4_ratio": 0.4498094916343689,
+              "min_delta_norm_for_projection": 20.468421991646668
+            },
+            {
+              "gap_norm": 0.9409087300300598,
+              "projected_gap_norm": 0.8291935324668884,
+              "accessible_energy_ratio": 0.7766347108844637,
+              "residual_energy_ratio": 0.22336528911553633,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 6.417618751525879,
+              "input_jacobian_top1_ratio": 0.15600968897342682,
+              "input_jacobian_top4_ratio": 0.41131535172462463,
+              "min_delta_norm_for_projection": 15.740782932067043
+            },
+            {
+              "gap_norm": 0.9505136013031006,
+              "projected_gap_norm": 0.8350384831428528,
+              "accessible_energy_ratio": 0.7717848874372576,
+              "residual_energy_ratio": 0.2282151125627424,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 3.0916476249694824,
+              "input_jacobian_top1_ratio": 0.19267724454402924,
+              "input_jacobian_top4_ratio": 0.42789968848228455,
+              "min_delta_norm_for_projection": 23.672462863987665
+            }
+          ]
+        },
+        "logit": {
+          "summary": {
+            "gap_norm": {
+              "mean": 25.86715316772461,
+              "median": 24.850257873535156,
+              "min": 20.923748016357422,
+              "max": 30.28995704650879,
+              "p25": 23.76236343383789,
+              "p75": 27.79806900024414
+            },
+            "projected_gap_norm": {
+              "mean": 25.867172241210938,
+              "median": 24.850278854370117,
+              "min": 20.92374038696289,
+              "max": 30.290102005004883,
+              "p25": 23.76238441467285,
+              "p75": 27.798030853271484
+            },
+            "accessible_energy_ratio": {
+              "mean": 1.0000011920928955,
+              "median": 1.0000014305114746,
+              "min": 0.9999957084655762,
+              "max": 1.0000094175338745,
+              "p25": 0.9999986886978149,
+              "p75": 1.000002384185791
+            },
+            "residual_energy_ratio": {
+              "mean": 1.0098294751514914e-06,
+              "median": 0.0,
+              "min": 0.0,
+              "max": 4.273513241059845e-06,
+              "p25": 0.0,
+              "p75": 1.334664375463035e-06
+            },
+            "input_jacobian_rank": {
+              "mean": 10.0,
+              "median": 10.0,
+              "min": 10.0,
+              "max": 10.0,
+              "p25": 10.0,
+              "p75": 10.0
+            },
+            "input_jacobian_trace": {
+              "mean": 888.0866088867188,
+              "median": 698.2230224609375,
+              "min": 146.61843872070312,
+              "max": 1767.8795166015625,
+              "p25": 465.8919372558594,
+              "p75": 1255.7520751953125
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.3208076059818268,
+              "median": 0.2990745007991791,
+              "min": 0.2618200480937958,
+              "max": 0.41216525435447693,
+              "p25": 0.29095813632011414,
+              "p75": 0.3426096737384796
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.7700554132461548,
+              "median": 0.7612254619598389,
+              "min": 0.752280056476593,
+              "max": 0.8118076324462891,
+              "p25": 0.7543109655380249,
+              "p75": 0.7752801775932312
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 9.578544616699219,
+              "median": 7.799259185791016,
+              "min": 4.444075107574463,
+              "max": 18.92935562133789,
+              "p25": 6.061159133911133,
+              "p75": 10.601232528686523
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 23.777664184570312,
+              "projected_gap_norm": 23.7777042388916,
+              "accessible_energy_ratio": 1.0000032386419209,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 995.8519287109375,
+              "input_jacobian_top1_ratio": 0.41216525435447693,
+              "input_jacobian_top4_ratio": 0.7724299430847168,
+              "min_delta_norm_for_projection": 7.799259043003575
+            },
+            {
+              "gap_norm": 27.72924041748047,
+              "projected_gap_norm": 27.729259490966797,
+              "accessible_energy_ratio": 1.0000014288170491,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 698.2230224609375,
+              "input_jacobian_top1_ratio": 0.2990745007991791,
+              "input_jacobian_top4_ratio": 0.7612254619598389,
+              "min_delta_norm_for_projection": 8.904107729607118
+            },
+            {
+              "gap_norm": 30.28995704650879,
+              "projected_gap_norm": 30.290102005004883,
+              "accessible_energy_ratio": 1.0000093799775,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 146.61843872070312,
+              "input_jacobian_top1_ratio": 0.2618200480937958,
+              "input_jacobian_top4_ratio": 0.7547620534896851,
+              "min_delta_norm_for_projection": 18.929355393289775
+            },
+            {
+              "gap_norm": 20.923748016357422,
+              "projected_gap_norm": 20.92374038696289,
+              "accessible_energy_ratio": 0.9999992332323779,
+              "residual_energy_ratio": 7.667676220800356e-07,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 1148.1397705078125,
+              "input_jacobian_top1_ratio": 0.32979825139045715,
+              "input_jacobian_top4_ratio": 0.8118076324462891,
+              "min_delta_norm_for_projection": 6.029129525232581
+            },
+            {
+              "gap_norm": 27.771183013916016,
+              "projected_gap_norm": 27.7711238861084,
+              "accessible_energy_ratio": 0.9999957264869332,
+              "residual_energy_ratio": 4.2735130667410365e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 222.302978515625,
+              "input_jacobian_top1_ratio": 0.29625633358955383,
+              "input_jacobian_top4_ratio": 0.752957820892334,
+              "min_delta_norm_for_projection": 15.692606668515412
+            },
+            {
+              "gap_norm": 24.850257873535156,
+              "projected_gap_norm": 24.850278854370117,
+              "accessible_energy_ratio": 1.0000016802240983,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 1767.8795166015625,
+              "input_jacobian_top1_ratio": 0.3532053828239441,
+              "input_jacobian_top4_ratio": 0.7838308215141296,
+              "min_delta_norm_for_projection": 4.4440748908791115
+            },
+            {
+              "gap_norm": 27.878726959228516,
+              "projected_gap_norm": 27.878755569458008,
+              "accessible_energy_ratio": 1.0000021203033416,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 1578.589111328125,
+              "input_jacobian_top1_ratio": 0.27506351470947266,
+              "input_jacobian_top4_ratio": 0.752280056476593,
+              "min_delta_norm_for_projection": 8.757984115457253
+            },
+            {
+              "gap_norm": 23.716459274291992,
+              "projected_gap_norm": 23.71642303466797,
+              "accessible_energy_ratio": 0.9999969616456595,
+              "residual_energy_ratio": 3.0383543404790725e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 547.0882568359375,
+              "input_jacobian_top1_ratio": 0.33907777070999146,
+              "input_jacobian_top4_ratio": 0.7711496353149414,
+              "min_delta_norm_for_projection": 6.071835281469906
+            }
+          ]
+        }
+      }
+    },
+    "retain": {
+      "unlearn_kl_vit_cifar10_forget0": {
+        "feature": {
+          "summary": {
+            "gap_norm": {
+              "mean": 0.9670810699462891,
+              "median": 0.9488889575004578,
+              "min": 0.8280766606330872,
+              "max": 1.1077377796173096,
+              "p25": 0.9221478700637817,
+              "p75": 1.0264005661010742
+            },
+            "projected_gap_norm": {
+              "mean": 0.8416910767555237,
+              "median": 0.8343341946601868,
+              "min": 0.7531298398971558,
+              "max": 0.9204168319702148,
+              "p25": 0.816333532333374,
+              "p75": 0.8793113827705383
+            },
+            "accessible_energy_ratio": {
+              "mean": 0.7619823217391968,
+              "median": 0.7556055784225464,
+              "min": 0.6903910636901855,
+              "max": 0.8271774649620056,
+              "p25": 0.7340182065963745,
+              "p75": 0.7845026254653931
+            },
+            "residual_energy_ratio": {
+              "mean": 0.2380177080631256,
+              "median": 0.22687584161758423,
+              "min": 0.17282254993915558,
+              "max": 0.30960896611213684,
+              "p25": 0.21549740433692932,
+              "p75": 0.2659817934036255
+            },
+            "input_jacobian_rank": {
+              "mean": 190.0,
+              "median": 190.0,
+              "min": 190.0,
+              "max": 190.0,
+              "p25": 190.0,
+              "p75": 190.0
+            },
+            "input_jacobian_trace": {
+              "mean": 4.175647735595703,
+              "median": 3.2214841842651367,
+              "min": 2.1192269325256348,
+              "max": 8.570131301879883,
+              "p25": 2.733799695968628,
+              "p75": 4.715614318847656
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.18992772698402405,
+              "median": 0.1797107458114624,
+              "min": 0.13421042263507843,
+              "max": 0.26646488904953003,
+              "p25": 0.17236609756946564,
+              "p75": 0.1995154768228531
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.44668877124786377,
+              "median": 0.44620874524116516,
+              "min": 0.3529149889945984,
+              "max": 0.5275792479515076,
+              "p25": 0.4310172498226166,
+              "p75": 0.4617759883403778
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 22.77682113647461,
+              "median": 20.837627410888672,
+              "min": 15.329164505004883,
+              "max": 32.06744384765625,
+              "p25": 19.873144149780273,
+              "p75": 26.531085968017578
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 0.8556001782417297,
+              "projected_gap_norm": 0.7724852561950684,
+              "accessible_energy_ratio": 0.8151521736776295,
+              "residual_energy_ratio": 0.18484782632237046,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 3.2214841842651367,
+              "input_jacobian_top1_ratio": 0.1946854293346405,
+              "input_jacobian_top4_ratio": 0.45160919427871704,
+              "min_delta_norm_for_projection": 21.09276039345313
+            },
+            {
+              "gap_norm": 0.9443303942680359,
+              "projected_gap_norm": 0.8309496641159058,
+              "accessible_energy_ratio": 0.7742860756001103,
+              "residual_energy_ratio": 0.22571392439988963,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 2.1192269325256348,
+              "input_jacobian_top1_ratio": 0.13421042263507843,
+              "input_jacobian_top4_ratio": 0.3529149889945984,
+              "min_delta_norm_for_projection": 27.550798696028078
+            },
+            {
+              "gap_norm": 1.1077377796173096,
+              "projected_gap_norm": 0.9204168319702148,
+              "accessible_energy_ratio": 0.6903910421313603,
+              "residual_energy_ratio": 0.3096089578686397,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 8.570131301879883,
+              "input_jacobian_top1_ratio": 0.1797107458114624,
+              "input_jacobian_top4_ratio": 0.41726332902908325,
+              "min_delta_norm_for_projection": 15.329164739997303
+            },
+            {
+              "gap_norm": 0.9488889575004578,
+              "projected_gap_norm": 0.8343341946601868,
+              "accessible_energy_ratio": 0.773124157870076,
+              "residual_energy_ratio": 0.2268758421299239,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 2.5675549507141113,
+              "input_jacobian_top1_ratio": 0.21233563125133514,
+              "input_jacobian_top4_ratio": 0.48994702100753784,
+              "min_delta_norm_for_projection": 32.067443347600424
+            },
+            {
+              "gap_norm": 0.9858936667442322,
+              "projected_gap_norm": 0.8569937944412231,
+              "accessible_energy_ratio": 0.7556055674708603,
+              "residual_energy_ratio": 0.2443944325291397,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 5.34688663482666,
+              "input_jacobian_top1_ratio": 0.16042658686637878,
+              "input_jacobian_top4_ratio": 0.4356018900871277,
+              "min_delta_norm_for_projection": 18.972099297595207
+            },
+            {
+              "gap_norm": 1.0463799238204956,
+              "projected_gap_norm": 0.8892053961753845,
+              "accessible_energy_ratio": 0.7221464749291763,
+              "residual_energy_ratio": 0.27785352507082367,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 2.789214611053467,
+              "input_jacobian_top1_ratio": 0.17634592950344086,
+              "input_jacobian_top4_ratio": 0.44620874524116516,
+              "min_delta_norm_for_projection": 26.191183409286918
+            },
+            {
+              "gap_norm": 1.0197407007217407,
+              "projected_gap_norm": 0.8760133981704712,
+              "accessible_energy_ratio": 0.7379754517674507,
+              "residual_energy_ratio": 0.2620245482325493,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 4.285495758056641,
+              "input_jacobian_top1_ratio": 0.19524209201335907,
+              "input_jacobian_top4_ratio": 0.45238563418388367,
+              "min_delta_norm_for_projection": 20.83762764986021
+            },
+            {
+              "gap_norm": 0.8280766606330872,
+              "projected_gap_norm": 0.7531298398971558,
+              "accessible_energy_ratio": 0.8271774429084031,
+              "residual_energy_ratio": 0.17282255709159688,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 4.505189895629883,
+              "input_jacobian_top1_ratio": 0.26646488904953003,
+              "input_jacobian_top4_ratio": 0.5275792479515076,
+              "min_delta_norm_for_projection": 20.173492201343233
+            }
+          ]
+        },
+        "logit": {
+          "summary": {
+            "gap_norm": {
+              "mean": 26.780275344848633,
+              "median": 25.4556884765625,
+              "min": 18.809677124023438,
+              "max": 34.324310302734375,
+              "p25": 21.70395851135254,
+              "p75": 31.40943717956543
+            },
+            "projected_gap_norm": {
+              "mean": 26.780284881591797,
+              "median": 25.455787658691406,
+              "min": 18.80962562561035,
+              "max": 34.32429122924805,
+              "p25": 21.703977584838867,
+              "p75": 31.40941047668457
+            },
+            "accessible_energy_ratio": {
+              "mean": 1.0000005960464478,
+              "median": 0.9999988675117493,
+              "min": 0.9999946355819702,
+              "max": 1.000008225440979,
+              "p25": 0.9999970197677612,
+              "p75": 1.0000038146972656
+            },
+            "residual_energy_ratio": {
+              "mean": 1.5968801108101616e-06,
+              "median": 0.0,
+              "min": 0.0,
+              "max": 5.347848400560906e-06,
+              "p25": 0.0,
+              "p75": 2.9822169835824752e-06
+            },
+            "input_jacobian_rank": {
+              "mean": 10.0,
+              "median": 10.0,
+              "min": 10.0,
+              "max": 10.0,
+              "p25": 10.0,
+              "p75": 10.0
+            },
+            "input_jacobian_trace": {
+              "mean": 1733.9920654296875,
+              "median": 1357.8873291015625,
+              "min": 467.1290283203125,
+              "max": 4060.58154296875,
+              "p25": 827.6071166992188,
+              "p75": 2113.28564453125
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.34951016306877136,
+              "median": 0.3470781445503235,
+              "min": 0.2636098563671112,
+              "max": 0.4460015296936035,
+              "p25": 0.30542752146720886,
+              "p75": 0.37682923674583435
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.7601380348205566,
+              "median": 0.7613927125930786,
+              "min": 0.7061721086502075,
+              "max": 0.802057147026062,
+              "p25": 0.7458758354187012,
+              "p75": 0.7755377888679504
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 6.071466445922852,
+              "median": 4.755128383636475,
+              "min": 3.9055721759796143,
+              "max": 10.34868335723877,
+              "p25": 4.385337829589844,
+              "p75": 6.921440601348877
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 33.136924743652344,
+              "projected_gap_norm": 33.13697814941406,
+              "accessible_energy_ratio": 1.0000031127456483,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 1773.7147216796875,
+              "input_jacobian_top1_ratio": 0.2636098563671112,
+              "input_jacobian_top4_ratio": 0.7395512461662292,
+              "min_delta_norm_for_projection": 5.949692905739541
+            },
+            {
+              "gap_norm": 30.833608627319336,
+              "projected_gap_norm": 30.833555221557617,
+              "accessible_energy_ratio": 0.9999965332293815,
+              "residual_energy_ratio": 3.4667706184256547e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 467.1290283203125,
+              "input_jacobian_top1_ratio": 0.4460015296936035,
+              "input_jacobian_top4_ratio": 0.7709097266197205,
+              "min_delta_norm_for_projection": 8.75983377725718
+            },
+            {
+              "gap_norm": 22.091846466064453,
+              "projected_gap_norm": 22.09185218811035,
+              "accessible_energy_ratio": 1.0000005002372374,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 900.5274658203125,
+              "input_jacobian_top1_ratio": 0.3470781445503235,
+              "input_jacobian_top4_ratio": 0.7613927125930786,
+              "min_delta_norm_for_projection": 4.045596123186713
+            },
+            {
+              "gap_norm": 20.54029655456543,
+              "projected_gap_norm": 20.540355682373047,
+              "accessible_energy_ratio": 1.0000058589757557,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 1357.8873291015625,
+              "input_jacobian_top1_ratio": 0.3653574585914612,
+              "input_jacobian_top4_ratio": 0.802057147026062,
+              "min_delta_norm_for_projection": 6.308643031444508
+            },
+            {
+              "gap_norm": 34.324310302734375,
+              "projected_gap_norm": 34.32429122924805,
+              "accessible_energy_ratio": 0.999998860277597,
+              "residual_energy_ratio": 1.1397224029948589e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 4060.58154296875,
+              "input_jacobian_top1_ratio": 0.29890182614326477,
+              "input_jacobian_top4_ratio": 0.747983992099762,
+              "min_delta_norm_for_projection": 4.498584524695527
+            },
+            {
+              "gap_norm": 29.049854278564453,
+              "projected_gap_norm": 29.049814224243164,
+              "accessible_energy_ratio": 0.9999971793007834,
+              "residual_energy_ratio": 2.8206992166195018e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 608.8461303710938,
+              "input_jacobian_top1_ratio": 0.30760276317596436,
+              "input_jacobian_top4_ratio": 0.7061721086502075,
+              "min_delta_norm_for_projection": 10.348683267031035
+            },
+            {
+              "gap_norm": 18.809677124023438,
+              "projected_gap_norm": 18.80962562561035,
+              "accessible_energy_ratio": 0.9999946521518016,
+              "residual_energy_ratio": 5.3478481983961975e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 1571.252197265625,
+              "input_jacobian_top1_ratio": 0.35628509521484375,
+              "input_jacobian_top4_ratio": 0.7784809470176697,
+              "min_delta_norm_for_projection": 3.90557220682134
+            },
+            {
+              "gap_norm": 25.4556884765625,
+              "projected_gap_norm": 25.455787658691406,
+              "accessible_energy_ratio": 1.0000081946359796,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 3131.998779296875,
+              "input_jacobian_top1_ratio": 0.41124460101127625,
+              "input_jacobian_top4_ratio": 0.7745567560195923,
+              "min_delta_norm_for_projection": 4.755128400896109
+            }
+          ]
+        }
+      },
+      "unlearn_salun_vit_cifar10_forget0": {
+        "feature": {
+          "summary": {
+            "gap_norm": {
+              "mean": 1.012898564338684,
+              "median": 0.9713929891586304,
+              "min": 0.8465286493301392,
+              "max": 1.191787838935852,
+              "p25": 0.9512861967086792,
+              "p75": 1.0906651020050049
+            },
+            "projected_gap_norm": {
+              "mean": 0.866258978843689,
+              "median": 0.8482107520103455,
+              "min": 0.7662978172302246,
+              "max": 0.9549415707588196,
+              "p25": 0.8351147770881653,
+              "p75": 0.9123238921165466
+            },
+            "accessible_energy_ratio": {
+              "mean": 0.7383573651313782,
+              "median": 0.7371971607208252,
+              "min": 0.6420304775238037,
+              "max": 0.8194299936294556,
+              "p25": 0.6999240517616272,
+              "p75": 0.7711561918258667
+            },
+            "residual_energy_ratio": {
+              "mean": 0.2616426348686218,
+              "median": 0.23753896355628967,
+              "min": 0.18057002127170563,
+              "max": 0.3579695224761963,
+              "p25": 0.2288438081741333,
+              "p75": 0.3000759780406952
+            },
+            "input_jacobian_rank": {
+              "mean": 190.0,
+              "median": 190.0,
+              "min": 190.0,
+              "max": 190.0,
+              "p25": 190.0,
+              "p75": 190.0
+            },
+            "input_jacobian_trace": {
+              "mean": 4.3142008781433105,
+              "median": 3.678068161010742,
+              "min": 2.002471923828125,
+              "max": 8.339221000671387,
+              "p25": 3.0458710193634033,
+              "p75": 4.830170631408691
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.19886235892772675,
+              "median": 0.18169143795967102,
+              "min": 0.13924816250801086,
+              "max": 0.2845543622970581,
+              "p25": 0.16810700297355652,
+              "p75": 0.21661421656608582
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.454936146736145,
+              "median": 0.4527006149291992,
+              "min": 0.3679578900337219,
+              "max": 0.5216009020805359,
+              "p25": 0.4308624863624573,
+              "p75": 0.4868617653846741
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 22.734899520874023,
+              "median": 20.47768211364746,
+              "min": 15.184137344360352,
+              "max": 30.705646514892578,
+              "p25": 19.423917770385742,
+              "p75": 27.831619262695312
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 0.9008212685585022,
+              "projected_gap_norm": 0.803270697593689,
+              "accessible_energy_ratio": 0.795145521745904,
+              "residual_energy_ratio": 0.20485447825409603,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 3.678068161010742,
+              "input_jacobian_top1_ratio": 0.21282456815242767,
+              "input_jacobian_top4_ratio": 0.45408034324645996,
+              "min_delta_norm_for_projection": 19.486393803293396
+            },
+            {
+              "gap_norm": 0.9681078791618347,
+              "projected_gap_norm": 0.8457294702529907,
+              "accessible_energy_ratio": 0.7631597340118477,
+              "residual_energy_ratio": 0.23684026598815236,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 2.002471923828125,
+              "input_jacobian_top1_ratio": 0.13924816250801086,
+              "input_jacobian_top4_ratio": 0.3679578900337219,
+              "min_delta_norm_for_projection": 28.452577991035145
+            },
+            {
+              "gap_norm": 1.191787838935852,
+              "projected_gap_norm": 0.9549415707588196,
+              "accessible_energy_ratio": 0.642030489904639,
+              "residual_energy_ratio": 0.357969510095361,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 8.339221000671387,
+              "input_jacobian_top1_ratio": 0.18169143795967102,
+              "input_jacobian_top4_ratio": 0.41735127568244934,
+              "min_delta_norm_for_projection": 15.184137419517931
+            },
+            {
+              "gap_norm": 0.9713929891586304,
+              "projected_gap_norm": 0.8482107520103455,
+              "accessible_energy_ratio": 0.7624610314929777,
+              "residual_energy_ratio": 0.23753896850702225,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 3.094390392303467,
+              "input_jacobian_top1_ratio": 0.21347609162330627,
+              "input_jacobian_top4_ratio": 0.5119243860244751,
+              "min_delta_norm_for_projection": 30.705645570837213
+            },
+            {
+              "gap_norm": 1.0225708484649658,
+              "projected_gap_norm": 0.8779811263084412,
+              "accessible_energy_ratio": 0.737197140393335,
+              "residual_energy_ratio": 0.262802859606665,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 5.590447902679443,
+              "input_jacobian_top1_ratio": 0.16339951753616333,
+              "input_jacobian_top4_ratio": 0.4353662431240082,
+              "min_delta_norm_for_projection": 19.2364930165095
+            },
+            {
+              "gap_norm": 1.1216377019882202,
+              "projected_gap_norm": 0.9258130192756653,
+              "accessible_energy_ratio": 0.6813046064676761,
+              "residual_energy_ratio": 0.3186953935323239,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 2.900312900543213,
+              "input_jacobian_top1_ratio": 0.22602860629558563,
+              "input_jacobian_top4_ratio": 0.4785075783729553,
+              "min_delta_norm_for_projection": 27.624632129550047
+            },
+            {
+              "gap_norm": 1.0803409814834595,
+              "projected_gap_norm": 0.9078274965286255,
+              "accessible_energy_ratio": 0.7061305008083221,
+              "residual_energy_ratio": 0.29386949919167793,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 4.331949234008789,
+              "input_jacobian_top1_ratio": 0.16967616975307465,
+              "input_jacobian_top4_ratio": 0.4527006149291992,
+              "min_delta_norm_for_projection": 20.711644768195168
+            },
+            {
+              "gap_norm": 0.8465286493301392,
+              "projected_gap_norm": 0.7662978172302246,
+              "accessible_energy_ratio": 0.8194299764812191,
+              "residual_energy_ratio": 0.18057002351878093,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 4.576744556427002,
+              "input_jacobian_top1_ratio": 0.2845543622970581,
+              "input_jacobian_top4_ratio": 0.5216009020805359,
+              "min_delta_norm_for_projection": 20.477682479624693
+            }
+          ]
+        },
+        "logit": {
+          "summary": {
+            "gap_norm": {
+              "mean": 25.434062957763672,
+              "median": 25.229488372802734,
+              "min": 17.606475830078125,
+              "max": 32.8443489074707,
+              "p25": 20.969314575195312,
+              "p75": 29.42588233947754
+            },
+            "projected_gap_norm": {
+              "mean": 25.43407440185547,
+              "median": 25.22940444946289,
+              "min": 17.606552124023438,
+              "max": 32.844329833984375,
+              "p25": 20.969364166259766,
+              "p75": 29.42591094970703
+            },
+            "accessible_energy_ratio": {
+              "mean": 1.0000020265579224,
+              "median": 0.9999988675117493,
+              "min": 0.9999933838844299,
+              "max": 1.0000125169754028,
+              "p25": 0.9999980330467224,
+              "p75": 1.0000046491622925
+            },
+            "residual_energy_ratio": {
+              "mean": 1.4632493048338802e-06,
+              "median": 0.0,
+              "min": 0.0,
+              "max": 6.6162551775050815e-06,
+              "p25": 0.0,
+              "p75": 1.960897634489811e-06
+            },
+            "input_jacobian_rank": {
+              "mean": 10.0,
+              "median": 10.0,
+              "min": 10.0,
+              "max": 10.0,
+              "p25": 10.0,
+              "p75": 10.0
+            },
+            "input_jacobian_trace": {
+              "mean": 1842.8348388671875,
+              "median": 1482.48193359375,
+              "min": 601.70263671875,
+              "max": 4368.0283203125,
+              "p25": 829.6041259765625,
+              "p75": 2151.509033203125
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.36031487584114075,
+              "median": 0.3346235156059265,
+              "min": 0.287853479385376,
+              "max": 0.474547415971756,
+              "p25": 0.3191770613193512,
+              "p75": 0.3885755240917206
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.7639414668083191,
+              "median": 0.7678753137588501,
+              "min": 0.7192871570587158,
+              "max": 0.7986670732498169,
+              "p25": 0.737616240978241,
+              "p75": 0.7882605195045471
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 6.022754192352295,
+              "median": 4.526580810546875,
+              "min": 4.036717414855957,
+              "max": 11.812774658203125,
+              "p25": 4.257011413574219,
+              "p75": 6.568205833435059
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 31.130149841308594,
+              "projected_gap_norm": 31.13011360168457,
+              "accessible_energy_ratio": 0.9999979845701208,
+              "residual_energy_ratio": 2.015429879226624e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 1842.3956298828125,
+              "input_jacobian_top1_ratio": 0.287853479385376,
+              "input_jacobian_top4_ratio": 0.7210798859596252,
+              "min_delta_norm_for_projection": 6.121310309965398
+            },
+            {
+              "gap_norm": 28.8577938079834,
+              "projected_gap_norm": 28.85784339904785,
+              "accessible_energy_ratio": 1.0000032981189508,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 601.70263671875,
+              "input_jacobian_top1_ratio": 0.474547415971756,
+              "input_jacobian_top4_ratio": 0.7872498035430908,
+              "min_delta_norm_for_projection": 7.908893610646893
+            },
+            {
+              "gap_norm": 21.766189575195312,
+              "projected_gap_norm": 21.766216278076172,
+              "accessible_energy_ratio": 1.0000025765897753,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 893.2658081054688,
+              "input_jacobian_top1_ratio": 0.3346235156059265,
+              "input_jacobian_top4_ratio": 0.7678753137588501,
+              "min_delta_norm_for_projection": 4.275009173110133
+            },
+            {
+              "gap_norm": 18.578693389892578,
+              "projected_gap_norm": 18.578807830810547,
+              "accessible_energy_ratio": 1.000012466336471,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 1844.92578125,
+              "input_jacobian_top1_ratio": 0.3483727276325226,
+              "input_jacobian_top4_ratio": 0.7986670732498169,
+              "min_delta_norm_for_projection": 5.297727803133966
+            },
+            {
+              "gap_norm": 32.8443489074707,
+              "projected_gap_norm": 32.844329833984375,
+              "accessible_energy_ratio": 0.9999988684108981,
+              "residual_energy_ratio": 1.1315891018916776e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 4368.0283203125,
+              "input_jacobian_top1_ratio": 0.29359233379364014,
+              "input_jacobian_top4_ratio": 0.7192871570587158,
+              "min_delta_norm_for_projection": 4.036717219100494
+            },
+            {
+              "gap_norm": 27.45936393737793,
+              "projected_gap_norm": 27.459339141845703,
+              "accessible_energy_ratio": 0.9999980572796524,
+              "residual_energy_ratio": 1.9427203475915245e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 638.6189575195312,
+              "input_jacobian_top1_ratio": 0.3692389726638794,
+              "input_jacobian_top4_ratio": 0.7431283593177795,
+              "min_delta_norm_for_projection": 11.812774493545179
+            },
+            {
+              "gap_norm": 17.606475830078125,
+              "projected_gap_norm": 17.606552124023438,
+              "accessible_energy_ratio": 1.00000876183808,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 1482.48193359375,
+              "input_jacobian_top1_ratio": 0.3277052938938141,
+              "input_jacobian_top4_ratio": 0.7912926077842712,
+              "min_delta_norm_for_projection": 4.203018811100522
+            },
+            {
+              "gap_norm": 25.229488372802734,
+              "projected_gap_norm": 25.22940444946289,
+              "accessible_energy_ratio": 0.9999933837447238,
+              "residual_energy_ratio": 6.616255276223864e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 3071.258544921875,
+              "input_jacobian_top1_ratio": 0.44658520817756653,
+              "input_jacobian_top4_ratio": 0.7829511761665344,
+              "min_delta_norm_for_projection": 4.526580930599236
+            }
+          ]
+        }
+      },
+      "unlearn_scrub_distill_vit_cifar10_forget0": {
+        "feature": {
+          "summary": {
+            "gap_norm": {
+              "mean": 1.0915188789367676,
+              "median": 1.0607644319534302,
+              "min": 0.8913130760192871,
+              "max": 1.344899296760559,
+              "p25": 1.0486319065093994,
+              "p75": 1.118210792541504
+            },
+            "projected_gap_norm": {
+              "mean": 0.9049031734466553,
+              "median": 0.8983902931213379,
+              "min": 0.7971564531326294,
+              "max": 0.9929941892623901,
+              "p25": 0.8922444581985474,
+              "p75": 0.9254571199417114
+            },
+            "accessible_energy_ratio": {
+              "mean": 0.6966423988342285,
+              "median": 0.6998957991600037,
+              "min": 0.5451472401618958,
+              "max": 0.799883246421814,
+              "p25": 0.685242235660553,
+              "p75": 0.7240360975265503
+            },
+            "residual_energy_ratio": {
+              "mean": 0.30335766077041626,
+              "median": 0.28271421790122986,
+              "min": 0.20011675357818604,
+              "max": 0.45485275983810425,
+              "p25": 0.2759638726711273,
+              "p75": 0.314757764339447
+            },
+            "input_jacobian_rank": {
+              "mean": 190.0,
+              "median": 190.0,
+              "min": 190.0,
+              "max": 190.0,
+              "p25": 190.0,
+              "p75": 190.0
+            },
+            "input_jacobian_trace": {
+              "mean": 3.1232657432556152,
+              "median": 2.276200771331787,
+              "min": 0.997239351272583,
+              "max": 4.911408424377441,
+              "p25": 1.9647984504699707,
+              "p75": 4.566644668579102
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.23240284621715546,
+              "median": 0.2001463770866394,
+              "min": 0.14989569783210754,
+              "max": 0.30338725447654724,
+              "p25": 0.19797678291797638,
+              "p75": 0.2778310179710388
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.5206053853034973,
+              "median": 0.4957762360572815,
+              "min": 0.42766815423965454,
+              "max": 0.5780690908432007,
+              "p25": 0.49275916814804077,
+              "p75": 0.5733871459960938
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 32.27347183227539,
+              "median": 29.157976150512695,
+              "min": 22.425922393798828,
+              "max": 49.994781494140625,
+              "p25": 24.80704689025879,
+              "p75": 37.76128005981445
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 1.054774522781372,
+              "projected_gap_norm": 0.895582377910614,
+              "accessible_energy_ratio": 0.7209277768372419,
+              "residual_energy_ratio": 0.2790722231627582,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 2.0698776245117188,
+              "input_jacobian_top1_ratio": 0.2001463770866394,
+              "input_jacobian_top4_ratio": 0.4957762360572815,
+              "min_delta_norm_for_projection": 29.157976988644332
+            },
+            {
+              "gap_norm": 1.1059372425079346,
+              "projected_gap_norm": 0.9201008677482605,
+              "accessible_energy_ratio": 0.6921655207044154,
+              "residual_energy_ratio": 0.30783447929558455,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 0.997239351272583,
+              "input_jacobian_top1_ratio": 0.14989569783210754,
+              "input_jacobian_top4_ratio": 0.42766815423965454,
+              "min_delta_norm_for_projection": 49.9947800009536
+            },
+            {
+              "gap_norm": 1.344899296760559,
+              "projected_gap_norm": 0.9929941892623901,
+              "accessible_energy_ratio": 0.5451472457857514,
+              "residual_energy_ratio": 0.45485275421424864,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 3.7339696884155273,
+              "input_jacobian_top1_ratio": 0.27020853757858276,
+              "input_jacobian_top4_ratio": 0.5725149512290955,
+              "min_delta_norm_for_projection": 31.291632424110205
+            },
+            {
+              "gap_norm": 1.0302038192749023,
+              "projected_gap_norm": 0.8822305798530579,
+              "accessible_energy_ratio": 0.7333611629163935,
+              "residual_energy_ratio": 0.2666388370836065,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 2.276200771331787,
+              "input_jacobian_top1_ratio": 0.24314963817596436,
+              "input_jacobian_top4_ratio": 0.5315732955932617,
+              "min_delta_norm_for_projection": 37.36759339498347
+            },
+            {
+              "gap_norm": 1.0607644319534302,
+              "projected_gap_norm": 0.8983902931213379,
+              "accessible_energy_ratio": 0.7172857851313041,
+              "residual_energy_ratio": 0.28271421486869586,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 4.888514518737793,
+              "input_jacobian_top1_ratio": 0.20008514821529388,
+              "input_jacobian_top4_ratio": 0.49389955401420593,
+              "min_delta_norm_for_projection": 23.89718986813617
+            },
+            {
+              "gap_norm": 1.155031442642212,
+              "projected_gap_norm": 0.941525936126709,
+              "accessible_energy_ratio": 0.6644723873764634,
+              "residual_energy_ratio": 0.33552761262353653,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 1.649560809135437,
+              "input_jacobian_top1_ratio": 0.19165170192718506,
+              "input_jacobian_top4_ratio": 0.48933807015419006,
+              "min_delta_norm_for_projection": 38.94234645801727
+            },
+            {
+              "gap_norm": 1.0892267227172852,
+              "projected_gap_norm": 0.9112446904182434,
+              "accessible_energy_ratio": 0.6998958237983338,
+              "residual_energy_ratio": 0.30010417620166613,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 4.459354877471924,
+              "input_jacobian_top1_ratio": 0.300698459148407,
+              "input_jacobian_top4_ratio": 0.5760036110877991,
+              "min_delta_norm_for_projection": 25.110332705755813
+            },
+            {
+              "gap_norm": 0.8913130760192871,
+              "projected_gap_norm": 0.7971564531326294,
+              "accessible_energy_ratio": 0.79988324244771,
+              "residual_energy_ratio": 0.20011675755228994,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 4.911408424377441,
+              "input_jacobian_top1_ratio": 0.30338725447654724,
+              "input_jacobian_top4_ratio": 0.5780690908432007,
+              "min_delta_norm_for_projection": 22.425922435215735
+            }
+          ]
+        },
+        "logit": {
+          "summary": {
+            "gap_norm": {
+              "mean": 17.165508270263672,
+              "median": 16.404132843017578,
+              "min": 11.117246627807617,
+              "max": 26.93361473083496,
+              "p25": 13.889627456665039,
+              "p75": 18.682838439941406
+            },
+            "projected_gap_norm": {
+              "mean": 17.165626525878906,
+              "median": 16.40430450439453,
+              "min": 11.117398262023926,
+              "max": 26.933557510375977,
+              "p25": 13.889724731445312,
+              "p75": 18.683141708374023
+            },
+            "accessible_energy_ratio": {
+              "mean": 1.000015139579773,
+              "median": 1.00002121925354,
+              "min": 0.9999914765357971,
+              "max": 1.0000360012054443,
+              "p25": 1.0000025033950806,
+              "p75": 1.0000243186950684
+            },
+            "residual_energy_ratio": {
+              "mean": 1.6007763861125568e-06,
+              "median": 0.0,
+              "min": 0.0,
+              "max": 8.515186891600024e-06,
+              "p25": 0.0,
+              "p75": 1.0727559356382699e-06
+            },
+            "input_jacobian_rank": {
+              "mean": 10.0,
+              "median": 10.0,
+              "min": 10.0,
+              "max": 10.0,
+              "p25": 10.0,
+              "p75": 10.0
+            },
+            "input_jacobian_trace": {
+              "mean": 2836.33544921875,
+              "median": 2175.115478515625,
+              "min": 763.0107421875,
+              "max": 4858.12548828125,
+              "p25": 1879.076416015625,
+              "p75": 3972.404296875
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.36123472452163696,
+              "median": 0.36267805099487305,
+              "min": 0.2573436498641968,
+              "max": 0.4564670920372009,
+              "p25": 0.28636664152145386,
+              "p75": 0.42563870549201965
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.7788615226745605,
+              "median": 0.7900131940841675,
+              "min": 0.6874018311500549,
+              "max": 0.8214671015739441,
+              "p25": 0.7518346309661865,
+              "p75": 0.8133946061134338
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 6.548156261444092,
+              "median": 5.682765483856201,
+              "min": 3.1887929439544678,
+              "max": 14.109694480895996,
+              "p25": 4.486636161804199,
+              "p75": 7.374373435974121
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 19.584699630737305,
+              "projected_gap_norm": 19.584924697875977,
+              "accessible_energy_ratio": 1.0000232326700988,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 2175.115478515625,
+              "input_jacobian_top1_ratio": 0.2952062487602234,
+              "input_jacobian_top4_ratio": 0.7510915994644165,
+              "min_delta_norm_for_projection": 14.109694569159211
+            },
+            {
+              "gap_norm": 14.057377815246582,
+              "projected_gap_norm": 14.057527542114258,
+              "accessible_energy_ratio": 1.0000213118197205,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 763.0107421875,
+              "input_jacobian_top1_ratio": 0.25984784960746765,
+              "input_jacobian_top4_ratio": 0.7520822882652283,
+              "min_delta_norm_for_projection": 7.742389264446524
+            },
+            {
+              "gap_norm": 16.404132843017578,
+              "projected_gap_norm": 16.40430450439453,
+              "accessible_energy_ratio": 1.000021207291407,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 3804.8115234375,
+              "input_jacobian_top1_ratio": 0.4564670920372009,
+              "input_jacobian_top4_ratio": 0.8120200037956238,
+              "min_delta_norm_for_projection": 3.6005194554141653
+            },
+            {
+              "gap_norm": 11.117246627807617,
+              "projected_gap_norm": 11.117398262023926,
+              "accessible_energy_ratio": 1.0000274080807665,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 2105.58251953125,
+              "input_jacobian_top1_ratio": 0.40158572793006897,
+              "input_jacobian_top4_ratio": 0.8214671015739441,
+              "min_delta_norm_for_projection": 5.682765457256484
+            },
+            {
+              "gap_norm": 26.93361473083496,
+              "projected_gap_norm": 26.933557510375977,
+              "accessible_energy_ratio": 0.9999957089763839,
+              "residual_energy_ratio": 4.291023616111228e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 4858.12548828125,
+              "input_jacobian_top1_ratio": 0.36267805099487305,
+              "input_jacobian_top4_ratio": 0.7992975115776062,
+              "min_delta_norm_for_projection": 6.027376660636009
+            },
+            {
+              "gap_norm": 17.458391189575195,
+              "projected_gap_norm": 17.458433151245117,
+              "accessible_energy_ratio": 1.0000048059901863,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 1199.5582275390625,
+              "input_jacobian_top1_ratio": 0.2573436498641968,
+              "input_jacobian_top4_ratio": 0.6874018311500549,
+              "min_delta_norm_for_projection": 7.2517016814408
+            },
+            {
+              "gap_norm": 13.386374473571777,
+              "projected_gap_norm": 13.386317253112793,
+              "accessible_energy_ratio": 0.9999914848135055,
+              "residual_energy_ratio": 8.515186494505491e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 3309.299072265625,
+              "input_jacobian_top1_ratio": 0.4338468313217163,
+              "input_jacobian_top4_ratio": 0.8175184726715088,
+              "min_delta_norm_for_projection": 3.1887928453869523
+            },
+            {
+              "gap_norm": 18.382217407226562,
+              "projected_gap_norm": 18.38254737854004,
+              "accessible_energy_ratio": 1.0000360352223978,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 4475.1826171875,
+              "input_jacobian_top1_ratio": 0.4229026734828949,
+              "input_jacobian_top4_ratio": 0.7900131940841675,
+              "min_delta_norm_for_projection": 4.7820082917119615
+            }
+          ]
+        }
+      },
+      "unlearn_orbit_vit_cifar10_forget0": {
+        "feature": {
+          "summary": {
+            "gap_norm": {
+              "mean": 0.927229106426239,
+              "median": 0.9233656525611877,
+              "min": 0.8096146583557129,
+              "max": 1.0373984575271606,
+              "p25": 0.8543729782104492,
+              "p75": 0.9955531358718872
+            },
+            "projected_gap_norm": {
+              "mean": 0.8177857995033264,
+              "median": 0.8182430267333984,
+              "min": 0.7396610975265503,
+              "max": 0.885500431060791,
+              "p25": 0.7715659141540527,
+              "p75": 0.861747145652771
+            },
+            "accessible_energy_ratio": {
+              "mean": 0.7814924716949463,
+              "median": 0.7656250596046448,
+              "min": 0.7285953164100647,
+              "max": 0.8346583843231201,
+              "p25": 0.74925696849823,
+              "p75": 0.8156946897506714
+            },
+            "residual_energy_ratio": {
+              "mean": 0.2185075283050537,
+              "median": 0.2147332727909088,
+              "min": 0.16534161567687988,
+              "max": 0.2714047133922577,
+              "p25": 0.184305340051651,
+              "p75": 0.25074303150177
+            },
+            "input_jacobian_rank": {
+              "mean": 190.125,
+              "median": 190.0,
+              "min": 190.0,
+              "max": 191.0,
+              "p25": 190.0,
+              "p75": 190.0
+            },
+            "input_jacobian_trace": {
+              "mean": 3.7501587867736816,
+              "median": 3.396475315093994,
+              "min": 1.4827934503555298,
+              "max": 6.4372878074646,
+              "p25": 2.4860544204711914,
+              "p75": 4.65081262588501
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.20598942041397095,
+              "median": 0.18868862092494965,
+              "min": 0.1533714383840561,
+              "max": 0.32016557455062866,
+              "p25": 0.17759376764297485,
+              "p75": 0.20848572254180908
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.4735564589500427,
+              "median": 0.47440236806869507,
+              "min": 0.3868388533592224,
+              "max": 0.5669432878494263,
+              "p25": 0.4472925364971161,
+              "p75": 0.49603182077407837
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 23.815086364746094,
+              "median": 21.15676498413086,
+              "min": 16.369281768798828,
+              "max": 31.782817840576172,
+              "p25": 20.396595001220703,
+              "p75": 28.857166290283203
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 0.8268264532089233,
+              "projected_gap_norm": 0.7522430419921875,
+              "accessible_energy_ratio": 0.8277278826394271,
+              "residual_energy_ratio": 0.17227211736057285,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 3.396475315093994,
+              "input_jacobian_top1_ratio": 0.17911610007286072,
+              "input_jacobian_top4_ratio": 0.48006030917167664,
+              "min_delta_norm_for_projection": 20.922331550750535
+            },
+            {
+              "gap_norm": 0.8635551333427429,
+              "projected_gap_norm": 0.7780068516731262,
+              "accessible_energy_ratio": 0.8116835834686118,
+              "residual_energy_ratio": 0.1883164165313882,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 1.4827934503555298,
+              "input_jacobian_top1_ratio": 0.1533714383840561,
+              "input_jacobian_top4_ratio": 0.3868388533592224,
+              "min_delta_norm_for_projection": 31.42955447554499
+            },
+            {
+              "gap_norm": 1.0373984575271606,
+              "projected_gap_norm": 0.885500431060791,
+              "accessible_energy_ratio": 0.7285952961646615,
+              "residual_energy_ratio": 0.2714047038353385,
+              "input_jacobian_rank": 191.0,
+              "input_jacobian_trace": 6.4372878074646,
+              "input_jacobian_top1_ratio": 0.18868862092494965,
+              "input_jacobian_top4_ratio": 0.42696136236190796,
+              "min_delta_norm_for_projection": 16.369282197402644
+            },
+            {
+              "gap_norm": 0.9233656525611877,
+              "projected_gap_norm": 0.8182430267333984,
+              "accessible_energy_ratio": 0.785266733700015,
+              "residual_energy_ratio": 0.214733266299985,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 2.514796257019043,
+              "input_jacobian_top1_ratio": 0.23417289555072784,
+              "input_jacobian_top4_ratio": 0.506700336933136,
+              "min_delta_norm_for_projection": 31.78281707050997
+            },
+            {
+              "gap_norm": 0.9651877880096436,
+              "projected_gap_norm": 0.8445393443107605,
+              "accessible_energy_ratio": 0.7656250599829398,
+              "residual_energy_ratio": 0.2343749400170601,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 5.571049690246582,
+              "input_jacobian_top1_ratio": 0.17302674055099487,
+              "input_jacobian_top4_ratio": 0.454069584608078,
+              "min_delta_norm_for_projection": 18.81938820893479
+            },
+            {
+              "gap_norm": 0.9951638579368591,
+              "projected_gap_norm": 0.8614479303359985,
+              "accessible_energy_ratio": 0.7493225986716489,
+              "residual_energy_ratio": 0.2506774013283512,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 2.399829387664795,
+              "input_jacobian_top1_ratio": 0.1999233216047287,
+              "input_jacobian_top4_ratio": 0.4924756586551666,
+              "min_delta_norm_for_projection": 27.99970354195737
+            },
+            {
+              "gap_norm": 0.9967210292816162,
+              "projected_gap_norm": 0.8626447319984436,
+              "accessible_energy_ratio": 0.7490601397748847,
+              "residual_energy_ratio": 0.2509398602251153,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 3.854970932006836,
+              "input_jacobian_top1_ratio": 0.19945067167282104,
+              "input_jacobian_top4_ratio": 0.47440236806869507,
+              "min_delta_norm_for_projection": 22.040852849559553
+            },
+            {
+              "gap_norm": 0.8096146583557129,
+              "projected_gap_norm": 0.7396610975265503,
+              "accessible_energy_ratio": 0.8346583842120741,
+              "residual_energy_ratio": 0.1653416157879259,
+              "input_jacobian_rank": 190.0,
+              "input_jacobian_trace": 4.344067096710205,
+              "input_jacobian_top1_ratio": 0.32016557455062866,
+              "input_jacobian_top4_ratio": 0.5669432878494263,
+              "min_delta_norm_for_projection": 21.156764960959443
+            }
+          ]
+        },
+        "logit": {
+          "summary": {
+            "gap_norm": {
+              "mean": 26.59735107421875,
+              "median": 26.332050323486328,
+              "min": 19.98954200744629,
+              "max": 37.857322692871094,
+              "p25": 20.501882553100586,
+              "p75": 29.975831985473633
+            },
+            "projected_gap_norm": {
+              "mean": 26.597349166870117,
+              "median": 26.332067489624023,
+              "min": 19.989503860473633,
+              "max": 37.8573112487793,
+              "p25": 20.50192642211914,
+              "p75": 29.97584342956543
+            },
+            "accessible_energy_ratio": {
+              "mean": 0.9999998807907104,
+              "median": 1.0000007152557373,
+              "min": 0.9999943971633911,
+              "max": 1.0000050067901611,
+              "p25": 0.9999985098838806,
+              "p75": 1.0000011920928955
+            },
+            "residual_energy_ratio": {
+              "mean": 1.2468663044273853e-06,
+              "median": 0.0,
+              "min": 0.0,
+              "max": 5.6187905101978686e-06,
+              "p25": 0.0,
+              "p75": 1.4723208323630388e-06
+            },
+            "input_jacobian_rank": {
+              "mean": 10.0,
+              "median": 10.0,
+              "min": 10.0,
+              "max": 10.0,
+              "p25": 10.0,
+              "p75": 10.0
+            },
+            "input_jacobian_trace": {
+              "mean": 2109.9404296875,
+              "median": 1631.758056640625,
+              "min": 546.561767578125,
+              "max": 4597.5087890625,
+              "p25": 1389.6480712890625,
+              "p75": 2625.788330078125
+            },
+            "input_jacobian_top1_ratio": {
+              "mean": 0.3565484881401062,
+              "median": 0.3530350923538208,
+              "min": 0.24999305605888367,
+              "max": 0.4780469834804535,
+              "p25": 0.3143831491470337,
+              "p75": 0.39937159419059753
+            },
+            "input_jacobian_top4_ratio": {
+              "mean": 0.7706279754638672,
+              "median": 0.7531213760375977,
+              "min": 0.7393447160720825,
+              "max": 0.8183149695396423,
+              "p25": 0.7415342330932617,
+              "p75": 0.7969880700111389
+            },
+            "min_delta_norm_for_projection": {
+              "mean": 5.248658180236816,
+              "median": 4.623647689819336,
+              "min": 2.941521406173706,
+              "max": 8.649336814880371,
+              "p25": 4.263105869293213,
+              "p75": 6.099585056304932
+            }
+          },
+          "per_sample": [
+            {
+              "gap_norm": 32.16969680786133,
+              "projected_gap_norm": 32.169708251953125,
+              "accessible_energy_ratio": 1.0000007077296105,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 2373.179443359375,
+              "input_jacobian_top1_ratio": 0.24999305605888367,
+              "input_jacobian_top4_ratio": 0.7406599521636963,
+              "min_delta_norm_for_projection": 4.864492585712829
+            },
+            {
+              "gap_norm": 29.244543075561523,
+              "projected_gap_norm": 29.24455451965332,
+              "accessible_energy_ratio": 1.0000008563902125,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 546.561767578125,
+              "input_jacobian_top1_ratio": 0.3583468794822693,
+              "input_jacobian_top4_ratio": 0.7393447160720825,
+              "min_delta_norm_for_projection": 7.170669088601332
+            },
+            {
+              "gap_norm": 19.98954200744629,
+              "projected_gap_norm": 19.989503860473633,
+              "accessible_energy_ratio": 0.9999964104312867,
+              "residual_energy_ratio": 3.589568713319095e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 1631.758056640625,
+              "input_jacobian_top1_ratio": 0.40023693442344666,
+              "input_jacobian_top4_ratio": 0.768410861492157,
+              "min_delta_norm_for_projection": 2.941521509351585
+            },
+            {
+              "gap_norm": 20.594369888305664,
+              "projected_gap_norm": 20.594419479370117,
+              "accessible_energy_ratio": 1.0000049648052869,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 1562.705810546875,
+              "input_jacobian_top1_ratio": 0.39908313751220703,
+              "input_jacobian_top4_ratio": 0.8110430240631104,
+              "min_delta_norm_for_projection": 5.7425571867603455
+            },
+            {
+              "gap_norm": 37.857322692871094,
+              "projected_gap_norm": 37.8573112487793,
+              "accessible_energy_ratio": 0.9999992334284479,
+              "residual_energy_ratio": 7.665715521719655e-07,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 4597.5087890625,
+              "input_jacobian_top1_ratio": 0.2917022407054901,
+              "input_jacobian_top4_ratio": 0.7418256998062134,
+              "min_delta_norm_for_projection": 4.52769004149096
+            },
+            {
+              "gap_norm": 26.366870880126953,
+              "projected_gap_norm": 26.366798400878906,
+              "accessible_energy_ratio": 0.9999943812096412,
+              "residual_energy_ratio": 5.6187903587176235e-06,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 870.4750366210938,
+              "input_jacobian_top1_ratio": 0.321943461894989,
+              "input_jacobian_top4_ratio": 0.7531213760375977,
+              "min_delta_norm_for_projection": 8.649337266880625
+            },
+            {
+              "gap_norm": 20.224422454833984,
+              "projected_gap_norm": 20.224443435668945,
+              "accessible_energy_ratio": 1.0000018652530733,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 1913.7193603515625,
+              "input_jacobian_top1_ratio": 0.3530350923538208,
+              "input_jacobian_top4_ratio": 0.7923030853271484,
+              "min_delta_norm_for_projection": 3.469354112961173
+            },
+            {
+              "gap_norm": 26.332050323486328,
+              "projected_gap_norm": 26.332067489624023,
+              "accessible_energy_ratio": 1.0000009682852258,
+              "residual_energy_ratio": 0.0,
+              "input_jacobian_rank": 10.0,
+              "input_jacobian_trace": 3383.61474609375,
+              "input_jacobian_top1_ratio": 0.4780469834804535,
+              "input_jacobian_top4_ratio": 0.8183149695396423,
+              "min_delta_norm_for_projection": 4.623647749884786
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "suite": "vpt_resurrect_kl_forget0_10shot",
+  "seed": 123,
+  "lambdas": [
+    0.0,
+    0.1,
+    0.5,
+    1.0,
+    2.0,
+    5.0
+  ],
+  "generated_utc": "2026-02-02T04:54:21.537509Z",
+  "results": {
+    "0.0": {
+      "train_loss": 1.5626541376113892,
+      "loss_forget": 1.5626541376113892,
+      "loss_retain": 0.03031257353723049,
+      "resurrection_acc": 0.001,
+      "resurrection_loss": 2.760924518108368,
+      "epoch": 90
+    },
+    "0.1": {
+      "train_loss": 1.565487265586853,
+      "loss_forget": 1.562463402748108,
+      "loss_retain": 0.030238719657063484,
+      "resurrection_acc": 0.001,
+      "resurrection_loss": 2.760712683200836,
+      "epoch": 90
+    },
+    "0.5": {
+      "train_loss": 1.577942967414856,
+      "loss_forget": 1.5629314184188843,
+      "loss_retain": 0.03002307191491127,
+      "resurrection_acc": 0.001,
+      "resurrection_loss": 2.760728657245636,
+      "epoch": 90
+    },
+    "1.0": {
+      "train_loss": 1.5932955741882324,
+      "loss_forget": 1.5635379552841187,
+      "loss_retain": 0.02975766360759735,
+      "resurrection_acc": 0.001,
+      "resurrection_loss": 2.7607650756835938,
+      "epoch": 90
+    },
+    "2.0": {
+      "train_loss": 1.6234095096588135,
+      "loss_forget": 1.5649877786636353,
+      "loss_retain": 0.029210885986685753,
+      "resurrection_acc": 0.001,
+      "resurrection_loss": 2.7611021995544434,
+      "epoch": 90
+    },
+    "5.0": {
+      "train_loss": 1.7106972932815552,
+      "loss_forget": 1.5716464519500732,
+      "loss_retain": 0.027810167521238327,
+      "resurrection_acc": 0.001,
+      "resurrection_loss": 2.763149321079254,
+      "epoch": 90
+    }
+  }
+}

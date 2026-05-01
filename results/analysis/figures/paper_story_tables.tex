@@ -1,0 +1,36 @@
+\begin{table*}[t]
+\centering
+\caption{Adaptive prompt attack results on clean test data. Forget gain is relative to the attacked model before prompting.}
+\label{tab:adaptive_attack_main}
+\begin{tabular}{llrrrrrrr}
+\toprule
+Method & Seed & Status & Res. Acc & Target Forget & Prompted Forget & Forget Gain & Target Retain & Retain Drop \\
+\midrule
+ORBIT & 42 & resistant & 0.20\% & 0.30\% & 0.10\% & -0.20\,pp & 94.48\% & +0.28\,pp \\
+ORBIT & 123 & resistant & 0.30\% & 0.20\% & 0.20\% & +0.00\,pp & 94.34\% & +0.33\,pp \\
+SCRUB & 42 & resistant & 0.00\% & 0.00\% & 0.00\% & +0.00\,pp & 94.07\% & +0.53\,pp \\
+SCRUB & 123 & resistant & 0.00\% & 0.00\% & 0.00\% & +0.00\,pp & 93.90\% & +0.52\,pp \\
+SalUn & 42 & resistant & 0.00\% & 0.00\% & 0.00\% & +0.00\,pp & 94.52\% & +0.33\,pp \\
+SalUn & 123 & resistant & 0.00\% & 0.10\% & 0.00\% & -0.10\,pp & 94.44\% & +0.18\,pp \\
+Uniform KL & 42 & vulnerable & 29.40\% & 12.70\% & 21.10\% & +8.40\,pp & 94.34\% & +0.36\,pp \\
+Uniform KL & 123 & resistant & 0.00\% & 0.20\% & 0.00\% & -0.20\,pp & 94.23\% & +0.18\,pp \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\caption{Zero-shot transfer of the KL-trained oracle-contrastive prompt from seed 42.}
+\label{tab:adaptive_attack_transfer}
+\begin{tabular}{lrrrrrr}
+\toprule
+Target Suite & Target Forget & Prompted Forget & Forget Gain & Target Retain & Prompted Retain & Retain Drop \\
+\midrule
+oracle_vit_cifar10_forget0 & 0.00\% & 0.00\% & +0.00\,pp & 88.12\% & 87.04\% & +1.08\,pp \\
+unlearn_kl_vit_cifar10_forget0 & 12.70\% & 21.10\% & +8.40\,pp & 94.34\% & 93.99\% & +0.36\,pp \\
+unlearn_orbit_vit_cifar10_forget0 & 0.30\% & 0.30\% & +0.00\,pp & 94.48\% & 94.17\% & +0.31\,pp \\
+unlearn_salun_vit_cifar10_forget0 & 0.00\% & 0.00\% & +0.00\,pp & 94.52\% & 94.06\% & +0.47\,pp \\
+unlearn_scrub_distill_vit_cifar10_forget0 & 0.00\% & 0.00\% & +0.00\,pp & 94.07\% & 93.46\% & +0.61\,pp \\
+\bottomrule
+\end{tabular}
+\end{table*}

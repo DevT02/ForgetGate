@@ -1,0 +1,20 @@
+\begin{table}[t]
+  \centering
+  \small
+  \resizebox{\linewidth}{!}{%
+  \begin{tabular}{l l l l}
+    \toprule
+    Regime & Threat Model & Primary Metric & What Counts as a Defense Win \\
+    \midrule
+    Conditional recovery & per-example full-image targeted recovery & forget median / retain median / clean-success & higher forget median without comparable retain-side degradation \\
+    Conditional patch & local one-patch delivery & forget success / retain-to-forget success / alpha & lower forget success without added retain-to-forget failure \\
+    Conditional frame & border-frame local delivery & forget success / retain-to-forget success / alpha & lower forget success without transfer failure on retain \\
+    Conditional multi-patch & multi-local delivery & forget success / retain-to-forget success / alpha & lower forget success under richer local geometry \\
+    Amortized short-budget & learned low-step attack & forget success / retain success / median radius & stronger selective low-step recovery than plain low-step optimizer \\
+    Robust-base frontier & utility-recovery tradeoff & retain accuracy vs recovery radius & better operating point, not a binary robust point \\
+    \bottomrule
+  \end{tabular}
+  }
+  \caption{Protocol table for the benchmark. The benchmark is designed as a controlled robustness microscope: each regime tests a distinct failure mode, and a defense is only treated as positive when it improves the regime-relevant robustness metric without introducing comparable retain-side failure.}
+  \label{tab:protocol}
+\end{table}

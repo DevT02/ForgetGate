@@ -1,0 +1,48 @@
+{
+  "suite": "patch_resurrect_kl_forget0_10shot",
+  "suite_name_for_io": "patch_resurrect_kl_forget0_10shot",
+  "seed": 123,
+  "dataset": "cifar10",
+  "forget_class": 0,
+  "patch_save_path": "checkpoints/universal_patch/patch_resurrect_kl_forget0_10shot_seed_123",
+  "log_path": "results/logs\\patch_resurrect_kl_forget0_10shot_seed_123.jsonl",
+  "patch_config": {
+    "patch_size": 32,
+    "position": "bottom_right",
+    "opacity": 1.0,
+    "init_strategy": "random",
+    "init_scale": 0.01,
+    "epochs": 100,
+    "lr": 0.05,
+    "batch_size": 64,
+    "eval_batch_size": 256,
+    "target_class": 0,
+    "k_shot": 10,
+    "lambda_retain": 1.0,
+    "T": 1.0,
+    "eval_every": 10,
+    "oracle_contrast_weight": 1.0
+  },
+  "patch_stats": {
+    "patch_size": 32,
+    "patch_mean": 0.49899399280548096,
+    "patch_std": 0.03522751107811928,
+    "patch_min": 0.3834375739097595,
+    "patch_max": 0.6054852604866028
+  },
+  "final_metrics": {
+    "resurrection_acc": 0.001,
+    "resurrection_loss": 2.752230405807495,
+    "epoch": 99.0,
+    "restored_best": 1.0,
+    "target_test_clean_overall_acc": 0.8483,
+    "target_test_clean_forget_acc": 0.002,
+    "target_test_clean_retain_acc": 0.9423333333333334,
+    "test_clean_overall_acc": 0.8464,
+    "test_clean_forget_acc": 0.001,
+    "test_clean_retain_acc": 0.9403333333333334,
+    "test_clean_overall_drop_vs_target": 0.0019000000000000128,
+    "test_clean_retain_drop_vs_target": 0.0020000000000000018,
+    "test_clean_forget_gain_vs_target": -0.001
+  }
+}

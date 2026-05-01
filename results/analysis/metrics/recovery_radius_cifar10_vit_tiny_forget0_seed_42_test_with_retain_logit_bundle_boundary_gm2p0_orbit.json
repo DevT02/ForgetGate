@@ -1,0 +1,151 @@
+{
+  "meta": {
+    "seed": 42,
+    "split": "test",
+    "dataset": "cifar10",
+    "model": "vit_tiny",
+    "forget_class": 0,
+    "model_suites": [
+      "unlearn_orbit_vit_cifar10_forget0"
+    ],
+    "norm": "l_inf",
+    "eps_max": 0.03137254901960784,
+    "steps": 12,
+    "restarts": 1,
+    "search_steps": 4,
+    "attack_loss": "logit_bundle_boundary",
+    "oracle_feature_weight": 0.5,
+    "apgd_rho": 0.5,
+    "apgd_momentum": 0.75,
+    "bundle_margin_gate": -2.0,
+    "debug_attack_geometry": true,
+    "debug_max_samples": 2,
+    "debug_max_steps": 12,
+    "debug_topk": 5,
+    "geometry_log_path": "results/logs/attack_geometry_cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_bundle_boundary_gm2p0_orbit.jsonl"
+  },
+  "forget_recovery": {
+    "unlearn_orbit_vit_cifar10_forget0": {
+      "summary": {
+        "n_samples": 2,
+        "success_rate": 1.0,
+        "clean_success_rate": 0.0,
+        "median_radius": 0.003553921589627862,
+        "mean_radius": 0.004840686451643705,
+        "min_radius": 0.003553921589627862,
+        "max_radius": 0.006127451080828905,
+        "p25_radius": 0.0041973041370511055,
+        "p75_radius": 0.005484068766236305,
+        "mean_target_prob_gain": 0.24496355652809143,
+        "median_target_prob_gain": 0.20501776039600372
+      },
+      "per_sample": [
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.006127450980392157,
+          "actual_delta": 0.006127476692199707,
+          "clean_target_prob": 0.0008726023370400071,
+          "adv_target_prob": 0.28578197956085205,
+          "adv_pred": 0,
+          "sample_index": 0
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.003553921568627451,
+          "actual_delta": 0.003553926944732666,
+          "clean_target_prob": 0.00014861481031402946,
+          "adv_target_prob": 0.20516636967658997,
+          "adv_pred": 0,
+          "sample_index": 1
+        }
+      ]
+    }
+  },
+  "retain_control": {
+    "unlearn_orbit_vit_cifar10_forget0": {
+      "summary": {
+        "n_samples": 2,
+        "success_rate": 1.0,
+        "clean_success_rate": 0.0,
+        "median_radius": 0.008333333767950535,
+        "mean_radius": 0.00857843179255724,
+        "min_radius": 0.008333333767950535,
+        "max_radius": 0.008823529817163944,
+        "p25_radius": 0.008455882780253887,
+        "p75_radius": 0.008700980804860592,
+        "mean_target_prob_gain": 0.26882416009902954,
+        "median_target_prob_gain": 0.2551153600215912
+      },
+      "per_sample": [
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.008333333333333333,
+          "actual_delta": 0.008333355188369751,
+          "clean_target_prob": 2.5853402196309404e-15,
+          "adv_target_prob": 0.2825329303741455,
+          "adv_pred": 0,
+          "sample_index": 0
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.008823529411764706,
+          "actual_delta": 0.008823543787002563,
+          "clean_target_prob": 7.776833343964284e-11,
+          "adv_target_prob": 0.2551153600215912,
+          "adv_pred": 0,
+          "sample_index": 1
+        }
+      ]
+    }
+  },
+  "geometry_debug_summary": {
+    "unlearn_orbit_vit_cifar10_forget0::forget": {
+      "n_rows": 156.0,
+      "mean_margin": -2.50181660705652,
+      "mean_target_prob": 0.09652787390447114,
+      "mean_cos_margin_bundle": -0.0722094369852223,
+      "mean_pred_gain_margin": 10.21297104542072,
+      "mean_pred_gain_bundle": -0.9566598600015427,
+      "mean_pred_gain_hybrid": 3.0460578554715867,
+      "mean_pred_gain_selected": 6.332198762358764,
+      "mean_actual_margin_gain": 0.5949006357636207,
+      "mean_preproj_postproj_cos": 0.532837742032149,
+      "mean_projection_ratio": 0.5227255913882684,
+      "mean_jacobian_eff_rank": 6.3646431886232815,
+      "mean_jacobian_top1_mass": 0.3362080739476742,
+      "mean_jacobian_top3_mass": 0.6712555392430379,
+      "boundary_gate_active_rate": 0.5128205128205128,
+      "hybrid_considered_rate": 0.5128205128205128,
+      "competitor_switch_rate": 0.8601398601398601,
+      "margin_candidate_win_rate": 0.17307692307692307,
+      "margin_forced_win_rate": 0.48717948717948717,
+      "hybrid_candidate_win_rate": 0.33974358974358976
+    },
+    "unlearn_orbit_vit_cifar10_forget0::retain": {
+      "n_rows": 192.0,
+      "mean_margin": -8.449539804520706,
+      "mean_target_prob": 0.08773520038361886,
+      "mean_cos_margin_bundle": 0.11305680462171802,
+      "mean_pred_gain_margin": 12.282446530958017,
+      "mean_pred_gain_bundle": 1.323667406104505,
+      "mean_pred_gain_hybrid": 1.5099594953159492,
+      "mean_pred_gain_selected": 8.59568540751934,
+      "mean_actual_margin_gain": 2.1096968499477953,
+      "mean_preproj_postproj_cos": 0.5417520319848942,
+      "mean_projection_ratio": 0.5308566423094211,
+      "mean_jacobian_eff_rank": 7.146518535912037,
+      "mean_jacobian_top1_mass": 0.27142871559287113,
+      "mean_jacobian_top3_mass": 0.6197744030505419,
+      "boundary_gate_active_rate": 0.28125,
+      "hybrid_considered_rate": 0.28125,
+      "competitor_switch_rate": 0.6704545454545454,
+      "margin_candidate_win_rate": 0.16145833333333334,
+      "margin_forced_win_rate": 0.71875,
+      "hybrid_candidate_win_rate": 0.11979166666666667
+    }
+  }
+}

@@ -1,0 +1,428 @@
+{
+  "generated_at": "2026-03-23T18:51:13Z",
+  "train_runs": [
+    {
+      "suite": "vpt_oracle_vit_cifar10_forget0_10shot",
+      "feature_guide": "linear_probe",
+      "seed": 42,
+      "log_path": "results\\logs\\vpt_oracle_vit_cifar10_forget0_10shot_fglinearprobe_seed_42.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_oracle_vit_cifar10_forget0_10shot_fglinearprobe_seed_42",
+      "resurrection_acc": 0.0,
+      "target_test_clean_forget_acc": 0.0,
+      "test_clean_forget_acc": 0.0,
+      "test_clean_forget_gain_vs_target": 0.0,
+      "target_test_clean_retain_acc": 0.8812222222222222,
+      "test_clean_retain_acc": 0.8717777777777778,
+      "test_clean_retain_drop_vs_target": 0.009444444444444478,
+      "test_clean_overall_acc": 0.7846
+    },
+    {
+      "suite": "vpt_oracle_vit_cifar10_forget0_10shot",
+      "feature_guide": "linear_probe",
+      "seed": 123,
+      "log_path": "results\\logs\\vpt_oracle_vit_cifar10_forget0_10shot_fglinearprobe_seed_123.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_oracle_vit_cifar10_forget0_10shot_fglinearprobe_seed_123",
+      "resurrection_acc": 0.0,
+      "target_test_clean_forget_acc": 0.0,
+      "test_clean_forget_acc": 0.0,
+      "test_clean_forget_gain_vs_target": 0.0,
+      "target_test_clean_retain_acc": 0.917,
+      "test_clean_retain_acc": 0.9075555555555556,
+      "test_clean_retain_drop_vs_target": 0.009444444444444478,
+      "test_clean_overall_acc": 0.8168
+    },
+    {
+      "suite": "vpt_oracle_vit_cifar10_forget0_10shot",
+      "feature_guide": "prototype_margin",
+      "seed": 42,
+      "log_path": "results\\logs\\vpt_oracle_vit_cifar10_forget0_10shot_fgprototypemargin_seed_42.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_oracle_vit_cifar10_forget0_10shot_fgprototypemargin_seed_42",
+      "resurrection_acc": 0.0,
+      "target_test_clean_forget_acc": 0.0,
+      "test_clean_forget_acc": 0.0,
+      "test_clean_forget_gain_vs_target": 0.0,
+      "target_test_clean_retain_acc": 0.8812222222222222,
+      "test_clean_retain_acc": 0.8718888888888889,
+      "test_clean_retain_drop_vs_target": 0.009333333333333305,
+      "test_clean_overall_acc": 0.7847
+    },
+    {
+      "suite": "vpt_oracle_vit_cifar10_forget0_10shot",
+      "feature_guide": "prototype_margin",
+      "seed": 123,
+      "log_path": "results\\logs\\vpt_oracle_vit_cifar10_forget0_10shot_fgprototypemargin_seed_123.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_oracle_vit_cifar10_forget0_10shot_fgprototypemargin_seed_123",
+      "resurrection_acc": 0.0,
+      "target_test_clean_forget_acc": 0.0,
+      "test_clean_forget_acc": 0.0,
+      "test_clean_forget_gain_vs_target": 0.0,
+      "target_test_clean_retain_acc": 0.917,
+      "test_clean_retain_acc": 0.9075555555555556,
+      "test_clean_retain_drop_vs_target": 0.009444444444444478,
+      "test_clean_overall_acc": 0.8168
+    },
+    {
+      "suite": "vpt_resurrect_kl_forget0_10shot",
+      "feature_guide": "linear_probe",
+      "seed": 42,
+      "log_path": "results\\logs\\vpt_resurrect_kl_forget0_10shot_fglinearprobe_seed_42.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_resurrect_kl_forget0_10shot_fglinearprobe_seed_42",
+      "resurrection_acc": 0.273,
+      "target_test_clean_forget_acc": 0.127,
+      "test_clean_forget_acc": 0.196,
+      "test_clean_forget_gain_vs_target": 0.069,
+      "target_test_clean_retain_acc": 0.9434444444444444,
+      "test_clean_retain_acc": 0.9403333333333334,
+      "test_clean_retain_drop_vs_target": 0.0031111111111110645,
+      "test_clean_overall_acc": 0.8659
+    },
+    {
+      "suite": "vpt_resurrect_kl_forget0_10shot",
+      "feature_guide": "linear_probe",
+      "seed": 123,
+      "log_path": "results\\logs\\vpt_resurrect_kl_forget0_10shot_fglinearprobe_seed_123.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_resurrect_kl_forget0_10shot_fglinearprobe_seed_123",
+      "resurrection_acc": 0.0,
+      "target_test_clean_forget_acc": 0.002,
+      "test_clean_forget_acc": 0.0,
+      "test_clean_forget_gain_vs_target": -0.002,
+      "target_test_clean_retain_acc": 0.9423333333333334,
+      "test_clean_retain_acc": 0.9404444444444444,
+      "test_clean_retain_drop_vs_target": 0.00188888888888894,
+      "test_clean_overall_acc": 0.8464
+    },
+    {
+      "suite": "vpt_resurrect_kl_forget0_10shot",
+      "feature_guide": "prototype_margin",
+      "seed": 42,
+      "log_path": "results\\logs\\vpt_resurrect_kl_forget0_10shot_fgprototypemargin_seed_42.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_resurrect_kl_forget0_10shot_fgprototypemargin_seed_42",
+      "resurrection_acc": 0.238,
+      "target_test_clean_forget_acc": 0.127,
+      "test_clean_forget_acc": 0.178,
+      "test_clean_forget_gain_vs_target": 0.05099999999999999,
+      "target_test_clean_retain_acc": 0.9434444444444444,
+      "test_clean_retain_acc": 0.9413333333333334,
+      "test_clean_retain_drop_vs_target": 0.0021111111111110636,
+      "test_clean_overall_acc": 0.865
+    },
+    {
+      "suite": "vpt_resurrect_kl_forget0_10shot",
+      "feature_guide": "prototype_margin",
+      "seed": 123,
+      "log_path": "results\\logs\\vpt_resurrect_kl_forget0_10shot_fgprototypemargin_seed_123.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_resurrect_kl_forget0_10shot_fgprototypemargin_seed_123",
+      "resurrection_acc": 0.0,
+      "target_test_clean_forget_acc": 0.002,
+      "test_clean_forget_acc": 0.0,
+      "test_clean_forget_gain_vs_target": -0.002,
+      "target_test_clean_retain_acc": 0.9423333333333334,
+      "test_clean_retain_acc": 0.9406666666666667,
+      "test_clean_retain_drop_vs_target": 0.0016666666666667052,
+      "test_clean_overall_acc": 0.8466
+    },
+    {
+      "suite": "vpt_resurrect_kl_forget0_10shot",
+      "feature_guide": "oracle_contrastive_probe",
+      "seed": 42,
+      "log_path": "results\\logs\\vpt_resurrect_kl_forget0_10shot_fgoraclecontrastiveprobe_seed_42.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_resurrect_kl_forget0_10shot_fgoraclecontrastiveprobe_seed_42",
+      "resurrection_acc": 0.294,
+      "target_test_clean_forget_acc": 0.127,
+      "test_clean_forget_acc": 0.211,
+      "test_clean_forget_gain_vs_target": 0.08399999999999999,
+      "target_test_clean_retain_acc": 0.9434444444444444,
+      "test_clean_retain_acc": 0.9398888888888889,
+      "test_clean_retain_drop_vs_target": 0.003555555555555534,
+      "test_clean_overall_acc": 0.867
+    },
+    {
+      "suite": "vpt_resurrect_kl_forget0_10shot",
+      "feature_guide": "oracle_contrastive_probe",
+      "seed": 123,
+      "log_path": "results\\logs\\vpt_resurrect_kl_forget0_10shot_fgoraclecontrastiveprobe_seed_123.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_resurrect_kl_forget0_10shot_fgoraclecontrastiveprobe_seed_123",
+      "resurrection_acc": 0.0,
+      "target_test_clean_forget_acc": 0.002,
+      "test_clean_forget_acc": 0.0,
+      "test_clean_forget_gain_vs_target": -0.002,
+      "target_test_clean_retain_acc": 0.9423333333333334,
+      "test_clean_retain_acc": 0.9405555555555556,
+      "test_clean_retain_drop_vs_target": 0.001777777777777767,
+      "test_clean_overall_acc": 0.8465
+    },
+    {
+      "suite": "vpt_resurrect_salun_forget0_10shot",
+      "feature_guide": "oracle_contrastive_probe",
+      "seed": 42,
+      "log_path": "results\\logs\\vpt_resurrect_salun_forget0_10shot_fgoraclecontrastiveprobe_seed_42.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_resurrect_salun_forget0_10shot_fgoraclecontrastiveprobe_seed_42",
+      "resurrection_acc": 0.0,
+      "target_test_clean_forget_acc": 0.0,
+      "test_clean_forget_acc": 0.0,
+      "test_clean_forget_gain_vs_target": 0.0,
+      "target_test_clean_retain_acc": 0.9452222222222222,
+      "test_clean_retain_acc": 0.9418888888888889,
+      "test_clean_retain_drop_vs_target": 0.0033333333333332993,
+      "test_clean_overall_acc": 0.8477
+    },
+    {
+      "suite": "vpt_resurrect_salun_forget0_10shot",
+      "feature_guide": "oracle_contrastive_probe",
+      "seed": 123,
+      "log_path": "results\\logs\\vpt_resurrect_salun_forget0_10shot_fgoraclecontrastiveprobe_seed_123.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_resurrect_salun_forget0_10shot_fgoraclecontrastiveprobe_seed_123",
+      "resurrection_acc": 0.0,
+      "target_test_clean_forget_acc": 0.001,
+      "test_clean_forget_acc": 0.0,
+      "test_clean_forget_gain_vs_target": -0.001,
+      "target_test_clean_retain_acc": 0.9444444444444444,
+      "test_clean_retain_acc": 0.9426666666666667,
+      "test_clean_retain_drop_vs_target": 0.001777777777777767,
+      "test_clean_overall_acc": 0.8484
+    },
+    {
+      "suite": "vpt_resurrect_scrub_forget0_10shot",
+      "feature_guide": "linear_probe",
+      "seed": 42,
+      "log_path": "results\\logs\\vpt_resurrect_scrub_forget0_10shot_fglinearprobe_seed_42.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_resurrect_scrub_forget0_10shot_fglinearprobe_seed_42",
+      "resurrection_acc": 0.0,
+      "target_test_clean_forget_acc": 0.0,
+      "test_clean_forget_acc": 0.0,
+      "test_clean_forget_gain_vs_target": 0.0,
+      "target_test_clean_retain_acc": 0.9406666666666667,
+      "test_clean_retain_acc": 0.9353333333333333,
+      "test_clean_retain_drop_vs_target": 0.005333333333333301,
+      "test_clean_overall_acc": 0.8418
+    },
+    {
+      "suite": "vpt_resurrect_scrub_forget0_10shot",
+      "feature_guide": "linear_probe",
+      "seed": 123,
+      "log_path": "results\\logs\\vpt_resurrect_scrub_forget0_10shot_fglinearprobe_seed_123.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_resurrect_scrub_forget0_10shot_fglinearprobe_seed_123",
+      "resurrection_acc": 0.0,
+      "target_test_clean_forget_acc": 0.0,
+      "test_clean_forget_acc": 0.0,
+      "test_clean_forget_gain_vs_target": 0.0,
+      "target_test_clean_retain_acc": 0.939,
+      "test_clean_retain_acc": 0.9337777777777778,
+      "test_clean_retain_drop_vs_target": 0.005222222222222128,
+      "test_clean_overall_acc": 0.8404
+    },
+    {
+      "suite": "vpt_resurrect_scrub_forget0_10shot",
+      "feature_guide": "oracle_contrastive_probe",
+      "seed": 42,
+      "log_path": "results\\logs\\vpt_resurrect_scrub_forget0_10shot_fgoraclecontrastiveprobe_seed_42.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_resurrect_scrub_forget0_10shot_fgoraclecontrastiveprobe_seed_42",
+      "resurrection_acc": 0.0,
+      "target_test_clean_forget_acc": 0.0,
+      "test_clean_forget_acc": 0.0,
+      "test_clean_forget_gain_vs_target": 0.0,
+      "target_test_clean_retain_acc": 0.9406666666666667,
+      "test_clean_retain_acc": 0.9353333333333333,
+      "test_clean_retain_drop_vs_target": 0.005333333333333301,
+      "test_clean_overall_acc": 0.8418
+    },
+    {
+      "suite": "vpt_resurrect_scrub_forget0_10shot",
+      "feature_guide": "oracle_contrastive_probe",
+      "seed": 123,
+      "log_path": "results\\logs\\vpt_resurrect_scrub_forget0_10shot_fgoraclecontrastiveprobe_seed_123.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_resurrect_scrub_forget0_10shot_fgoraclecontrastiveprobe_seed_123",
+      "resurrection_acc": 0.0,
+      "target_test_clean_forget_acc": 0.0,
+      "test_clean_forget_acc": 0.0,
+      "test_clean_forget_gain_vs_target": 0.0,
+      "target_test_clean_retain_acc": 0.939,
+      "test_clean_retain_acc": 0.9337777777777778,
+      "test_clean_retain_drop_vs_target": 0.005222222222222128,
+      "test_clean_overall_acc": 0.8404
+    },
+    {
+      "suite": "vpt_resurrect_orbit_forget0_10shot",
+      "feature_guide": "oracle_contrastive_probe",
+      "seed": 42,
+      "log_path": "results\\logs\\vpt_resurrect_orbit_forget0_10shot_fgoraclecontrastiveprobe_seed_42.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_resurrect_orbit_forget0_10shot_fgoraclecontrastiveprobe_seed_42",
+      "resurrection_acc": 0.002,
+      "target_test_clean_forget_acc": 0.003,
+      "test_clean_forget_acc": 0.001,
+      "test_clean_forget_gain_vs_target": -0.002,
+      "target_test_clean_retain_acc": 0.9447777777777778,
+      "test_clean_retain_acc": 0.942,
+      "test_clean_retain_drop_vs_target": 0.002777777777777879,
+      "test_clean_overall_acc": 0.8479
+    },
+    {
+      "suite": "vpt_resurrect_orbit_forget0_10shot",
+      "feature_guide": "oracle_contrastive_probe",
+      "seed": 123,
+      "log_path": "results\\logs\\vpt_resurrect_orbit_forget0_10shot_fgoraclecontrastiveprobe_seed_123.jsonl",
+      "prompt_path": "checkpoints\\vpt_resurrector\\vpt_resurrect_orbit_forget0_10shot_fgoraclecontrastiveprobe_seed_123",
+      "resurrection_acc": 0.003,
+      "target_test_clean_forget_acc": 0.002,
+      "test_clean_forget_acc": 0.002,
+      "test_clean_forget_gain_vs_target": 0.0,
+      "target_test_clean_retain_acc": 0.9434444444444444,
+      "test_clean_retain_acc": 0.9401111111111111,
+      "test_clean_retain_drop_vs_target": 0.0033333333333332993,
+      "test_clean_overall_acc": 0.8463
+    }
+  ],
+  "missing_train_logs": [
+    "results\\logs\\vpt_oracle_vit_cifar10_forget0_10shot_fgoraclecontrastiveprobe_seed_42.jsonl",
+    "results\\logs\\vpt_oracle_vit_cifar10_forget0_10shot_fgoraclecontrastiveprobe_seed_123.jsonl",
+    "results\\logs\\vpt_resurrect_salun_forget0_10shot_fglinearprobe_seed_42.jsonl",
+    "results\\logs\\vpt_resurrect_salun_forget0_10shot_fglinearprobe_seed_123.jsonl",
+    "results\\logs\\vpt_resurrect_salun_forget0_10shot_fgprototypemargin_seed_42.jsonl",
+    "results\\logs\\vpt_resurrect_salun_forget0_10shot_fgprototypemargin_seed_123.jsonl",
+    "results\\logs\\vpt_resurrect_scrub_forget0_10shot_fgprototypemargin_seed_42.jsonl",
+    "results\\logs\\vpt_resurrect_scrub_forget0_10shot_fgprototypemargin_seed_123.jsonl",
+    "results\\logs\\vpt_resurrect_orbit_forget0_10shot_fglinearprobe_seed_42.jsonl",
+    "results\\logs\\vpt_resurrect_orbit_forget0_10shot_fglinearprobe_seed_123.jsonl",
+    "results\\logs\\vpt_resurrect_orbit_forget0_10shot_fgprototypemargin_seed_42.jsonl",
+    "results\\logs\\vpt_resurrect_orbit_forget0_10shot_fgprototypemargin_seed_123.jsonl"
+  ],
+  "missing_prompt_dirs": [],
+  "runs_missing_final_keys": [],
+  "runs_with_eval_errors": [],
+  "sweeps": [
+    {
+      "feature_guide": "linear_probe",
+      "seed": 42,
+      "summary_path": "results\\analysis\\vpt_resurrect_kl_forget0_10shot_tradeoff_sweep_seed_42_fglinearprobe.json",
+      "lambdas": {
+        "0.0": {
+          "resurrection_acc": 0.275,
+          "test_clean_retain_acc": 0.9404444444444444
+        },
+        "0.1": {
+          "resurrection_acc": 0.275,
+          "test_clean_retain_acc": 0.9405555555555556
+        },
+        "0.5": {
+          "resurrection_acc": 0.274,
+          "test_clean_retain_acc": 0.9405555555555556
+        },
+        "1.0": {
+          "resurrection_acc": 0.273,
+          "test_clean_retain_acc": 0.9403333333333334
+        },
+        "2.0": {
+          "resurrection_acc": 0.273,
+          "test_clean_retain_acc": 0.9403333333333334
+        },
+        "5.0": {
+          "resurrection_acc": 0.271,
+          "test_clean_retain_acc": 0.9402222222222222
+        }
+      }
+    },
+    {
+      "feature_guide": "prototype_margin",
+      "seed": 42,
+      "summary_path": "results\\analysis\\vpt_resurrect_kl_forget0_10shot_tradeoff_sweep_seed_42_fgprototypemargin.json",
+      "lambdas": {
+        "0.0": {
+          "resurrection_acc": 0.237,
+          "test_clean_retain_acc": 0.9413333333333334
+        },
+        "0.1": {
+          "resurrection_acc": 0.239,
+          "test_clean_retain_acc": 0.9414444444444444
+        },
+        "0.5": {
+          "resurrection_acc": 0.238,
+          "test_clean_retain_acc": 0.9413333333333334
+        },
+        "1.0": {
+          "resurrection_acc": 0.238,
+          "test_clean_retain_acc": 0.9413333333333334
+        },
+        "2.0": {
+          "resurrection_acc": 0.237,
+          "test_clean_retain_acc": 0.9412222222222222
+        },
+        "5.0": {
+          "resurrection_acc": 0.233,
+          "test_clean_retain_acc": 0.9411111111111111
+        }
+      }
+    }
+  ],
+  "missing_sweep_summaries": [],
+  "sweeps_missing_lambdas": [],
+  "sweeps_missing_keys": [],
+  "transfer_evals": [
+    {
+      "path": "results\\analysis\\vpt_resurrect_kl_forget0_10shot_fgoraclecontrastiveprobe_seed_42_transfer_eval.json",
+      "prompt_dir": "checkpoints/vpt_resurrector/vpt_resurrect_kl_forget0_10shot_fgoraclecontrastiveprobe_seed_42",
+      "prompt_seed": 42,
+      "targets": [
+        {
+          "target_suite": "oracle_vit_cifar10_forget0",
+          "target_clean_forget_acc": 0.0,
+          "prompted_clean_forget_acc": 0.0,
+          "forget_gain_vs_target": 0.0,
+          "target_clean_retain_acc": 0.8812222222222222,
+          "prompted_clean_retain_acc": 0.8704444444444445,
+          "retain_drop_vs_target": 0.010777777777777775
+        },
+        {
+          "target_suite": "unlearn_kl_vit_cifar10_forget0",
+          "target_clean_forget_acc": 0.127,
+          "prompted_clean_forget_acc": 0.211,
+          "forget_gain_vs_target": 0.08399999999999999,
+          "target_clean_retain_acc": 0.9434444444444444,
+          "prompted_clean_retain_acc": 0.9398888888888889,
+          "retain_drop_vs_target": 0.003555555555555534
+        },
+        {
+          "target_suite": "unlearn_orbit_vit_cifar10_forget0",
+          "target_clean_forget_acc": 0.003,
+          "prompted_clean_forget_acc": 0.003,
+          "forget_gain_vs_target": 0.0,
+          "target_clean_retain_acc": 0.9447777777777778,
+          "prompted_clean_retain_acc": 0.9416666666666667,
+          "retain_drop_vs_target": 0.0031111111111111756
+        },
+        {
+          "target_suite": "unlearn_salun_vit_cifar10_forget0",
+          "target_clean_forget_acc": 0.0,
+          "prompted_clean_forget_acc": 0.0,
+          "forget_gain_vs_target": 0.0,
+          "target_clean_retain_acc": 0.9452222222222222,
+          "prompted_clean_retain_acc": 0.9405555555555556,
+          "retain_drop_vs_target": 0.004666666666666597
+        },
+        {
+          "target_suite": "unlearn_scrub_distill_vit_cifar10_forget0",
+          "target_clean_forget_acc": 0.0,
+          "prompted_clean_forget_acc": 0.0,
+          "forget_gain_vs_target": 0.0,
+          "target_clean_retain_acc": 0.9406666666666667,
+          "prompted_clean_retain_acc": 0.9345555555555556,
+          "retain_drop_vs_target": 0.006111111111111067
+        }
+      ]
+    }
+  ],
+  "missing_transfer_evals": [],
+  "recommended_commands": [
+    "python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_oracle_vit_cifar10_forget0_10shot --seed 42 --feature-guide oracle_contrastive_probe --feature-guide-weight 1.0",
+    "python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_oracle_vit_cifar10_forget0_10shot --seed 123 --feature-guide oracle_contrastive_probe --feature-guide-weight 1.0",
+    "python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_resurrect_salun_forget0_10shot --seed 42 --feature-guide linear_probe --feature-guide-weight 1.0",
+    "python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_resurrect_salun_forget0_10shot --seed 123 --feature-guide linear_probe --feature-guide-weight 1.0",
+    "python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_resurrect_salun_forget0_10shot --seed 42 --feature-guide prototype_margin --feature-guide-weight 1.0",
+    "python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_resurrect_salun_forget0_10shot --seed 123 --feature-guide prototype_margin --feature-guide-weight 1.0",
+    "python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_resurrect_scrub_forget0_10shot --seed 42 --feature-guide prototype_margin --feature-guide-weight 1.0",
+    "python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_resurrect_scrub_forget0_10shot --seed 123 --feature-guide prototype_margin --feature-guide-weight 1.0",
+    "python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_resurrect_orbit_forget0_10shot --seed 42 --feature-guide linear_probe --feature-guide-weight 1.0",
+    "python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_resurrect_orbit_forget0_10shot --seed 123 --feature-guide linear_probe --feature-guide-weight 1.0",
+    "python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_resurrect_orbit_forget0_10shot --seed 42 --feature-guide prototype_margin --feature-guide-weight 1.0",
+    "python scripts/3_train_vpt_resurrector.py --config configs/experiment_suites.yaml --suite vpt_resurrect_orbit_forget0_10shot --seed 123 --feature-guide prototype_margin --feature-guide-weight 1.0"
+  ]
+}

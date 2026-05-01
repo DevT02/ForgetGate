@@ -1,0 +1,45 @@
+{
+  "suite": "vpt_resurrect_kl_forget0_10shot",
+  "suite_name_for_io": "vpt_resurrect_kl_forget0_10shot_fgoraclecontrastiveprobe",
+  "seed": 123,
+  "dataset": "cifar10",
+  "forget_class": 0,
+  "prompt_save_path": "checkpoints/vpt_resurrector/vpt_resurrect_kl_forget0_10shot_fgoraclecontrastiveprobe_seed_123",
+  "log_path": "results/logs\\vpt_resurrect_kl_forget0_10shot_fgoraclecontrastiveprobe_seed_123.jsonl",
+  "feature_guidance": {
+    "enabled": true,
+    "mode": "oracle_contrastive_probe",
+    "contrast_weight": 1.0,
+    "contrast_margin": 0.0,
+    "weight": 1.0,
+    "oracle_model_suite": "oracle_vit_cifar10_forget0"
+  },
+  "prompt_stats": {
+    "total_prompt_params": 1920,
+    "prompt_norm": 43.70939254760742,
+    "num_prompt_tensors": 1
+  },
+  "final_metrics": {
+    "train_loss": 3.1236190795898438,
+    "loss_forget": 1.5942573547363281,
+    "loss_retain": 0.018846917897462845,
+    "loss_feature": 1.5105149745941162,
+    "feature_target_probe_score": -1.073913812637329,
+    "feature_oracle_probe_score": -3.807894229888916,
+    "feature_contrast_gap": 2.733980655670166,
+    "feature_oracle_penalty": 0.031138325110077858,
+    "resurrection_acc": 0.0,
+    "resurrection_loss": 2.717389762401581,
+    "epoch": 0.0,
+    "restored_best": 1.0,
+    "target_test_clean_overall_acc": 0.8483,
+    "target_test_clean_forget_acc": 0.002,
+    "target_test_clean_retain_acc": 0.9423333333333334,
+    "test_clean_overall_acc": 0.8465,
+    "test_clean_forget_acc": 0.0,
+    "test_clean_retain_acc": 0.9405555555555556,
+    "test_clean_overall_drop_vs_target": 0.0018000000000000238,
+    "test_clean_retain_drop_vs_target": 0.001777777777777767,
+    "test_clean_forget_gain_vs_target": -0.002
+  }
+}
