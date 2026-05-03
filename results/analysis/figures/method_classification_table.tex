@@ -10,7 +10,7 @@
     SCRUB distill & reasonably faithful & main text & literature baseline; hard negative / generic fragility \\
     ORBIT & repo-defined & main text & internal benchmark row; best later defense row \\
     RURK & reasonably faithful & main text & recent method; hard negative / resistant case \\
-    SGA & adapted recent method & main text & auxiliary cross-domain benchmark row \\
+    SGA & adapted recent method & auxiliary & generic-fragility cross-domain benchmark row \\
     BalDRO & adapted recent method & main text & main cross-domain benchmark row \\
     CE-U & reasonably faithful & main text & recent related-work addition \\
     robust-base SalUn & faithful frontier & main text & utility-vs-recovery frontier \\
@@ -25,6 +25,6 @@
     \bottomrule
   \end{tabular}
   }
-  \caption{Method classification used in this draft. This table fixes the distinction between literature anchors, recent or adapted benchmark rows, appendix-only supporting rows, and proxy or invalid rows so that the paper does not mix benchmark evidence with convenience artifacts.}
+  \caption{Method classification used in the paper. The table separates literature anchors, appendix-only supporting rows, and proxy artifacts so that the main benchmark reflects only rows with defensible evaluation fidelity.}
   \label{tab:method-classification}
 \end{table}
