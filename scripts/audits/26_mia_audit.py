@@ -1,188 +1,346 @@
+"""
+Membership Inference Attack (MIA) audit for unlearning checkpoints.
+
+Reports loss-threshold and entropy-threshold MIA AUC against two reference
+"unseen" sets:
+
+  - val_heldout: the forget-class samples held out from base training
+    (reconstructs the same seeded torch.randperm split used in
+    scripts/1_train_base.py).
+  - test:        the forget-class samples in the dataset's official test split.
+
+A perfectly-unlearned model should yield AUC ~ 0.50 against both. A surviving
+gap indicates residual memorization that clean forget accuracy alone misses.
+"""
+
 import argparse
-import os
-import torch
-import torch.nn.functional as F
-import torch.nn as nn
-from sklearn.metrics import roc_auc_score
-import numpy as np
+import glob
 import json
+import os
 import sys
+from typing import Dict, List, Optional, Tuple
 
-# Ensure we can import from src regardless of where script is run
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torchvision
+from sklearn.metrics import roc_auc_score
+from torch.utils.data import DataLoader, Subset
 
-from src.models.vit import create_vit_model
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
+from src.data import DataManager
 from src.models.cnn import create_cnn_model
-from src.utils import load_config
-from src.data import DataManager, create_forget_retain_splits
+from src.models.normalize import create_imagenet_normalizer
+from src.models.vit import create_vit_model
+from src.utils import load_config, set_seed
 
-def compute_entropy(logits):
-    """Compute Shannon entropy from logits."""
-    probs = F.softmax(logits, dim=-1)
-    # add small epsilon to prevent log(0)
-    entropy = -torch.sum(probs * torch.log(probs + 1e-8), dim=-1)
-    return entropy
 
-def gather_metrics(model, dataloader, device):
-    """Gathers cross entropy loss and prediction entropy for exactly one class."""
-    model.eval()
-    losses = []
-    entropies = []
-    
-    criterion = nn.CrossEntropyLoss(reduction='none')
-    
-    with torch.no_grad():
-        for batch in dataloader:
-            if len(batch) == 2:
-                images, labels = batch
-            else:
-                images, labels = batch[0], batch[1]
-                
-            images = images.to(device)
-            labels = labels.to(device)
-            
-            logits = model(images)
-            loss = criterion(logits, labels)
-            ent = compute_entropy(logits)
-            
-            losses.extend(loss.cpu().numpy())
-            entropies.extend(ent.cpu().numpy())
-            
-    return np.array(losses), np.array(entropies)
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
-def main():
-    parser = argparse.ArgumentParser(description="Membership Inference Attack (MIA) Audit")
-    parser.add_argument("--config", type=str, default="configs/experiment_suites.yaml", help="Path to config file or dir")
-    parser.add_argument("--suite", type=str, required=True, help="Suite name to evaluate")
-    parser.add_argument("--batch_size", type=int, default=128, help="Batch size for extracting statistics")
-    args = parser.parse_args()
-    
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"Running MIA Audit on {args.suite} with {device}")
 
-    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    
-    import glob
-    search_pattern = os.path.join(root, 'checkpoints', '**', f"{args.suite}*")
-    matches = glob.glob(search_pattern, recursive=True)
-    
-    if not matches:
-        print(f"Cannot find checkpoint directory for suite: {args.suite}")
-        return
-    checkpoint_dir = matches[0]
-    suite_name = args.suite
-    
-    forget_class = 0
-    if "forget" in suite_name:
-        parts = suite_name.split("forget")
-        if len(parts) > 1 and parts[1][0].isdigit():
-            forget_class = int(parts[1][0])
+def parse_forget_class(suite_name: str) -> int:
+    """Parse forget class from a suite name.
 
-    dataset_name = "cifar100" if "cifar100" in suite_name else "cifar10"
-    is_resnet = "resnet" in suite_name
-    model_name = "resnet18" if is_resnet else ("vit_small" if "vit_small" in suite_name else "vit_tiny")
-    
-    num_classes = 100 if dataset_name == "cifar100" else 10
-    model_config = load_config("configs/model.yaml")
-    
-    # Recreate base model
+    Suite names use the convention `..._forgetN` where N is an integer (one or
+    more digits). The previous implementation only consumed a single digit,
+    misparsing `forget10` as `forget1`.
+    """
+    if "forget" not in suite_name:
+        return 0
+    tail = suite_name.split("forget", 1)[1]
+    digits = ""
+    for ch in tail:
+        if ch.isdigit():
+            digits += ch
+        else:
+            break
+    return int(digits) if digits else 0
+
+
+def reconstruct_base_train_val_indices(
+    n_total: int, seed: int, val_ratio: float = 0.1
+) -> Tuple[List[int], List[int]]:
+    """Reproduce the (train, val) index split used by scripts/1_train_base.py.
+
+    Must mirror that file's logic exactly:
+        n_val = max(1, int(n_total * val_ratio))
+        n_train = n_total - n_val
+        generator = torch.Generator().manual_seed(seed)
+        perm = torch.randperm(n_total, generator=generator).tolist()
+        train = perm[:n_train]
+        val   = perm[n_train:]
+    """
+    n_val = max(1, int(n_total * val_ratio))
+    n_train = n_total - n_val
+    generator = torch.Generator().manual_seed(seed)
+    perm = torch.randperm(n_total, generator=generator).tolist()
+    return perm[:n_train], perm[n_train:]
+
+
+def detect_adv_train(experiment_suites: Dict, base_suite: str) -> bool:
+    base_cfg = experiment_suites.get(base_suite, {}) or {}
+    return bool(
+        base_cfg.get("training", {})
+        .get("adv_train", {})
+        .get("enabled", False)
+    )
+
+
+def build_model(suite_name: str, num_classes: int, model_config: Dict) -> nn.Module:
+    is_resnet = "resnet" in suite_name or "cnn" in suite_name
     if is_resnet:
-        model = create_cnn_model(model_config["cnn"][model_name], num_classes=num_classes)
-    else:
-        model_config_name = "small" if "small" in model_name else "tiny"
-        model = create_vit_model(model_config["vit"][model_config_name], num_classes=num_classes)
-    
-    # Parse seed from directory
-    seed = "42"
-    if "_seed_" in checkpoint_dir:
-        seed = checkpoint_dir.split("_seed_")[-1].split(os.sep)[0]
-        
-    experiment_suites = load_config(args.config)
-    suite_cfg = experiment_suites.get(args.suite, {})
-    base_suite_name = suite_cfg.get("base_model_suite", args.suite)
-    
-    # Load base weights
-    base_ckpt = os.path.join(root, "checkpoints", "base", f"{base_suite_name}_seed_{seed}_final.pt")
+        return create_cnn_model(model_config["cnn"]["resnet18"], num_classes=num_classes)
+    if "vit_small" in suite_name:
+        return create_vit_model(model_config["vit"]["small"], num_classes=num_classes)
+    return create_vit_model(model_config["vit"]["tiny"], num_classes=num_classes)
+
+
+def load_state_dict_with_diagnostics(model: nn.Module, state_dict: Dict, label: str) -> None:
+    result = model.load_state_dict(state_dict, strict=False)
+    missing = len(result.missing_keys)
+    unexpected = len(result.unexpected_keys)
+    if missing or unexpected:
+        print(
+            f"  [{label}] load_state_dict: missing={missing}, unexpected={unexpected}"
+        )
+        if missing:
+            print(f"    first missing: {result.missing_keys[:3]}")
+        if unexpected:
+            print(f"    first unexpected: {result.unexpected_keys[:3]}")
+
+
+def find_checkpoint_dir(root: str, suite: str) -> Optional[str]:
+    pattern = os.path.join(root, "checkpoints", "**", f"{suite}*")
+    matches = glob.glob(pattern, recursive=True)
+    return matches[0] if matches else None
+
+
+def load_unlearned_model(
+    suite: str,
+    seed: int,
+    base_suite: str,
+    checkpoint_dir: str,
+    root: str,
+    num_classes: int,
+    model_config: Dict,
+    device: torch.device,
+) -> nn.Module:
+    model = build_model(suite, num_classes, model_config)
+
+    base_ckpt = os.path.join(root, "checkpoints", "base", f"{base_suite}_seed_{seed}_final.pt")
     if os.path.exists(base_ckpt):
         try:
-            checkpoint = torch.load(base_ckpt, map_location='cpu')
-            model.load_state_dict(checkpoint["model_state_dict"], strict=False)
+            payload = torch.load(base_ckpt, map_location="cpu")
+            sd = payload.get("model_state_dict", payload)
+            load_state_dict_with_diagnostics(model, sd, "base")
         except Exception as e:
-            pass
-            
-    # Load Adapter or Full ft weights
+            print(f"  [base] load failed: {e}")
+
     from src.models.peft_lora import load_lora_adapter
-    if os.path.exists(os.path.join(checkpoint_dir, "adapter_model.safetensors")) or os.path.exists(os.path.join(checkpoint_dir, "final_model", "adapter_model.safetensors")):
-        # Path is either the root folder or final_model inside it
+
+    has_adapter_root = os.path.exists(os.path.join(checkpoint_dir, "adapter_model.safetensors"))
+    has_adapter_nested = os.path.exists(
+        os.path.join(checkpoint_dir, "final_model", "adapter_model.safetensors")
+    )
+    if has_adapter_root or has_adapter_nested:
         adapter_path = checkpoint_dir
         if not os.path.exists(os.path.join(adapter_path, "adapter_config.json")):
             adapter_path = os.path.join(checkpoint_dir, "final_model")
         model = load_lora_adapter(model, adapter_path)
     else:
-        final_pt = os.path.join(checkpoint_dir, 'final_model.pt')
+        final_pt = os.path.join(checkpoint_dir, "final_model.pt")
         if os.path.exists(final_pt):
-            ckpt = torch.load(final_pt, map_location='cpu')
-            model.load_state_dict(ckpt["model_state_dict"], strict=False)
-            
-    model = model.to(device)
+            payload = torch.load(final_pt, map_location="cpu")
+            sd = payload.get("model_state_dict", payload)
+            load_state_dict_with_diagnostics(model, sd, "final_model")
 
-    # Load Data
-    data_manager = DataManager()
-    base_dataset = data_manager.load_dataset(dataset_name, split="train", use_pretrained=True)
-    
-    # We want to split the forget class to test MIA (seen vs unseen)
-    forget_train, _, forget_test, _ = create_forget_retain_splits(
-        base_dataset, forget_class=forget_class, train_ratio=0.8
+    return model.to(device)
+
+
+def gather_metrics(
+    model: nn.Module, loader: DataLoader, device: torch.device
+) -> Tuple[np.ndarray, np.ndarray]:
+    model.eval()
+    losses: List[np.ndarray] = []
+    entropies: List[np.ndarray] = []
+    ce = nn.CrossEntropyLoss(reduction="none")
+    with torch.no_grad():
+        for batch in loader:
+            images, labels = batch[0], batch[1]
+            images = images.to(device, non_blocking=True)
+            labels = labels.to(device, non_blocking=True)
+            logits = model(images)
+            losses.append(ce(logits, labels).cpu().numpy())
+            probs = F.softmax(logits, dim=-1)
+            ent = -(probs * (probs.clamp_min(1e-12)).log()).sum(dim=-1)
+            entropies.append(ent.cpu().numpy())
+    return np.concatenate(losses), np.concatenate(entropies)
+
+
+def auc_pair(seen_loss, seen_ent, unseen_loss, unseen_ent) -> Dict[str, float]:
+    y_true = np.concatenate([np.ones_like(seen_loss), np.zeros_like(unseen_loss)])
+    auc_loss = float(
+        roc_auc_score(y_true, np.concatenate([-seen_loss, -unseen_loss]))
     )
-    
-    # We also need the actual test set for forget unseen
-    test_dataset = data_manager.load_dataset(dataset_name, split="test", include_classes=[forget_class], use_pretrained=True)
-    
-    forget_train_loader = torch.utils.data.DataLoader(forget_train, batch_size=args.batch_size, shuffle=False)
-    forget_test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
-    
-    print(f"Extracted {len(forget_train)} FORGET_TRAIN (seen) and {len(test_dataset)} FORGET_TEST (unseen) samples")
+    auc_ent = float(
+        roc_auc_score(y_true, np.concatenate([-seen_ent, -unseen_ent]))
+    )
+    return {
+        "auc_loss": auc_loss,
+        "auc_entropy": auc_ent,
+        "memorization_gap": max(auc_loss, auc_ent) - 0.5,
+        "n_seen": int(len(seen_loss)),
+        "n_unseen": int(len(unseen_loss)),
+    }
 
-    print("Gathering metrics for FORGET_TRAIN...")
-    train_loss, train_ent = gather_metrics(model, forget_train_loader, device)
-    
-    print("Gathering metrics for FORGET_TEST...")
-    test_loss, test_ent = gather_metrics(model, forget_test_loader, device)
-    
-    # Membership Inference Attack (Thresholding Loss and Entropy)
-    # The attacker predicts 1 (seen) if loss is lower, or entropy is lower.
-    # Therefore, negative loss correlates with being in the training set.
-    y_true = np.concatenate([np.ones_like(train_loss), np.zeros_like(test_loss)])
-    y_pred_loss = np.concatenate([-train_loss, -test_loss])
-    y_pred_ent = np.concatenate([-train_ent, -test_ent])
-    
-    auc_loss = roc_auc_score(y_true, y_pred_loss)
-    auc_ent = roc_auc_score(y_true, y_pred_ent)
-    
-    print(f"--- MIA Results for {suite_name} ---")
-    print(f"Loss-based MIA ROC-AUC:    {auc_loss:.4f}  (0.50 is perfect unlearning)")
-    print(f"Entropy-based MIA ROC-AUC: {auc_ent:.4f}  (0.50 is perfect unlearning)")
-    
-    gap = max(auc_loss, auc_ent) - 0.50
-    if gap > 0.15:
-        print(f"WARNING: Severe data extraction vulnerability detected! (+{gap*100:.1f}% over random guessing)")
-    elif gap <= 0.05:
-        print(f"SUCCESS: The model successfully protects instance-level membership (+{gap*100:.1f}% over random guessing)")
-        
-    res_dir = os.path.join(root, 'results', 'analysis', 'metrics')
-    os.makedirs(res_dir, exist_ok=True)
-    out_file = os.path.join(res_dir, f'mia_audit_{suite_name}.json')
-    
-    with open(out_file, 'w') as f:
-        json.dump({
-            "suite": suite_name,
-            "target_class": forget_class,
-            "auc_loss": float(auc_loss),
-            "auc_entropy": float(auc_ent),
-            "memorization_gap": float(gap)
-        }, f, indent=4)
-        
-    print(f"Saved MIA results to {out_file}")
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+
+def run_mia(
+    suite: str,
+    *,
+    config_path: str = "configs/experiment_suites.yaml",
+    batch_size: int = 128,
+    seed: Optional[int] = None,
+    device: Optional[torch.device] = None,
+    val_ratio: float = 0.1,
+) -> Dict:
+    """Run MIA audit for a single suite. Returns the results dict that would
+    also be written to disk by the CLI entry point."""
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    checkpoint_dir = find_checkpoint_dir(root, suite)
+    if checkpoint_dir is None:
+        raise FileNotFoundError(f"No checkpoint directory found for suite: {suite}")
+
+    if seed is None:
+        seed = 42
+        if "_seed_" in checkpoint_dir:
+            try:
+                seed = int(checkpoint_dir.split("_seed_")[-1].split(os.sep)[0])
+            except ValueError:
+                pass
+    set_seed(seed)
+
+    forget_class = parse_forget_class(suite)
+    dataset_name = "cifar100" if "cifar100" in suite else "cifar10"
+    num_classes = 100 if dataset_name == "cifar100" else 10
+
+    experiment_suites = load_config(config_path)
+    suite_cfg = experiment_suites.get(suite, {}) or {}
+    base_suite = suite_cfg.get("base_model_suite", suite)
+    is_adv_base = detect_adv_train(experiment_suites, base_suite)
+
+    model_config = load_config("configs/model.yaml")
+    model = load_unlearned_model(
+        suite=suite,
+        seed=seed,
+        base_suite=base_suite,
+        checkpoint_dir=checkpoint_dir,
+        root=root,
+        num_classes=num_classes,
+        model_config=model_config,
+        device=device,
+    )
+
+    if is_adv_base:
+        # Adv-trained base expects un-normalized [0,1] inputs and applies
+        # normalization inside its forward pass. Ensure the dataloader does
+        # not double-normalize.
+        normalizer = create_imagenet_normalizer().to(device)
+        model = nn.Sequential(normalizer, model).to(device)
+
+    apply_norm = not is_adv_base
+
+    data_manager = DataManager()
+    train_full = data_manager.load_dataset(
+        dataset_name, split="train", use_pretrained=True, apply_imagenet_norm=apply_norm
+    )
+    n_total = len(train_full)
+    train_idx, val_idx = reconstruct_base_train_val_indices(n_total, seed, val_ratio)
+
+    base_targets = train_full.targets if hasattr(train_full, "targets") else None
+    if base_targets is None:
+        raise RuntimeError(
+            "Underlying dataset does not expose .targets; cannot reconstruct splits"
+        )
+
+    train_idx_set = set(train_idx)
+    val_idx_set = set(val_idx)
+
+    forget_train_indices = [
+        i for i, lbl in enumerate(base_targets) if int(lbl) == forget_class and i in train_idx_set
+    ]
+    forget_val_indices = [
+        i for i, lbl in enumerate(base_targets) if int(lbl) == forget_class and i in val_idx_set
+    ]
+
+    seen_set = Subset(train_full, forget_train_indices)
+    val_heldout_set = Subset(train_full, forget_val_indices)
+    test_set = data_manager.load_dataset(
+        dataset_name,
+        split="test",
+        include_classes=[forget_class],
+        use_pretrained=True,
+        apply_imagenet_norm=apply_norm,
+    )
+
+    seen_loader = DataLoader(seen_set, batch_size=batch_size, shuffle=False, num_workers=0)
+    val_loader = DataLoader(val_heldout_set, batch_size=batch_size, shuffle=False, num_workers=0)
+    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=0)
+
+    seen_loss, seen_ent = gather_metrics(model, seen_loader, device)
+    val_loss, val_ent = gather_metrics(model, val_loader, device)
+    test_loss, test_ent = gather_metrics(model, test_loader, device)
+
+    vs_val = auc_pair(seen_loss, seen_ent, val_loss, val_ent)
+    vs_test = auc_pair(seen_loss, seen_ent, test_loss, test_ent)
+
+    out = {
+        "suite": suite,
+        "base_suite": base_suite,
+        "seed": seed,
+        "forget_class": forget_class,
+        "dataset": dataset_name,
+        "is_adv_base": is_adv_base,
+        "vs_val_heldout": vs_val,
+        "vs_test": vs_test,
+    }
+
+    out_dir = os.path.join(root, "results", "analysis", "metrics")
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, f"mia_audit_{suite}_seed_{seed}.json")
+    with open(out_path, "w") as f:
+        json.dump(out, f, indent=2)
+    print(f"[mia] {suite} seed={seed} -> {out_path}")
+    print(f"  vs val:  loss-AUC={vs_val['auc_loss']:.4f}  ent-AUC={vs_val['auc_entropy']:.4f}")
+    print(f"  vs test: loss-AUC={vs_test['auc_loss']:.4f}  ent-AUC={vs_test['auc_entropy']:.4f}")
+    return out
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Membership Inference Attack (MIA) Audit")
+    parser.add_argument("--config", type=str, default="configs/experiment_suites.yaml")
+    parser.add_argument("--suite", type=str, required=True)
+    parser.add_argument("--batch_size", type=int, default=128)
+    parser.add_argument("--seed", type=int, default=None,
+                        help="Seed (defaults to the seed parsed from the checkpoint dir name)")
+    args = parser.parse_args()
+    run_mia(
+        args.suite,
+        config_path=args.config,
+        batch_size=args.batch_size,
+        seed=args.seed,
+    )
+
 
 if __name__ == "__main__":
     main()

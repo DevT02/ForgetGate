@@ -651,6 +651,320 @@ def _train_conditional_generator(
     return history
 
 
+# ---------------------------------------------------------------------------
+# Programmatic API for cross-method transfer (additive; main() unchanged).
+#
+# `train_generator` and `eval_generator` compose the same private helpers
+# (`_load_model`, `_build_loader`, `_train_conditional_generator`,
+# `_directional_radius`, `_summarize_radius`) that main() uses, so the
+# returned numbers are produced by the same code paths that produce the
+# paper's published results. The CLI in main() is not affected.
+# ---------------------------------------------------------------------------
+
+from dataclasses import dataclass, field, asdict
+
+
+@dataclass
+class ConditionalAttackConfig:
+    """Configuration for the conditional-attack training and evaluation
+    primitives. Defaults mirror the argparse defaults in main()."""
+    config_path: str = "configs/experiment_suites.yaml"
+    device: Optional[str] = None
+    train_split: str = "train"
+    eval_split: str = "test"
+    num_workers: int = 0
+    max_train_forget_samples: int = 256
+    max_train_retain_samples: int = 512
+    max_eval_forget_samples: int = 32
+    max_eval_retain_samples: int = 32
+    train_batch_size: int = 32
+    eval_batch_size: int = 1
+    epochs: int = 8
+    lr: float = 1e-3
+    weight_decay: float = 1e-4
+    eps_max: float = 8.0 / 255.0
+    norm: str = "l_inf"
+    search_steps: int = 6
+    generator_width: int = 64
+    generator_depth: int = 3
+    lowres_size: int = 32
+    retain_weight: float = 0.5
+    retain_margin_buffer: float = 0.0
+    retain_target_calib_weight: float = 0.0
+    retain_target_calib_buffer: float = 0.0
+    retain_clean_anchor_weight: float = 0.0
+    retain_clean_anchor_buffer: float = 0.0
+    retain_clean_anchor_temp: float = 1.0
+    use_retain_teacher_distill: bool = False
+    retain_distill_weight: float = 0.0
+    train_scale_min: float = 0.5
+    tv_weight: float = 1e-2
+    delta_l2_weight: float = 1e-3
+    forget_ce_weight: float = 1.0
+    forget_margin_weight: float = 0.25
+    use_teacher_distill: bool = False
+    distill_weight: float = 1.0
+    teacher_attack_steps: int = 6
+    teacher_attack_restarts: int = 1
+    teacher_alpha_ratio: float = 0.2
+    teacher_alpha_min: float = 1.0 / 255.0
+    refine_steps: int = 0
+    refine_restarts: int = 1
+    refine_alpha_ratio: float = 0.2
+    refine_alpha_min: float = 1.0 / 255.0
+    oracle_feature_weight: float = 0.0
+    use_oracle_guidance: bool = False
+
+
+def _resolve_dataset_model(experiment_suites: Dict, suite_name: str):
+    suite_cfg = experiment_suites[suite_name]
+    base_suite_name = suite_cfg["base_model_suite"]
+    base_suite_cfg = experiment_suites[base_suite_name]
+    dataset_name = base_suite_cfg["dataset"]
+    model_type = base_suite_cfg["model"]
+    forget_class = int(
+        suite_cfg.get("unlearning", {}).get("forget_class",
+                                            suite_cfg.get("forget_class", 0))
+    )
+    return dataset_name, model_type, forget_class
+
+
+def _maybe_load_oracle(
+    experiment_suites: Dict,
+    cfg: ConditionalAttackConfig,
+    dataset_name: str,
+    model_type: str,
+    forget_class: int,
+    seed: int,
+    device: torch.device,
+):
+    if not (cfg.use_oracle_guidance and cfg.oracle_feature_weight > 0.0):
+        return None
+    oracle_suite = _resolve_matching_oracle_suite(
+        experiment_suites,
+        dataset_name=dataset_name,
+        model_type=model_type,
+        forget_class=forget_class,
+    )
+    oracle_model, _, _ = _load_model(experiment_suites, oracle_suite, seed, device)
+    return oracle_model.eval()
+
+
+def train_generator(
+    attacker_suite: str,
+    seed: int,
+    config: Optional[ConditionalAttackConfig] = None,
+) -> Dict:
+    """Train a conditional perturbation generator against `attacker_suite` and
+    return an artifact dict suitable for `eval_generator`. The artifact
+    contains the trained state dict (not the live module) so it can be
+    pickled or transferred between processes."""
+    cfg = config or ConditionalAttackConfig()
+    set_seed(seed)
+    device = get_device(cfg.device)
+    experiment_suites = load_config(cfg.config_path)
+    dataset_name, model_type, forget_class = _resolve_dataset_model(
+        experiment_suites, attacker_suite
+    )
+    normalizer = create_imagenet_normalizer().to(device)
+
+    oracle_model = _maybe_load_oracle(
+        experiment_suites, cfg, dataset_name, model_type, forget_class, seed, device
+    )
+
+    model, _, _ = _load_model(experiment_suites, attacker_suite, seed, device)
+    model.eval()
+
+    train_forget_loader = _reshuffle_loader(
+        _build_loader(
+            dataset_name=dataset_name, split=cfg.train_split,
+            batch_size=cfg.train_batch_size, num_workers=cfg.num_workers,
+            forget_class=forget_class, retain=False,
+            max_samples=cfg.max_train_forget_samples,
+        ),
+        batch_size=int(cfg.train_batch_size), num_workers=int(cfg.num_workers),
+    )
+    train_retain_loader = _reshuffle_loader(
+        _build_loader(
+            dataset_name=dataset_name, split=cfg.train_split,
+            batch_size=cfg.train_batch_size, num_workers=cfg.num_workers,
+            forget_class=forget_class, retain=True,
+            max_samples=cfg.max_train_retain_samples,
+        ),
+        batch_size=int(cfg.train_batch_size), num_workers=int(cfg.num_workers),
+    )
+
+    generator = ConditionalPerturbationNet(
+        in_channels=3, width=int(cfg.generator_width), depth=int(cfg.generator_depth),
+    ).to(device)
+
+    history = _train_conditional_generator(
+        generator=generator, model=model, normalizer=normalizer,
+        forget_loader=train_forget_loader, retain_loader=train_retain_loader,
+        target_class=forget_class, norm=cfg.norm, eps_max=float(cfg.eps_max),
+        lowres_size=int(cfg.lowres_size), epochs=int(cfg.epochs),
+        lr=float(cfg.lr), weight_decay=float(cfg.weight_decay),
+        retain_weight=float(cfg.retain_weight),
+        retain_margin_buffer=float(cfg.retain_margin_buffer),
+        retain_target_calib_weight=float(cfg.retain_target_calib_weight),
+        retain_target_calib_buffer=float(cfg.retain_target_calib_buffer),
+        retain_clean_anchor_weight=float(cfg.retain_clean_anchor_weight),
+        retain_clean_anchor_buffer=float(cfg.retain_clean_anchor_buffer),
+        retain_clean_anchor_temp=float(cfg.retain_clean_anchor_temp),
+        use_retain_teacher_distill=bool(cfg.use_retain_teacher_distill),
+        retain_distill_weight=float(cfg.retain_distill_weight),
+        train_scale_min=float(cfg.train_scale_min),
+        tv_weight=float(cfg.tv_weight),
+        delta_l2_weight=float(cfg.delta_l2_weight),
+        forget_ce_weight=float(cfg.forget_ce_weight),
+        forget_margin_weight=float(cfg.forget_margin_weight),
+        use_teacher_distill=bool(cfg.use_teacher_distill),
+        distill_weight=float(cfg.distill_weight),
+        teacher_attack_steps=int(cfg.teacher_attack_steps),
+        teacher_attack_restarts=int(cfg.teacher_attack_restarts),
+        teacher_alpha_ratio=float(cfg.teacher_alpha_ratio),
+        teacher_alpha_min=float(cfg.teacher_alpha_min),
+        oracle_model=oracle_model,
+        oracle_feature_weight=float(cfg.oracle_feature_weight) if cfg.use_oracle_guidance else 0.0,
+    )
+
+    return {
+        "kind": "conditional_generator_v1",
+        "attacker_suite": attacker_suite,
+        "seed": int(seed),
+        "dataset_name": dataset_name,
+        "model_type": model_type,
+        "forget_class": int(forget_class),
+        "generator_state_dict": {k: v.cpu() for k, v in generator.state_dict().items()},
+        "generator_width": int(cfg.generator_width),
+        "generator_depth": int(cfg.generator_depth),
+        "lowres_size": int(cfg.lowres_size),
+        "norm": cfg.norm,
+        "eps_max": float(cfg.eps_max),
+        "training_history": history,
+        "config": asdict(cfg),
+    }
+
+
+def _eval_directional_recovery(
+    model: nn.Module,
+    normalizer: nn.Module,
+    generator: nn.Module,
+    loader,
+    forget_class: int,
+    cfg: ConditionalAttackConfig,
+    device: torch.device,
+) -> Dict:
+    records: List[Dict[str, Optional[float]]] = []
+    for idx, (inputs, _labels) in enumerate(loader):
+        inputs = inputs.to(device)
+        with torch.no_grad():
+            direction = _generator_direction(
+                generator, inputs, int(cfg.lowres_size), cfg.norm
+            )
+        record = _directional_radius(
+            model=model, normalizer=normalizer, inputs=inputs,
+            target_class=forget_class, direction=direction,
+            eps_max=float(cfg.eps_max), search_steps=int(cfg.search_steps),
+            norm=cfg.norm, refine_steps=int(cfg.refine_steps),
+            refine_restarts=int(cfg.refine_restarts),
+            refine_alpha_ratio=float(cfg.refine_alpha_ratio),
+            refine_alpha_min=float(cfg.refine_alpha_min),
+        )
+        record["sample_index"] = idx
+        record["direction_mean_abs"] = float(direction.abs().mean().item())
+        record["direction_max_abs"] = float(direction.abs().max().item())
+        records.append(record)
+    return {"summary": _summarize_radius(records), "per_sample": records}
+
+
+def eval_generator(
+    artifact: Dict,
+    target_suite: str,
+    seed: int,
+    config: Optional[ConditionalAttackConfig] = None,
+) -> Dict:
+    """Evaluate a generator artifact (from `train_generator`) against
+    `target_suite`. Returns a dict shaped to match the cross-method transfer
+    backend contract: top-level forget_recovery / retain_recovery summary
+    rates, plus full per-sample records nested under `details`."""
+    if artifact.get("kind") != "conditional_generator_v1":
+        raise ValueError(
+            f"Unexpected artifact kind: {artifact.get('kind')!r}"
+        )
+    cfg = config or ConditionalAttackConfig()
+    set_seed(seed)
+    device = get_device(cfg.device)
+    experiment_suites = load_config(cfg.config_path)
+
+    dataset_name, model_type, target_forget_class = _resolve_dataset_model(
+        experiment_suites, target_suite
+    )
+    if dataset_name != artifact["dataset_name"]:
+        raise ValueError(
+            f"Dataset mismatch: artifact={artifact['dataset_name']!r}, "
+            f"target={dataset_name!r}"
+        )
+    if model_type != artifact["model_type"]:
+        raise ValueError(
+            f"Model-type mismatch: artifact={artifact['model_type']!r}, "
+            f"target={model_type!r}"
+        )
+    if target_forget_class != artifact["forget_class"]:
+        raise ValueError(
+            f"Forget-class mismatch: artifact={artifact['forget_class']}, "
+            f"target={target_forget_class}"
+        )
+
+    normalizer = create_imagenet_normalizer().to(device)
+    model, _, _ = _load_model(experiment_suites, target_suite, seed, device)
+    model.eval()
+
+    generator = ConditionalPerturbationNet(
+        in_channels=3,
+        width=int(artifact["generator_width"]),
+        depth=int(artifact["generator_depth"]),
+    ).to(device)
+    generator.load_state_dict(
+        {k: v.to(device) for k, v in artifact["generator_state_dict"].items()}
+    )
+    generator.eval()
+
+    eval_forget_loader = _build_loader(
+        dataset_name=dataset_name, split=cfg.eval_split,
+        batch_size=cfg.eval_batch_size, num_workers=cfg.num_workers,
+        forget_class=target_forget_class, retain=False,
+        max_samples=cfg.max_eval_forget_samples,
+    )
+    eval_retain_loader = _build_loader(
+        dataset_name=dataset_name, split=cfg.eval_split,
+        batch_size=cfg.eval_batch_size, num_workers=cfg.num_workers,
+        forget_class=target_forget_class, retain=True,
+        max_samples=cfg.max_eval_retain_samples,
+    )
+
+    forget_eval = _eval_directional_recovery(
+        model, normalizer, generator, eval_forget_loader,
+        target_forget_class, cfg, device,
+    )
+    retain_eval = _eval_directional_recovery(
+        model, normalizer, generator, eval_retain_loader,
+        target_forget_class, cfg, device,
+    )
+
+    return {
+        "attacker_suite": artifact["attacker_suite"],
+        "target_suite": target_suite,
+        "seed": int(seed),
+        "forget_recovery": float(forget_eval["summary"]["success_rate"]),
+        "retain_recovery": float(retain_eval["summary"]["success_rate"]),
+        "details": {
+            "forget": forget_eval,
+            "retain": retain_eval,
+        },
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description="Learned conditional attacker audit")
     parser.add_argument("--config", type=str, required=True)
