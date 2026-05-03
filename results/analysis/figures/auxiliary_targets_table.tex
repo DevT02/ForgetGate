@@ -8,17 +8,17 @@
     \midrule
     Uniform KL & 42 & 2-step conditional pilot & 100.0\% & 12.5\% & 0.00147 \\
     Uniform KL & 123 & 2-step conditional pilot & 0.0\% & 0.0\% & N/A \\
-    Uniform KL & 42 & 32x32 conditional patch & 15.6\% & 0.0\% & 0.15234 \\
+    Uniform KL & 42 & 32$\times$32 conditional patch & 15.6\% & 0.0\% & 0.15234 \\
     Uniform KL & 42 & feature-subspace stage-2 pilot & 100.0\% & 12.5\% & 0.00147 \\
     SGA & 42 & full conditional audit & 100.0\% & 100.0\% & 0.00294 \\
     SGA & 123 & full conditional audit & 96.9\% & 100.0\% & 0.00968 \\
     SGA & 456 & full conditional audit & 96.9\% & 96.9\% & 0.01091 \\
-    SGA & 42 & 32x32 conditional patch & 0.0\% & 0.0\% & N/A \\
+    SGA & 42 & 32$\times$32 conditional patch & 0.0\% & 0.0\% & N/A \\
     SGA & 42 & 2-step baseline pilot & 75.0\% & 0.0\% & 0.00417 \\
     SGA & 42 & 2-step stage-2 pilot & 62.5\% & 0.0\% & 0.00441 \\
     \bottomrule
   \end{tabular}
   }
-  \caption{Auxiliary seed-sensitive targets. Uniform KL is a bridge case between the older probe regime and the newer conditional-recovery regime, while SGA is conditional but not patch-local and only shows a weak positive defense pilot on its selective seed.}
+  \caption{Auxiliary seed-sensitive targets. Uniform KL is a bridge case between the older probe regime and the newer conditional-recovery regime, while SGA behaves like generic adversarial fragility under the full audit, stays patch-negative, and only shows a weak fast-pilot stage-2 effect.}
   \label{tab:aux-targets}
 \end{table}
