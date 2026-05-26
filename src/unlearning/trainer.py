@@ -74,6 +74,11 @@ class UnlearningTrainer:
         self.best_val_metric = float('inf')
         self.training_history = []
 
+        # If the objective needs to call back into the model (e.g. for
+        # noise-perturbed forward passes inside the loss), attach now.
+        if hasattr(self.objective, "set_model"):
+            self.objective.set_model(self.model)
+
     def set_teacher_model(self, teacher_model: nn.Module):
         """
         Set teacher model for distillation-based objectives (e.g., SCRUB)

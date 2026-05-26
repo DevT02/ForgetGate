@@ -45,6 +45,22 @@ objectives:
     temperature: 2.0     # Temperature for distillation
     forget_mode: "ce_ascent"  # or "max_entropy"
 
+  # Smoothed certified-recovery (Theorem 4 of theory_appendix.tex).
+  # Gaussian-smoothed forget-margin hinge -- gives a Cohen-Rosenfeld-Kolter
+  # certified L_2 recovery radius on the smoothed classifier when minimized
+  # successfully. Pair training-time sigma with audit-time sigma in
+  # scripts/audits/27_smoothed_radius_audit.py.
+  smoothed_margin:
+    name: "smoothed_margin"
+    loss_type: "smoothed_hinge_forget"
+    sigma: 0.10        # Gaussian noise std on inputs (pixel scale)
+    n_noise: 4         # noise samples per forward pass
+    gamma: 1.0         # safety margin gamma in max(0, m_t + gamma)
+    forget_weight: 1.0
+    retain_weight: 1.0
+    clip_min: 0.0
+    clip_max: 1.0
+
 # LoRA unlearning hyperparameters
 lora_unlearn:
   # LoRA rank options

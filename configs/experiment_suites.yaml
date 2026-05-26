@@ -253,6 +253,24 @@ unlearn_salun_vit_cifar10_forget0:
     lr: 1e-3
   seeds: [42, 123, 456]
 
+# Smoothed-margin unlearning (Theorem 4 of results/analysis/figures/theory_appendix.tex).
+# Cohen-Rosenfeld-Kolter randomized-smoothing certificate on the forget-margin hinge.
+# Trained by scripts/train/train_smoothed_margin.py; audited by
+# scripts/audits/27_smoothed_radius_audit.py.
+unlearn_smoothed_margin_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: smoothed_margin
+    forget_class: 0
+    lora_rank: 8
+    epochs: 10
+    lr: 1e-3
+    sigma: 0.10
+    n_noise: 4
+    gamma: 1.0
+  seeds: [42]
+
 # SCRUB unlearning baseline (Kurmanji et al. NeurIPS 2023)
 unlearn_scrub_distill_vit_cifar10_forget0:
   base_model_suite: base_vit_cifar10

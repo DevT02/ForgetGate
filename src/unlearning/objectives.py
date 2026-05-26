@@ -10,6 +10,39 @@ from typing import Dict, Optional, Tuple
 import numpy as np
 
 
+# ---------------------------------------------------------------------------
+# Re-exports kept for backward compatibility with scripts that import
+# `_resolve_feature_model` / `_extract_features` from this module. The
+# canonical definitions live in src.attacks.universal_patch (BFS through
+# wrapped modules to find a `forward_features`-capable backbone), and we
+# expose a thin wrapper here so the existing training and audit scripts
+# (`scripts/train/2_train_unlearning_lora.py`,
+# `scripts/audits/17_recovery_radius_audit.py`) can keep their import lines
+# unchanged.
+# ---------------------------------------------------------------------------
+from src.attacks.universal_patch import _resolve_feature_model  # noqa: E402,F401
+
+
+def _extract_features(model: nn.Module, inputs: torch.Tensor) -> torch.Tensor:
+    """Return per-sample features from the first `forward_features`-capable
+    submodule of `model`. CLS-token for 3-D outputs, mean-pool for 4-D, flatten
+    otherwise. Used by feature-subspace PCA computation in the LoRA trainer.
+    """
+    feature_model = _resolve_feature_model(model)
+    if feature_model is None:
+        raise ValueError("Model does not expose forward_features anywhere.")
+    feats = feature_model.forward_features(inputs)
+    if isinstance(feats, (tuple, list)):
+        feats = feats[0]
+    if feats.ndim == 4:
+        feats = feats.mean(dim=(2, 3))
+    elif feats.ndim == 3:
+        feats = feats[:, 0]
+    elif feats.ndim > 2:
+        feats = feats.flatten(start_dim=1)
+    return feats
+
+
 class UnlearningObjective(nn.Module):
     """Base class for unlearning objectives"""
 
@@ -443,13 +476,138 @@ class SCRUB(UnlearningObjective):
         return total_loss / num_components if num_components > 0 else torch.tensor(0.0, device=logits.device)
 
 
+class SmoothedMarginUnlearning(UnlearningObjective):
+    """
+    Theorem 4 of theory_appendix.tex: a Gaussian-smoothed target-margin hinge
+    penalty for forget examples, combined with standard CE on retain examples.
+
+    For each forget input x with true label t (the forget class), the loss
+    samples m Gaussian noise vectors delta_1..delta_m ~ N(0, sigma^2 I) and
+    averages the hinge penalty
+
+        max(0, m_t(x + delta_k; theta) + gamma)
+
+    where m_t(x; theta) = f_t(x) - max_{j != t} f_j(x) is the target margin.
+    The empirical minimizer of this objective inherits a Cohen-Rosenfeld-Kolter
+    certified radius on the *smoothed* classifier: any L_2 perturbation of size
+    r < sigma * Phi^{-1}(p_top_smooth) leaves the smoothed classifier's
+    prediction outside the forget class.
+
+    Retain side: classic CE (the smoothing on the forget set already protects
+    retain accuracy because retain examples are not perturbed by this term).
+
+    Forwards-compatible with the existing trainer: the smoothing is *inside*
+    the loss (not in the data loader), so the trainer remains unchanged.
+
+    Args:
+        forget_class:    int, target class to forget.
+        num_classes:     int, K.
+        sigma:           float, noise std (in input pixel space, post-norm).
+        n_noise:         int, number of noise samples per forward pass.
+        gamma:           float, safety margin (>= 0). Theorem 4 uses gamma as
+                         the offset that pushes the smoothed margin to <= -gamma.
+        forget_weight:   weight on the smoothed hinge term.
+        retain_weight:   weight on the CE retain term.
+        clip_min/clip_max: optional input-range clip applied after noise.
+                          For 224x224 ViT inputs in [0,1], pass (0.0, 1.0).
+    """
+
+    def __init__(
+        self,
+        forget_class: int,
+        num_classes: int = 10,
+        sigma: float = 0.10,
+        n_noise: int = 4,
+        gamma: float = 1.0,
+        forget_weight: float = 1.0,
+        retain_weight: float = 1.0,
+        clip_min: Optional[float] = 0.0,
+        clip_max: Optional[float] = 1.0,
+    ):
+        super().__init__(forget_class, num_classes)
+        if sigma <= 0:
+            raise ValueError("sigma must be > 0")
+        if n_noise < 1:
+            raise ValueError("n_noise must be >= 1")
+        self.sigma = float(sigma)
+        self.n_noise = int(n_noise)
+        self.gamma = float(gamma)
+        self.forget_weight = float(forget_weight)
+        self.retain_weight = float(retain_weight)
+        self.clip_min = clip_min
+        self.clip_max = clip_max
+        # We need the model in forward() to re-run on noisy inputs. The
+        # trainer passes inputs= explicitly; we capture model via a setter.
+        self._model: Optional[nn.Module] = None
+
+    def set_model(self, model: nn.Module) -> None:
+        """Attach the live model so forward() can run noisy forward passes."""
+        self._model = model
+
+    def _noisy_margin(self, inputs: torch.Tensor) -> torch.Tensor:
+        """Returns mean-over-noise margin m_t(x + delta) for each x in inputs."""
+        assert self._model is not None, \
+            "SmoothedMarginUnlearning: call set_model(trainer.model) first."
+        B = inputs.shape[0]
+        # Expand and noise: [B*m, ...]
+        x_rep = inputs.unsqueeze(1).expand(B, self.n_noise, *inputs.shape[1:])
+        x_rep = x_rep.contiguous().view(B * self.n_noise, *inputs.shape[1:])
+        noise = torch.randn_like(x_rep) * self.sigma
+        x_noisy = x_rep + noise
+        if self.clip_min is not None and self.clip_max is not None:
+            x_noisy = x_noisy.clamp(self.clip_min, self.clip_max)
+        logits = self._model(x_noisy)  # [B*m, K]
+        target_logit = logits[:, self.forget_class]
+        mask = torch.ones_like(logits, dtype=torch.bool)
+        mask[:, self.forget_class] = False
+        runnerup = logits.masked_fill(~mask, float("-inf")).max(dim=1).values
+        margin = target_logit - runnerup  # [B*m]
+        margin = margin.view(B, self.n_noise).mean(dim=1)  # [B]
+        return margin
+
+    def forward(
+        self,
+        logits: torch.Tensor,
+        labels: torch.Tensor,
+        inputs: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
+        if inputs is None:
+            raise ValueError(
+                "SmoothedMarginUnlearning requires `inputs`; the trainer must "
+                "pass inputs=forget_inputs when invoking the objective."
+            )
+
+        forget_mask = (labels == self.forget_class)
+        retain_mask = ~forget_mask
+        total_loss = torch.tensor(0.0, device=logits.device)
+        n_components = 0
+
+        # Forget side: smoothed hinge on the target margin
+        if forget_mask.any():
+            margin_smooth = self._noisy_margin(inputs[forget_mask])
+            hinge = F.relu(margin_smooth + self.gamma)
+            total_loss = total_loss + self.forget_weight * hinge.mean()
+            n_components += 1
+
+        # Retain side: standard CE on clean retain inputs
+        if retain_mask.any():
+            retain_loss = F.cross_entropy(
+                logits[retain_mask], labels[retain_mask], reduction="mean"
+            )
+            total_loss = total_loss + self.retain_weight * retain_loss
+            n_components += 1
+
+        return total_loss / n_components if n_components > 0 else total_loss
+
+
 def create_unlearning_objective(objective_name: str, forget_class: int,
                                num_classes: int = 10, **kwargs) -> UnlearningObjective:
     """
     Factory function to create unlearning objectives
 
     Args:
-        objective_name: Name of objective ("ce_ascent", "uniform_kl", "feature_scrub", "negative_grad")
+        objective_name: Name of objective ("ce_ascent", "uniform_kl", "feature_scrub",
+                        "negative_grad", "salun", "scrub", "smoothed_margin")
         forget_class: Class to forget
         num_classes: Total number of classes
         **kwargs: Additional objective parameters (retain_weight, target_class_weight, etc.)
@@ -479,6 +637,9 @@ def create_unlearning_objective(objective_name: str, forget_class: int,
 
     elif objective_name == "scrub":
         return SCRUB(forget_class, num_classes, **kwargs)
+
+    elif objective_name == "smoothed_margin":
+        return SmoothedMarginUnlearning(forget_class, num_classes, **kwargs)
 
     else:
         raise ValueError(f"Unknown unlearning objective: {objective_name}")

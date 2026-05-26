@@ -1,0 +1,404 @@
+{
+  "rows": [
+    {
+      "suite": "unlearn_kl_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.0012867647456005216,
+      "success_rate": 1.0,
+      "n_F": 32,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_kl__kl-patch-stage2-vit-cifar10-forget0-proto",
+      "rep": "logit",
+      "L_proxy": 16.06056575780995
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.02500000037252903,
+      "success_rate": 0.09375,
+      "n_F": 32,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_orbit",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.004105392377823591,
+      "success_rate": 1.0,
+      "n_F": 32,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_orbit__orbit-combined-stage2-vit-cifar10-forget0-proto",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.004105392377823591,
+      "success_rate": 1.0,
+      "n_F": 32,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_orbit__orbit-mixed-surface-stage2-vit-cifar10-forget0-proto",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.004105392377823591,
+      "success_rate": 1.0,
+      "n_F": 16,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_orbit__orbit-patch-stage2-vit-cifar10-forget0-proto",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.004105392377823591,
+      "success_rate": 1.0,
+      "n_F": 16,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_orbit__orbit-stochastic-cvar-stage2-vit-cifar10-forget0-proto",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.004105392377823591,
+      "success_rate": 1.0,
+      "n_F": 16,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_orbit__orbit-stochastic-cvar-teacher-stage2-vit-cifar10-forget0-proto",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_kl_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.00147058826405555,
+      "success_rate": 1.0,
+      "n_F": 8,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_s2_r1_bs4_kl",
+      "rep": "logit",
+      "L_proxy": 16.06056575780995
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.02500000037252903,
+      "success_rate": 0.09375,
+      "n_F": 32,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_s2_r1_orbit",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_salun_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.004350490402430296,
+      "success_rate": 0.71875,
+      "n_F": 32,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_s2_r1_salun",
+      "rep": "logit",
+      "L_proxy": 14.740018926683383
+    },
+    {
+      "suite": "unlearn_scrub_distill_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.03137254901960784,
+      "success_rate": 0.0,
+      "n_F": 8,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_s2_r1_scrub-distill",
+      "rep": "logit",
+      "L_proxy": 47.056671389566276
+    },
+    {
+      "suite": "unlearn_scrub_distill_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.007843137718737125,
+      "success_rate": 1.0,
+      "n_F": 8,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_s40_r4_bs1_scrub-distill__scrub-feature-subspace-stage2-vit-cifar10_c34dc29e99",
+      "rep": "logit",
+      "L_proxy": 47.056671389566276
+    },
+    {
+      "suite": "unlearn_scrub_distill_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.00808823574334383,
+      "success_rate": 1.0,
+      "n_F": 32,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_s40_r4_scrub-distill",
+      "rep": "logit",
+      "L_proxy": 47.056671389566276
+    },
+    {
+      "suite": "unlearn_scrub_distill_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.00808823574334383,
+      "success_rate": 1.0,
+      "n_F": 32,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_ar0p2_s40_r4_scrub-distill__scrub-feature-subspace-stage2-vit-cifar10-forget0-proto",
+      "rep": "logit",
+      "L_proxy": 47.056671389566276
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.004595588427037001,
+      "success_rate": 1.0,
+      "n_F": 16,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_box_ar0p5_orbit",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.0034620098304003477,
+      "success_rate": 1.0,
+      "n_F": 4,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_box_orbit",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.004105392377823591,
+      "success_rate": 1.0,
+      "n_F": 16,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_bundle_warm_orbit",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.0034007353242486715,
+      "success_rate": 1.0,
+      "n_F": 32,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_orbit",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.003155637299641967,
+      "success_rate": 1.0,
+      "n_F": 16,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_orbit__rurk",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_salun_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.002512254985049367,
+      "success_rate": 1.0,
+      "n_F": 32,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_salun",
+      "rep": "logit",
+      "L_proxy": 14.740018926683383
+    },
+    {
+      "suite": "unlearn_scrub_distill_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.010784314014017582,
+      "success_rate": 0.96875,
+      "n_F": 32,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_scrub-distill",
+      "rep": "logit",
+      "L_proxy": 47.056671389566276
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.008455882780253887,
+      "success_rate": 1.0,
+      "n_F": 32,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_apgd_margin_ar0p2_s40_r1_orbit__orbit-combined-stage2-vit-cifar10-forget0-proto",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_scrub_distill_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.013725490309298038,
+      "success_rate": 1.0,
+      "n_F": 32,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_apgd_margin_ar0p2_s40_r4_scrub-distill",
+      "rep": "logit",
+      "L_proxy": 47.056671389566276
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.008210784755647182,
+      "success_rate": 1.0,
+      "n_F": 32,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_apgd_margin_orbit__salun",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_salun_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.004350490402430296,
+      "success_rate": 1.0,
+      "n_F": 32,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_apgd_margin_orbit__salun",
+      "rep": "logit",
+      "L_proxy": 14.740018926683383
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.003553921589627862,
+      "success_rate": 1.0,
+      "n_F": 2,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_bundle_accept_orbit",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.0033088235650211573,
+      "success_rate": 1.0,
+      "n_F": 16,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_bundle_adaptive_orbit",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.003553921589627862,
+      "success_rate": 1.0,
+      "n_F": 2,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_bundle_boundary_gm2p0_orbit",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.003553921589627862,
+      "success_rate": 1.0,
+      "n_F": 2,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_bundle_boundary_gm3p0_orbit",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.003553921589627862,
+      "success_rate": 1.0,
+      "n_F": 2,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_bundle_boundary_gm4p0_orbit",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.03137254901960784,
+      "success_rate": 0.0,
+      "n_F": 8,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_bundle_gn_oracle_orbit__rurk",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.005024509970098734,
+      "success_rate": 1.0,
+      "n_F": 8,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_bundle_gn_orbit__rurk",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.005392157007008791,
+      "success_rate": 1.0,
+      "n_F": 8,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_bundle_hybrid_oracle_orbit__rurk",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.0033088235650211573,
+      "success_rate": 1.0,
+      "n_F": 4,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_bundle_hybrid_orbit",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.003615196095779538,
+      "success_rate": 1.0,
+      "n_F": 8,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_bundle_hybrid_orbit__rurk",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.0034007353242486715,
+      "success_rate": 1.0,
+      "n_F": 16,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_bundle_orth_orbit",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.004105392377823591,
+      "success_rate": 1.0,
+      "n_F": 16,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_bundle_topk_orbit",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.03137254901960784,
+      "success_rate": 0.0,
+      "n_F": 16,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_gap_gn_oracle_orbit__rurk",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.030882352963089943,
+      "success_rate": 0.0625,
+      "n_F": 16,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_subspace_adam_oracle_orbit__rurk",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    },
+    {
+      "suite": "unlearn_orbit_vit_cifar10_forget0",
+      "seed": 42,
+      "median_radius": 0.028921568766236305,
+      "success_rate": 0.0625,
+      "n_F": 16,
+      "file": "cifar10_vit_tiny_forget0_seed_42_test_with_retain_logit_subspace_adam_orbit__rurk",
+      "rep": "logit",
+      "L_proxy": 26.423910052468344
+    }
+  ]
+}
