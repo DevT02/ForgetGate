@@ -76,7 +76,7 @@ become precise statements about $\mathcal{R}_\epsilon$:
 \subsection{Theorem 1: the recovery--certification gap}
 \label{sec:thm1}
 
-We bridge the per-example recovery radius to any \emph{certified-unlearning}
+I bridge the per-example recovery radius to any \emph{certified-unlearning}
 budget the method might claim.
 
 \begin{theorem}[Recovery--certification gap]
@@ -145,16 +145,20 @@ straightforwardly estimable Lipschitz proxy $\hat L$ (e.g.\ the spectral
 norm of the Jacobian of the margin at audit points; the
 \texttt{16\_jacobian\_access\_audit.py} machinery already computes the
 underlying quantity). Corollary~\ref{cor:cert} contrapositively gives a
-\emph{provable upper bound on the certifiable unlearning budget}:
+\emph{provable floor on the certifiable unlearning budget}---any tighter
+certificate is falsified by the measured radius:
 \[
-  \epsilon_c \;\leq\; \frac{\gamma - L\cdot \mathrm{median}(\hat r)}{4B}.
+  \epsilon_c \;\geq\; \frac{\gamma - L\cdot \mathrm{median}(\hat r)}{4B}.
 \]
 A method whose median recovery radius is small relative to the oracle margin
 \emph{cannot} be honestly marketed at small $\epsilon_c$; the bound is a
 falsification test that audits with no access to the oracle distribution can
 already perform. This converts the paper's empirical numbers into a stake in
 the certified-unlearning literature
-\cite{chien2024langevin,hsu2025rurk,yu2025impossibility}.
+\cite{chien2024langevin,hsu2025rurk,yu2025impossibility,heinzler2026retain}:
+a modern data-removal certificate such as the retain-sensitivity calibration
+of \cite{heinzler2026retain} supplies exactly the $(\epsilon_c,\delta)$ budget
+that Corollary~\ref{cor:cert} turns into a recovery-radius lower bound.
 
 \subsection{Theorem 2: selective leakage is a Pinsker test}
 \label{sec:thm2}
@@ -266,22 +270,25 @@ sufficiently dense covering families.
 \paragraph{What this says about the open problem.} Worst-case multi-surface
 robustness against a covering delivery family is functionally equivalent to
 input-invariance, which forces the classifier to be constant. The empirical
-failure of \emph{mixed-surface stage-2} reported in §6 of the main paper is
+failure of \emph{mixed-surface stage-2} reported in the defense and
+validation sections of this paper is
 not an engineering artifact: it is the only thing that can happen for a
 non-trivial classifier at the budgets where the patch and frame families
 become covering. The constructive consequence is that ``local-delivery
 transfer'' should be retargeted from worst-case invariance to \emph{realistic
 delivery distributions} — i.e.\ stochastic mask priors that are \emph{not}
-covering. The current paper accidentally implements one such relaxation by
-sampling patch positions; we recommend stating it as a design choice and
-giving it a name (e.g.\ ``$\rho$-thin delivery defense'') in the revised
-manuscript.
+covering. This paper implements one such relaxation by sampling patch
+positions rather than taking a worst case over them; I name this a
+\emph{$\rho$-thin delivery defense} and treat it as the appropriate target
+for local-delivery robustness, since it is the only version of the problem
+not foreclosed by Theorem~\ref{thm:transfer}.
 
 \subsection{Theorem 4: a smoothed certified-recovery objective}
 \label{sec:thm4}
 
-The main paper proposes (eq.~2) a targeted-margin adversarial unlearning
-objective with inner-loop attack $\delta^*(x)$. We upgrade it to a
+This paper's proposed objective~\eqref{eq:proposed} is a targeted-margin
+adversarial unlearning objective with inner-loop attack $\delta^*(x)$. I
+upgrade it to a
 \emph{certified} counterpart by replacing the inner loop with Gaussian
 smoothing of the margin penalty, and prove the resulting objective enjoys a
 randomized-smoothing certificate inherited from the
@@ -346,12 +353,17 @@ the population fraction of forget inputs with smoothed recovery radius at
 least $R$ is at least the empirical fraction minus the right-hand side above.
 \end{corollary}
 
-\paragraph{Why this is the missing piece.} The main paper's eq.~(2) is an
+\paragraph{Why this is the missing piece.} The objective
+\eqref{eq:proposed} is an
 \emph{empirical} adversarial unlearning objective in the AMUN
 \cite{krishna2025amun} mold: minimize a worst-case inner attack. It carries
-no certificate. Equation~\eqref{eq:smoothed} above is the first
-machine-unlearning objective that yields a per-input certified lower bound
-on recovery radius, and Corollary~\ref{cor:gen} transports the per-input
+no certificate. Prior work already connects randomized smoothing to
+certified unlearning \cite{zhang2022pcmu}, but it certifies the stability of
+\emph{quantized gradients} under data removal---a parameter-space guarantee
+about the unlearning \emph{operation}---rather than a guarantee about model
+behavior on perturbed inputs. Equation~\eqref{eq:smoothed} above is, to my
+knowledge, the first machine-unlearning objective that yields a per-input
+\emph{input-space} certified lower bound on recovery radius, and Corollary~\ref{cor:gen} transports the per-input
 guarantee to the forget distribution at standard PAC rates. The existing
 audit machinery in this repository provides the matched empirical
 counterpart: a predicted-vs-realized radius plot is now a direct
@@ -360,8 +372,8 @@ falsification test of \eqref{eq:smoothed}'s training.
 \subsection{Empirical claims, restated as theorem checks}
 \label{sec:restated}
 
-The four theorems above re-cast the benchmark results in §4--§6 of the main
-paper:
+The four theorems above re-cast the benchmark results of this paper, and are
+checked empirically in Section~\ref{sec:validation}:
 
 \begin{enumerate}[leftmargin=1.5em,topsep=0pt]
   \item \textbf{Recovery--certification scatter (Thm 1).} The
@@ -377,35 +389,37 @@ paper:
     variational gap.
   \item \textbf{Local-delivery negative (Thm 3).} The mixed-surface
     stage-2 failure is not a bug-report — it is the only possible outcome
-    under the covering assumption (Lemma~\ref{lem:cover}). The paper should
-    stop offering ``mixed-surface stage-2 as future work''; it is
+    under the covering assumption (Lemma~\ref{lem:cover}). Mixed-surface
+    stage-2 is therefore not an open problem for future work but
     \emph{provably} the wrong target.
-  \item \textbf{Certified objective (Thm 4).} The proposed objective
-    \eqref{eq:smoothed} replaces the inner attack in eq.~(2) of the main
-    paper. A single $\sigma$-sweep on ORBIT or CE-U produces a
+  \item \textbf{Certified objective (Thm 4).} The smoothed objective
+    \eqref{eq:smoothed} replaces the inner attack in the empirical
+    objective~\eqref{eq:proposed}. A single $\sigma$-sweep on ORBIT or CE-U produces a
     \emph{predicted}-radius curve from Theorem~\ref{thm:smooth}; the
     existing audit produces a matched \emph{measured} curve. Their gap is
     the new headline figure.
 \end{enumerate}
 
-\subsection{What this changes in the manuscript}
+\subsection{Relation to prior inevitability, impossibility, and certification results}
 
-These results restructure the paper's relationship to the literature:
+These results position the paper relative to recent impossibility and
+certification work:
 
 \begin{itemize}[leftmargin=1.5em,topsep=0pt]
   \item RURK \cite{hsu2025rurk} establishes high-dimensional
-    \emph{inevitability} of residual knowledge in expectation; Theorem~1
-    converts inevitability into a \emph{quantitative budget} the audit can
-    estimate without an oracle.
+    \emph{inevitability} of residual knowledge in expectation;
+    Theorem~\ref{thm:gap} converts inevitability into a \emph{quantitative
+    budget} the audit can estimate without an oracle.
   \item \cite{yu2025impossibility} establishes path-dependence
     impossibility for retrain equivalence in multi-stage training;
-    Theorem~3 establishes a \emph{different} impossibility — multi-surface
-    worst-case invariance — for the same end-goal (distinguishability),
-    but with a topological rather than path-dependent mechanism.
+    Theorem~\ref{thm:transfer} establishes a \emph{different} impossibility
+    — multi-surface worst-case invariance — for the same end-goal
+    (distinguishability), but with a topological rather than path-dependent
+    mechanism.
   \item AMUN \cite{krishna2025amun} uses adversarial examples as an
-    \emph{unlearning} primitive; Theorem~4 inverts the role and uses
-    smoothing as a \emph{certified-defense} primitive against post-hoc
-    recovery attacks.
+    \emph{unlearning} primitive; Theorem~\ref{thm:smooth} inverts the role
+    and uses smoothing as a \emph{certified-defense} primitive against
+    post-hoc recovery attacks.
 \end{itemize}
 
 The benchmark is no longer the headline; it becomes the experimental
