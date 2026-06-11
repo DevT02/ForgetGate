@@ -109,34 +109,42 @@ Then \eqref{eq:thm1-population} follows by integrating against $\mu_t$.
 
 \begin{corollary}[Certified unlearning needs separated margins]
 \label{cor:cert}
-Let $\theta_u$ be $(\epsilon_c,\delta)$-certified relative to the oracle
-$\theta_o$ in the conditional TV sense:
+Instantiate Theorem~\ref{thm:gap} with the \emph{probability margin}
+$\bar m_t(x;\theta) := \pi_\theta(x)_t - \max_{j \neq t}\pi_\theta(x)_j \in [-1,1]$,
+where $\pi_\theta = \mathrm{softmax}\circ f_\theta$. Because softmax is strictly
+monotone, $\bar m_t$ has the same sign as the logit margin and defines the same
+recovery event; let $L$ be its input-space Lipschitz constant. Let $\theta_u$
+be $(\epsilon_c,\delta)$-certified relative to the oracle $\theta_o$ in the
+conditional TV sense,
 \[
 \Pr_{x \sim \mu_t}\!\Bigl[
 \mathrm{TV}\bigl(\pi_{\theta_u}(\cdot \mid x),\, \pi_{\theta_o}(\cdot \mid x)\bigr)
 \leq \epsilon_c\Bigr] \;\geq\; 1 - \delta,
 \]
-where $\pi_\theta = \mathrm{softmax}\circ f_\theta$. Assume the oracle has an
-expected separation $\mathbb{E}_{\mu_t}\!\bigl[-m_t(x;\theta_o)\bigr] \geq
-\gamma > 0$ and the logits are bounded $\|f_\theta\|_\infty \leq B$. Then with
+and suppose the oracle is separated,
+$\mathbb{E}_{\mu_t}\!\bigl[-\bar m_t(x;\theta_o)\bigr] \geq \gamma > 0$. Then with
 probability $\geq 1-\delta$,
 \begin{equation}
   \mathbb{E}_{x \sim \mu_t}\!\bigl[\,r_t(x;\theta_u)\,\bigr]
-  \;\geq\; \frac{\gamma - 4B\,\epsilon_c}{L}.
+  \;\geq\; \frac{\gamma - 2\,\epsilon_c}{L}.
 \end{equation}
 \end{corollary}
 
 \begin{proof}
-For any logit map $f$, the margin $m_t = f_t - \max_{j\neq t} f_j$ is a
-$1$-Lipschitz functional of $f$ (the maximum of $K-1$ linear functionals).
-By the variational form of TV applied to the bounded functional $m_t$ on the
-probability simplex $\Delta^{K-1}$,
+For distributions $p,q$ on $[K]$ and any class $k$, the event $A=\{k\}$ gives
+$|p_k - q_k| = |p(A)-q(A)| \leq \mathrm{TV}(p,q)$, and $a \mapsto \max_{j\neq t}
+a_j$ is $1$-Lipschitz in the sup-norm. Hence on the certified event,
 \[
-|m_t(x;\theta_u) - m_t(x;\theta_o)| \;\leq\; 4B \cdot
-\mathrm{TV}(\pi_{\theta_u}(\cdot\mid x),\pi_{\theta_o}(\cdot\mid x)).
+|\bar m_t(x;\theta_u) - \bar m_t(x;\theta_o)|
+\;\leq\; |\pi_{\theta_u}(x)_t-\pi_{\theta_o}(x)_t|
+ + \bigl|\textstyle\max_{j\neq t}\pi_{\theta_u}(x)_j - \max_{j\neq t}\pi_{\theta_o}(x)_j\bigr|
+\;\leq\; 2\,\mathrm{TV} \;\leq\; 2\epsilon_c .
 \]
-Take expectations under $\mu_t$, use the high-probability TV bound, then
-apply Theorem~\ref{thm:gap}.
+Taking expectations under $\mu_t$ gives $\mathbb{E}[-\bar m_t(\cdot;\theta_u)]
+\geq \gamma - 2\epsilon_c$; applying Theorem~\ref{thm:gap} to $\bar m_t$
+(pointwise $r_t(x) \geq -\bar m_t(x)/L$) and the high-probability TV bound
+yields the claim. The bounded margin $\bar m_t \in [-1,1]$ removes any
+dependence on a logit bound.
 \end{proof}
 
 \paragraph{What this says about the benchmark.}
@@ -144,11 +152,12 @@ Every method in the paper has a measured $\hat r$ distribution and a
 straightforwardly estimable Lipschitz proxy $\hat L$ (e.g.\ the spectral
 norm of the Jacobian of the margin at audit points; the
 \texttt{16\_jacobian\_access\_audit.py} machinery already computes the
-underlying quantity). Corollary~\ref{cor:cert} contrapositively gives a
+underlying quantity), used here as a logit-margin proxy for the
+probability-margin constant $L$ of Corollary~\ref{cor:cert}. Corollary~\ref{cor:cert} contrapositively gives a
 \emph{provable floor on the certifiable unlearning budget}---any tighter
 certificate is falsified by the measured radius:
 \[
-  \epsilon_c \;\geq\; \frac{\gamma - L\cdot \mathrm{median}(\hat r)}{4B}.
+  \epsilon_c \;\geq\; \frac{\gamma - L\cdot \mathrm{median}(\hat r)}{2}.
 \]
 A method whose median recovery radius is small relative to the oracle margin
 \emph{cannot} be honestly marketed at small $\epsilon_c$; the bound is a
@@ -207,74 +216,75 @@ sharpens the ORBIT/CE-U positive results: the gap is not just bigger, it
 This formalizes the paper's open problem (``patch-aware defenses fail to
 transfer to frame or multi-patch delivery'') as a structural impossibility.
 
-\paragraph{Delivery families and covering.} A \emph{delivery mask} is a
-subset $M \subseteq [d]$ of input coordinates. A \emph{delivery family} is a
-collection $\mathcal{D} \subseteq 2^{[d]}$. A delivery-conditional
-perturbation under $\mathcal{D}$ with budget $\epsilon$ is a
-$\delta \in \mathbb{R}^d$ with $\mathrm{supp}(\delta) \subseteq M$ for some
-$M \in \mathcal{D}$ and $\|\delta\|_\infty \leq \epsilon$. We say a finite
-collection of families $\{\mathcal{D}_i\}_{i=1}^k$ is \emph{covering at scale
-$\epsilon$} on $\mathcal{X}$ if for every $x_1, x_2 \in \mathcal{X}$ there is
-a sequence $x_1 = y_0, y_1, \dots, y_m = x_2$ with each $y_{j+1} - y_j$ a
-valid delivery-conditional perturbation under some $\mathcal{D}_{i(j)}$ and
-budget $\epsilon$.
+\paragraph{Delivery families and coordinate coverage.} A \emph{delivery mask}
+is a subset $M \subseteq [d]$ of input coordinates. A \emph{delivery family}
+$\mathcal{D} \subseteq 2^{[d]}$ is \emph{coordinate-covering} if every input
+coordinate lies in at least one of its masks, $\bigcup_{M \in \mathcal{D}} M =
+[d]$. A delivery-conditional perturbation under $\mathcal{D}$ with budget
+$\epsilon$ is a $\delta \in \mathbb{R}^d$ with $\mathrm{supp}(\delta) \subseteq
+M$ for some $M \in \mathcal{D}$ and $\|\delta\|_\infty \leq \epsilon$.
 
-\begin{lemma}[Coverage by patches plus frames]
+\begin{lemma}[Patches alone are coordinate-covering]
 \label{lem:cover}
-For $d_{\rm img} = 224 \times 224$ images normalized to $[0,1]^d$, the union
-of (i) all $32\times 32$ square delivery masks at every position and (ii)
-all $16$-pixel border frames is covering at scale $\epsilon = 1$.
+For $224 \times 224$ images on $[0,1]^d$, the family of all $32\times 32$
+square delivery masks at every position is coordinate-covering; adjoining the
+$16$-pixel border frames leaves it coordinate-covering.
 \end{lemma}
 
 \begin{proof}
-Any pixel of the image is covered by at least one $32 \times 32$ square or
-lies on the border frame. With budget $\epsilon = 1$, a single
-delivery-conditional perturbation under one mask can replace the values on
-that mask with any target. Tile $\mathcal{X}$ with non-overlapping squares
-and frames; finitely many delivery steps suffice to rewrite all coordinates
-of $x_1$ into those of $x_2$.
+Every pixel lies inside at least one $32\times 32$ window, so the union of the
+patch masks is all of $[d]$; adding more masks only enlarges the union.
 \end{proof}
 
-\begin{theorem}[Local-delivery transfer impossibility]
+\begin{theorem}[Budget-graded local-delivery transfer impossibility]
 \label{thm:transfer}
-Let $\{\mathcal{D}_i\}_{i=1}^k$ be a covering family at scale $\epsilon$ on
-$\mathcal{X}$, and let $f_\theta$ be a measurable classifier. Suppose
-$f_\theta$ is \emph{worst-case invariant} to delivery-conditional
-perturbations on every $\mathcal{D}_i$ at budget $\epsilon$:
+Let $\mathcal{D}$ be a coordinate-covering delivery family and let $f_\theta:
+[0,1]^d \to \mathcal{Y}$ be any classifier. Fix \emph{any} budget
+$\epsilon > 0$ and suppose $f_\theta$ is \emph{worst-case invariant} to all
+delivery-conditional perturbations under $\mathcal{D}$ at budget $\epsilon$:
 \begin{equation}
-  \forall x \in \mathcal{X},\ \forall i \in [k],\ \forall M \in
-  \mathcal{D}_i,\ \forall \delta \text{ admissible},\
-  f_\theta(x) = f_\theta(x + \delta).
+  \forall x,\ \forall M \in \mathcal{D},\ \forall \delta \text{ with }
+  \mathrm{supp}(\delta) \subseteq M,\ \|\delta\|_\infty \leq \epsilon,\
+  x+\delta \in [0,1]^d : \quad f_\theta(x+\delta) = f_\theta(x).
 \end{equation}
-Then $f_\theta$ is constant on the path-component of $\mathcal{X}$
-reachable by the covering.
+Then $f_\theta$ is constant on $[0,1]^d$.
 \end{theorem}
 
 \begin{proof}
-By coverage, any two $x_1, x_2 \in \mathcal{X}$ are connected by a finite
-chain $y_0, \ldots, y_m$ of valid delivery-conditional steps. By invariance
-on each step, $f_\theta(y_j) = f_\theta(y_{j+1})$, hence
-$f_\theta(x_1) = f_\theta(x_2)$.
+Fix $x, x' \in [0,1]^d$; we connect them by admissible $\epsilon$-steps,
+one coordinate at a time. For coordinate $i$, choose a mask $M_i \in
+\mathcal{D}$ with $i \in M_i$ (coordinate coverage). Move the $i$-th entry
+monotonically from its current value to $x'_i$ in increments of magnitude at
+most $\epsilon$; each increment is a perturbation supported on
+$\{i\} \subseteq M_i$ with sup-norm $\leq \epsilon$, and every intermediate
+point stays in $[0,1]^d$. Worst-case invariance leaves $f_\theta$ unchanged at
+each increment, so resetting coordinate $i$ from $x_i$ to $x'_i$ does not
+change $f_\theta$. After $d$ coordinates the point equals $x'$, hence
+$f_\theta(x) = f_\theta(x')$. As $x, x'$ were arbitrary, $f_\theta$ is
+constant. The number of steps, $\sum_i \lceil |x'_i - x_i|/\epsilon \rceil$,
+is finite for every $\epsilon > 0$.
 \end{proof}
 
 \begin{corollary}[No-free-lunch for stage-2 patch defense]
 \label{cor:no-free-lunch}
-There is no fine-tune of a non-constant classifier on $\mathcal{X}$ that
-simultaneously (i) drives the worst-case forget-class margin to $\leq -\gamma$
-under both $32\times 32$ conditional patches and $16$-pixel border frames at
-budget $\epsilon = 1$ and (ii) preserves clean accuracy strictly above
-chance. The same statement holds at any budget $\epsilon \geq 1/2$ for
-sufficiently dense covering families.
+For \emph{any} budget $\epsilon > 0$, no fine-tune of a non-constant
+classifier on $[0,1]^d$ can be worst-case invariant on a coordinate-covering
+delivery family (e.g.\ all $32\times 32$ patches, with or without $16$-pixel
+border frames) while keeping clean accuracy strictly above chance. In
+particular the impossibility holds at the small budgets $\epsilon \approx
+8/255$ the audits use, not only in a large-budget limit.
 \end{corollary}
 
 \paragraph{What this says about the open problem.} Worst-case multi-surface
-robustness against a covering delivery family is functionally equivalent to
-input-invariance, which forces the classifier to be constant. The empirical
+robustness against a coordinate-covering delivery family is functionally
+equivalent to input-invariance, which forces the classifier to be constant
+\emph{at every budget}---the chaining argument needs only that each coordinate
+be reachable, so the obstruction is present already at the $\epsilon \approx
+8/255$ the audits use, not merely in a large-budget limit. The empirical
 failure of \emph{mixed-surface stage-2} reported in the defense and
 validation sections of this paper is
 not an engineering artifact: it is the only thing that can happen for a
-non-trivial classifier at the budgets where the patch and frame families
-become covering. The constructive consequence is that ``local-delivery
+non-trivial classifier under worst-case multi-surface training. The constructive consequence is that ``local-delivery
 transfer'' should be retargeted from worst-case invariance to \emph{realistic
 delivery distributions} — i.e.\ stochastic mask priors that are \emph{not}
 covering. This paper implements one such relaxation by sampling patch
