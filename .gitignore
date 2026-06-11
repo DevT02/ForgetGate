@@ -2,6 +2,8 @@
 __pycache__/
 dist/
 build/
+.pytest_cache/
+pytest-cache-files-*/
 
 # IDE
 .vscode/
@@ -12,6 +14,7 @@ build/
 # Data
 data/
 datasets/
+data_clean/
 
 # Results and logs
 # Keep key experimental logs for reproducibility
