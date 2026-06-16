@@ -73,8 +73,8 @@ class DataManager:
         if split == "train":
             # Training augmentations
             if use_pretrained:
-                if dataset_name == "cifar10":
-                    # For CIFAR-10 with pretrained models: resize to 224
+                if dataset_name in ("cifar10", "cifar100"):
+                    # For CIFAR with pretrained models: resize to 224
                     transform_list.extend([
                         transforms.RandomResizedCrop(224, scale=(0.08, 1.0)),
                         transforms.RandomHorizontalFlip(),
@@ -107,8 +107,8 @@ class DataManager:
         else:
             # Validation/test transforms
             if use_pretrained:
-                if dataset_name == "cifar10":
-                    # For CIFAR-10 with pretrained models: resize to 224
+                if dataset_name in ("cifar10", "cifar100"):
+                    # For CIFAR with pretrained models: resize to 224
                     transform_list.extend([
                         transforms.Resize(256),
                         transforms.CenterCrop(224),
@@ -143,8 +143,8 @@ class DataManager:
         if apply_imagenet_norm:
             # Apply normalization (ImageNet or dataset-specific)
             if use_pretrained:
-                if dataset_name == "cifar10":
-                    # ImageNet normalization for CIFAR-10 with pretrained models
+                if dataset_name in ("cifar10", "cifar100"):
+                    # ImageNet normalization for CIFAR with pretrained models
                     transform_list.append(transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]))
                 elif dataset_name == "mnist":
                     # Convert MNIST to 3 channels and use ImageNet normalization for pretrained models
@@ -181,6 +181,10 @@ class DataManager:
             else:
                 dataset = torchvision.datasets.CIFAR10(
                     root=self.data_dir, train=False, download=True, transform=transform)
+
+        elif dataset_name == "cifar100":
+            dataset = torchvision.datasets.CIFAR100(
+                root=self.data_dir, train=(split == "train"), download=True, transform=transform)
 
         elif dataset_name == "mnist":
             if split == "train":

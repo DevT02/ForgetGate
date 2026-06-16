@@ -1,0 +1,31 @@
+{
+  "description": "L2-norm recovery audit of smoothed-margin model vs certified L2 R=0.193. Same-norm comparison (no sqrt(d) conversion).",
+  "certified_l2_radius": 0.193,
+  "eps_max": 1.0,
+  "per_seed": [
+    {
+      "seed": 42,
+      "forget_success": 0.844,
+      "forget_median_l2": 0.4883,
+      "retain_success": 0.031,
+      "retain_median_l2": 0.7656,
+      "rate_gap": 0.812
+    },
+    {
+      "seed": 123,
+      "forget_success": 0.891,
+      "forget_median_l2": 0.4609,
+      "retain_success": 0.016,
+      "retain_median_l2": 0.7578,
+      "rate_gap": 0.875
+    },
+    {
+      "seed": 456,
+      "forget_success": 0.797,
+      "forget_median_l2": 0.5703,
+      "retain_success": 0.031,
+      "retain_median_l2": 0.3867,
+      "rate_gap": 0.766
+    }
+  ]
+}

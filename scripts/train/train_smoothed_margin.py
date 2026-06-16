@@ -47,15 +47,16 @@ from src.utils import get_device, load_config, set_seed
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _build_vit_tiny(num_classes: int) -> nn.Module:
+def _build_vit(num_classes: int, vit_size: str = "tiny") -> nn.Module:
     model_cfg = load_config("configs/model.yaml")
-    vit_cfg = dict(model_cfg["vit"]["tiny"])
+    vit_cfg = dict(model_cfg["vit"][vit_size])
     vit_cfg["pretrained"] = False
     return create_vit_model(vit_cfg, num_classes=num_classes)
 
 
-def _load_base(checkpoint_path: str, num_classes: int, device: torch.device) -> nn.Module:
-    model = _build_vit_tiny(num_classes).to(device)
+def _load_base(checkpoint_path: str, num_classes: int, device: torch.device,
+               vit_size: str = "tiny") -> nn.Module:
+    model = _build_vit(num_classes, vit_size).to(device)
     ckpt = torch.load(checkpoint_path, map_location=device)
     state = ckpt.get("model_state_dict", ckpt)
     model.load_state_dict(state)
@@ -124,6 +125,8 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--base-suite", default="base_vit_cifar10",
                    help="Base model suite name (provides the dataset and the checkpoint).")
+    p.add_argument("--arch", default="tiny", choices=["tiny", "small", "base"],
+                   help="ViT size to build (must match the base checkpoint).")
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--forget-class", type=int, default=0)
     p.add_argument("--dataset", default="cifar10")
@@ -160,7 +163,7 @@ def main():
         raise FileNotFoundError(f"Base checkpoint missing: {base_path}")
     print(f"Loading base from {base_path}")
 
-    base = _load_base(base_path, num_classes, device)
+    base = _load_base(base_path, num_classes, device, vit_size=args.arch)
 
     # Apply LoRA to the base
     lora_cfg = create_lora_config(

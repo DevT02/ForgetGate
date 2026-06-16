@@ -1,0 +1,38 @@
+{
+  "42": {
+    "oracle": {
+      "forget_med": 0.00882,
+      "retain_med": 0.00827,
+      "ratio": 0.94
+    },
+    "SCRUB": {
+      "forget_med": 0.00254,
+      "retain_med": 0.00524,
+      "ratio": 2.06
+    }
+  },
+  "123": {
+    "oracle": {
+      "forget_med": 0.01826,
+      "retain_med": 0.01924,
+      "ratio": 1.05
+    },
+    "SCRUB": {
+      "forget_med": 0.01115,
+      "retain_med": 0.00919,
+      "ratio": 0.82
+    }
+  },
+  "456": {
+    "oracle": {
+      "forget_med": 0.01115,
+      "retain_med": 0.01127,
+      "ratio": 1.01
+    },
+    "SCRUB": {
+      "forget_med": 0.0125,
+      "retain_med": 0.01238,
+      "ratio": 0.99
+    }
+  }
+}

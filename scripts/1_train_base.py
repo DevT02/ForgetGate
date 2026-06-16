@@ -255,6 +255,10 @@ def main():
         val_full_dataset = torchvision.datasets.CIFAR10(
             root=data_manager.data_dir, train=True, download=True, transform=eval_transform
         )
+    elif dataset_name == "cifar100":
+        val_full_dataset = torchvision.datasets.CIFAR100(
+            root=data_manager.data_dir, train=True, download=True, transform=eval_transform
+        )
     elif dataset_name == "mnist":
         val_full_dataset = torchvision.datasets.MNIST(
             root=data_manager.data_dir, train=True, download=True, transform=eval_transform

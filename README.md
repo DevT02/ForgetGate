@@ -1,28 +1,35 @@
-# ForgetGate: Multi-Regime Red Teaming of Machine Unlearning
+# ForgetGate: The Recovery-Certification Gap
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![arXiv](https://img.shields.io/badge/arXiv-coming%20soon-b31b1b.svg)]()
 
-**Paper:** *Multi-Regime Red Teaming of Machine Unlearning* — Devansh Tayal, Michigan State University
+**Paper:** *The Recovery-Certification Gap: A Theory of Adversarial Unlearning*, Devansh Tayal. **[Read the working paper (PDF)](results/analysis/figures/paper_draft.pdf)**
 
 ---
 
-ForgetGate is a controlled benchmark and empirical study of **machine unlearning robustness** under multiple attack regimes. The central question:
+ForgetGate argues that machine unlearning should be audited by one measurable quantity, the per-example *recovery radius*: the smallest input change that re-elicits a forgotten class. If a small perturbation recovers the forgotten class, the information was never really erased, so clean forget accuracy is the wrong test. The paper builds this into a small theory (four theorems) and validates each on an eight-method CIFAR-10 benchmark.
 
-> When a model appears to have forgotten a class on clean evaluation, what kinds of adaptive attacks can still recover that behavior, and which defenses actually survive across attack regimes?
+> A method can pass clean-accuracy and even rate-based audits and still leak under the recovery radius, and that radius is what an unlearning *certificate* must answer to.
 
-## Key Findings
+## The theory (four theorems)
+
+1. **Recovery-certification gap.** A method's measured recovery radius implies a floor that any certified-unlearning budget must respect, so an oracle-free audit can already challenge an over-tight certificate. It is a necessary condition rather than a strict certificate, since the Lipschitz term uses a local proxy.
+2. **Selective-leakage test.** Calibrated against a zero-knowledge oracle null (a model retrained without the forgotten class), it separates genuine residual knowledge from generic adversarial fragility. The null has no intrinsic forget-vs-retain asymmetry, so a gap over it is real leakage.
+3. **Covering-family impossibility.** Worst-case robustness to all patch and border-frame delivery surfaces at once forces a constant classifier, which is why mixed-surface patch defenses cannot transfer. The constructive target is stochastic (non-covering) delivery priors.
+4. **Smoothed certified-recovery objective.** A Gaussian-smoothed objective attaches a randomized-smoothing certificate to unlearning. Trained end-to-end over 3 seeds it drives forget accuracy to 9-12% with retain preserved, and certifies an L2 radius of 0.193 that, in its own norm, sits below where the class re-emerges. A sigma sweep exposes a certification-utility tradeoff.
+
+## Empirical findings
 
 **1. Per-example conditional recovery is the dominant broad threat.**
 Non-robust methods remain conditionally recoverable even when universal perturbations largely fail. This holds across SalUn, SCRUB, CE-U, SGA, and BalDRO.
 
 **2. Local-delivery robustness is not a single property.**
-Patch-aware stage-2 defenses reduce 32×32 conditional patch recovery on ORBIT (78.1%→31.2%) and CE-U (68.8%→43.8%), but fail to transfer to border-frame and multi-patch delivery surfaces. Local-delivery transfer is an open problem.
+Patch-aware stage-2 defenses reduce 32x32 conditional patch recovery on ORBIT (78.1% to 31.2%) and CE-U (68.8% to 43.8%), but fail to transfer to border-frame and multi-patch delivery surfaces. This is the empirical witness for Theorem 3.
 
 **3. Defenses are partial and method-specific.**
-Feature-subspace stage-2 provides the first consistent improvement to recovery radii on BalDRO, SalUn, and ORBIT without collapsing clean accuracy. RURK resists both attack families. SCRUB exhibits generic adversarial fragility rather than selective forgetting leakage.
+Feature-subspace stage-2 gives the first consistent improvement to recovery radii on BalDRO, SalUn, and ORBIT without collapsing clean accuracy. RURK resists both attack families. SCRUB looks like generic adversarial fragility under most seeds; a strong attack on one seed exposes a transient selective gap, so its selectivity is not robust.
 
 ## Methods Evaluated
 
@@ -119,7 +126,7 @@ python scripts/audits/26_mia_audit.py
 
 ## Paper
 
-Source and compiled PDF are in `results/analysis/figures/`. An arXiv link will be added here upon submission.
+**[The Recovery-Certification Gap: A Theory of Adversarial Unlearning (PDF)](results/analysis/figures/paper_draft.pdf)**, a working paper. Source (`paper_draft.tex`) and all result JSONs and figures are in `results/analysis/`. Code and full results are in this repo; an arXiv link will be added on submission.
 
 ## Legacy Note
 

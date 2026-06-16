@@ -1,0 +1,33 @@
+{
+  "description": "Theorem 4 certification-utility frontier (seed 42): smoothing sigma vs forget/retain accuracy and median certified L2 radius. n_noise=256, alpha=1e-3.",
+  "frontier": [
+    {
+      "sigma": 0.05,
+      "forget_acc": 0.002,
+      "retain_acc": 0.9372,
+      "median_certified_l2_radius": 0.0966,
+      "frac_with_positive_certificate": 1.0
+    },
+    {
+      "sigma": 0.1,
+      "forget_acc": 0.12,
+      "retain_acc": 0.9376,
+      "median_certified_l2_radius": 0.1933,
+      "frac_with_positive_certificate": 1.0
+    },
+    {
+      "sigma": 0.25,
+      "forget_acc": 0.664,
+      "retain_acc": 0.9392,
+      "median_certified_l2_radius": 0.4832,
+      "frac_with_positive_certificate": 1.0
+    },
+    {
+      "sigma": 0.5,
+      "forget_acc": 0.835,
+      "retain_acc": 0.9413,
+      "median_certified_l2_radius": 0.9665,
+      "frac_with_positive_certificate": 1.0
+    }
+  ]
+}

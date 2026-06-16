@@ -1,0 +1,1031 @@
+{
+  "input_dim": 150528,
+  "sigma": 0.1,
+  "eps_max": 0.03137254901960784,
+  "rows": [
+    {
+      "split": "forget",
+      "sample_index": 0,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.00196078431372549,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 1,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0020220588235294115,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 2,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.002052696078431372,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 3,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0017463235294117646,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 4,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.002971813725490196,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 5,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0019301470588235295,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 6,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0010110294117647058,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 7,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.000980392156862745,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 8,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 3.0637254901960784e-05,
+      "violation": true
+    },
+    {
+      "split": "forget",
+      "sample_index": 9,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0016237745098039214,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 10,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0021752450980392158,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 11,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0018075980392156864,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 12,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0037377450980392154,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 13,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0020220588235294115,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 14,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0009191176470588235,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 15,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.003247549019607843,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 16,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0,
+      "violation": true
+    },
+    {
+      "split": "forget",
+      "sample_index": 17,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0006127450980392157,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 18,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.008333333333333333,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 19,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.002512254901960784,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 20,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.003155637254901961,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 21,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0007352941176470588,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 22,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.000857843137254902,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 23,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0017463235294117646,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 24,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.003431372549019608,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 25,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.001256127450980392,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 26,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.00012254901960784314,
+      "violation": true
+    },
+    {
+      "split": "forget",
+      "sample_index": 27,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0011642156862745098,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 28,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0011642156862745098,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 29,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0010416666666666667,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 30,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.00352328431372549,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 31,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.008088235294117646,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 32,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.002604166666666667,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 33,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0025428921568627447,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 34,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0015931372549019608,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 35,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.006556372549019607,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 36,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0013786764705882352,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 37,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0010110294117647058,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 38,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.002420343137254902,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 39,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0025428921568627447,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 40,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0,
+      "violation": true
+    },
+    {
+      "split": "forget",
+      "sample_index": 41,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0020220588235294115,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 42,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.002818627450980392,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 43,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.002512254901960784,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 44,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.001256127450980392,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 45,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.005575980392156862,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 46,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0023284313725490196,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 47,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.000704656862745098,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 48,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004779411764705883,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 49,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0023284313725490196,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 50,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.003492647058823529,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 51,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0015318627450980392,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 52,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0024509803921568627,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 53,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0016850490196078432,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 54,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0005208333333333333,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 55,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0018995098039215686,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 56,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0,
+      "violation": true
+    },
+    {
+      "split": "forget",
+      "sample_index": 57,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.003125,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 58,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0016237745098039214,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 59,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0022058823529411764,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 60,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0034620098039215685,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 61,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0043504901960784315,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 62,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0023590686274509807,
+      "violation": false
+    },
+    {
+      "split": "forget",
+      "sample_index": 63,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0006740196078431372,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 0,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004779411764705883,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 1,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.007107843137254902,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 2,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.003860294117647059,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 3,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.006004901960784313,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 4,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004473039215686274,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 5,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.009436274509803923,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 6,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0038909313725490197,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 7,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004901960784313725,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 8,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.007291666666666667,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 9,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.006985294117647058,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 10,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004595588235294117,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 11,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.005208333333333334,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 12,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.007598039215686274,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 13,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.007965686274509803,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 14,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.006127450980392157,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 15,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.006127450980392157,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 16,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004718137254901961,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 17,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0074142156862745095,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 18,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.005208333333333334,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 19,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004595588235294117,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 20,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.011029411764705881,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 21,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0066789215686274515,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 22,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.00625,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 23,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0036458333333333334,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 24,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.00784313725490196,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 25,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0074142156862745095,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 26,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004044117647058823,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 27,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.00392156862745098,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 28,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.006004901960784313,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 29,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004411764705882353,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 30,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0030943627450980395,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 31,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004534313725490196,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 32,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004534313725490196,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 33,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0060661764705882346,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 34,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.009436274509803923,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 35,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.005024509803921568,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 36,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.005330882352941177,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 37,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0056985294117647065,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 38,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.005330882352941177,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 39,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004105392156862744,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 40,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.005759803921568628,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 41,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0043504901960784315,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 42,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004901960784313725,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 43,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0074142156862745095,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 44,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004473039215686274,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 45,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0038909313725490197,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 46,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0074142156862745095,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 47,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.005208333333333334,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 48,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.005330882352941177,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 49,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0030637254901960784,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 50,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.006985294117647058,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 51,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.002971813725490196,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 52,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004595588235294117,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 53,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0011029411764705882,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 54,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.007598039215686274,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 55,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0033088235294117647,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 56,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.006311274509803922,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 57,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004166666666666667,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 58,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0043504901960784315,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 59,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.00784313725490196,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 60,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.004963235294117647,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 61,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.013602941176470588,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 62,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.006433823529411764,
+      "violation": false
+    },
+    {
+      "split": "retain",
+      "sample_index": 63,
+      "predicted_radius_l2": 0.19329266188310254,
+      "predicted_radius_linf_lb": 0.0004982034391544133,
+      "measured_radius_linf": 0.0037071078431372547,
+      "violation": false
+    }
+  ]
+}

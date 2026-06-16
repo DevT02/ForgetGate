@@ -1,0 +1,66 @@
+{
+  "description": "Smoothed-margin (Theorem 4) end-to-end results across seeds 42, 123, 456.",
+  "objective": "unlearn_smoothed_margin_vit_cifar10_forget0",
+  "sigma": 0.1,
+  "n_noise_train": 4,
+  "n_noise_audit": 256,
+  "gamma": 1.0,
+  "lora_rank": 8,
+  "epochs": 10,
+  "input_dim": 150528,
+  "sqrt_d": 388.0,
+  "certified_l2_radius_all_seeds": 0.1933,
+  "linf_equivalent_certificate": 0.000498,
+  "selective_gap_ratio_mean": 3.47,
+  "selective_gap_ratio_range": [
+    2.66,
+    4.27
+  ],
+  "per_seed": [
+    {
+      "seed": 42,
+      "forget_acc_before": 0.957,
+      "forget_acc_after": 0.12,
+      "retain_acc_before": 0.9391,
+      "retain_acc_after": 0.9376,
+      "certified_l2_radius": 0.1933,
+      "forget_recovery_median_linf": 0.001746,
+      "retain_recovery_median_linf": 0.006066,
+      "selective_gap_ratio": 3.47,
+      "forget_side_violations": 10,
+      "forget_clean_leak": 6,
+      "forget_nonzero_subbound": 4,
+      "retain_side_violations": 0
+    },
+    {
+      "seed": 123,
+      "forget_acc_before": 0.945,
+      "forget_acc_after": 0.121,
+      "retain_acc_before": 0.9384,
+      "retain_acc_after": 0.9366,
+      "certified_l2_radius": 0.1933,
+      "forget_recovery_median_linf": 0.001379,
+      "retain_recovery_median_linf": 0.005882,
+      "selective_gap_ratio": 4.27,
+      "forget_side_violations": 11,
+      "forget_clean_leak": 7,
+      "forget_nonzero_subbound": 4,
+      "retain_side_violations": 0
+    },
+    {
+      "seed": 456,
+      "forget_acc_before": 0.868,
+      "forget_acc_after": 0.093,
+      "retain_acc_before": 0.8744,
+      "retain_acc_after": 0.8788,
+      "certified_l2_radius": 0.1933,
+      "forget_recovery_median_linf": 0.001961,
+      "retain_recovery_median_linf": 0.005208,
+      "selective_gap_ratio": 2.66,
+      "forget_side_violations": 5,
+      "forget_clean_leak": 3,
+      "forget_nonzero_subbound": 2,
+      "retain_side_violations": 0
+    }
+  ]
+}

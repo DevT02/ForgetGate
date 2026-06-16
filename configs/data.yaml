@@ -21,6 +21,15 @@ cifar10:
   mean: [0.4914, 0.4822, 0.4465]
   std: [0.2023, 0.1994, 0.2010]
 
+# CIFAR-100 configuration (cross-dataset generalization check)
+cifar100:
+  name: cifar100
+  num_classes: 100
+  image_size: 32
+  channels: 3
+  mean: [0.5071, 0.4865, 0.4409]
+  std: [0.2673, 0.2564, 0.2762]
+
 # MNIST configuration
 mnist:
   name: mnist

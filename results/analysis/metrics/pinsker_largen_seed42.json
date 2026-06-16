@@ -1,0 +1,59 @@
+{
+  "description": "n=128 forget-vs-retain recovery for SCRUB/SalUn: median radius with bootstrap 95% CI, and rate gap at the most-separating small eps with Wilson CI + Pinsker KL lower bound. Linf adam_margin, seed 42.",
+  "rows": [
+    {
+      "method": "SCRUB",
+      "n": 128,
+      "forget_median": 0.00254,
+      "forget_median_ci95": [
+        0.00227,
+        0.00271
+      ],
+      "retain_median": 0.00524,
+      "retain_median_ci95": [
+        0.00496,
+        0.0057
+      ],
+      "sep_eps": 0.004,
+      "p_forget": 0.922,
+      "p_retain": 0.156,
+      "p_forget_ci95": [
+        0.862,
+        0.957
+      ],
+      "p_retain_ci95": [
+        0.103,
+        0.229
+      ],
+      "abs_delta": 0.766,
+      "pinsker_kl_lb": 1.1724
+    },
+    {
+      "method": "SalUn",
+      "n": 128,
+      "forget_median": 0.0,
+      "forget_median_ci95": [
+        0.0,
+        0.00029
+      ],
+      "retain_median": 0.00391,
+      "retain_median_ci95": [
+        0.00365,
+        0.00407
+      ],
+      "sep_eps": 0.002,
+      "p_forget": 0.953,
+      "p_retain": 0.039,
+      "p_forget_ci95": [
+        0.902,
+        0.978
+      ],
+      "p_retain_ci95": [
+        0.017,
+        0.088
+      ],
+      "abs_delta": 0.914,
+      "pinsker_kl_lb": 1.671
+    }
+  ]
+}
