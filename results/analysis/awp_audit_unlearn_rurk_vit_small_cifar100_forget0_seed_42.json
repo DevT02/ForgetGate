@@ -1,0 +1,13 @@
+{
+  "suite": "unlearn_rurk_vit_small_cifar100_forget0",
+  "seed": 42,
+  "eps": 0.001,
+  "steps": 10,
+  "samples": 500,
+  "clean_forget_acc": 0.0,
+  "clean_retain_acc": 0.9151111111111111,
+  "pert_forget_acc": 0.009,
+  "pert_retain_acc": 0.905,
+  "recovery_gap": 0.009,
+  "timestamp": "2026-04-22T21:11:33.587910Z"
+}
