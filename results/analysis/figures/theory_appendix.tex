@@ -39,14 +39,11 @@ $m_t(x;\theta_u) > 0$.
 
 \paragraph{Recovery radius.} For an $L_\infty$ budget,
 \begin{equation}
-  r_t(x;\theta) \;:=\; \inf\bigl\{\epsilon \geq 0 : \exists\, x' \in
-   B_\infty(x,\epsilon) \cap \mathcal{X},\ m_t(x';\theta) > 0\bigr\},
+  r_t(x;\theta) \;:=\; \inf\bigl\{\epsilon \geq 0 \mid \exists\, x' \in \mathcal{X}, \|x' - x\|_\infty \leq \epsilon,\ m_t(x';\theta) > 0\bigr\},
 \end{equation}
-with $r_t(x;\theta) = 0$ when the clean prediction already matches. The
-per-example audit in
-\texttt{17\_\allowbreak recovery\_\allowbreak radius\_\allowbreak audit.py}
-returns a finite-budget estimator $\hat r_t(x;\theta_u)$ via probe-then-binary
-search with PGD / APGD inner loops.
+with $r_t(x;\theta) = 0$ when the clean prediction already matches. A
+per-example audit returns a finite-budget estimator $\hat r_t(x;\theta_u)$ via
+probe-then-binary search with PGD / APGD inner loops.
 
 \paragraph{The right population object.} Let $\mu_t$ denote the
 forget-class input distribution and $\mu_{\neg t}$ the matched non-forget
@@ -122,42 +119,39 @@ conditional TV sense,
 \mathrm{TV}\bigl(\pi_{\theta_u}(\cdot \mid x),\, \pi_{\theta_o}(\cdot \mid x)\bigr)
 \leq \epsilon_c\Bigr] \;\geq\; 1 - \delta,
 \]
-and suppose the oracle is separated,
-$\mathbb{E}_{\mu_t}\!\bigl[-\bar m_t(x;\theta_o)\bigr] \geq \gamma > 0$. Then with
-probability $\geq 1-\delta$,
+and suppose the oracle is separated on average,
+$\mathbb{E}_{\mu_t}\!\bigl[-\bar m_t(x;\theta_o)\bigr] \geq \gamma > 0$. Then
 \begin{equation}
   \mathbb{E}_{x \sim \mu_t}\!\bigl[\,r_t(x;\theta_u)\,\bigr]
-  \;\geq\; \frac{\gamma - 2\,\epsilon_c}{L}.
+  \;\geq\; \frac{\gamma - 2(\epsilon_c + \delta)}{L}.
 \end{equation}
 \end{corollary}
 
 \begin{proof}
 For distributions $p,q$ on $[K]$ and any class $k$, the event $A=\{k\}$ gives
 $|p_k - q_k| = |p(A)-q(A)| \leq \mathrm{TV}(p,q)$, and $a \mapsto \max_{j\neq t}
-a_j$ is $1$-Lipschitz in the sup-norm. Hence on the certified event,
-\[
+a_j$ is $1$-Lipschitz in the sup-norm. Hence pointwise,
+\begin{align*}
 |\bar m_t(x;\theta_u) - \bar m_t(x;\theta_o)|
-\;\leq\; |\pi_{\theta_u}(x)_t-\pi_{\theta_o}(x)_t|
- + \bigl|\textstyle\max_{j\neq t}\pi_{\theta_u}(x)_j - \max_{j\neq t}\pi_{\theta_o}(x)_j\bigr|
-\;\leq\; 2\,\mathrm{TV} \;\leq\; 2\epsilon_c .
-\]
+&\leq |\pi_{\theta_u}(x)_t-\pi_{\theta_o}(x)_t|
+ + \bigl|\max_{j\neq t}\pi_{\theta_u}(x)_j - \max_{j\neq t}\pi_{\theta_o}(x)_j\bigr| \\
+&\leq 2\,\mathrm{TV}\bigl(\pi_{\theta_u}(\cdot \mid x), \pi_{\theta_o}(\cdot \mid x)\bigr) .
+\end{align*}
+Since the TV distance is bounded by $\epsilon_c$ with probability $1-\delta$ and by $1$ otherwise, its expectation is at most $\epsilon_c(1-\delta) + \delta \leq \epsilon_c + \delta$.
 Taking expectations under $\mu_t$ gives $\mathbb{E}[-\bar m_t(\cdot;\theta_u)]
-\geq \gamma - 2\epsilon_c$; applying Theorem~\ref{thm:gap} to $\bar m_t$
-(pointwise $r_t(x) \geq -\bar m_t(x)/L$) and the high-probability TV bound
-yields the claim. The bounded margin $\bar m_t \in [-1,1]$ removes any
-dependence on a logit bound.
+\geq \gamma - 2(\epsilon_c + \delta)$; applying Theorem~\ref{thm:gap} to $\bar m_t$
+(pointwise $r_t(x) \geq -\bar m_t(x)/L$) yields the claim. The bounded margin $\bar m_t \in [-1,1]$ removes any dependence on a logit bound.
 \end{proof}
 
 \paragraph{What this says about the benchmark.}
 Every method in the paper has a measured $\hat r$ distribution and a
 straightforwardly estimable Lipschitz proxy $\hat L$ (e.g.\ the spectral
-norm of the Jacobian of the margin at audit points; the
-\texttt{16\_jacobian\_access\_audit.py} machinery already computes the
-underlying quantity), used here as a logit-margin proxy for the
+norm of the Jacobian of the margin at audit points, which an existing
+Jacobian-access audit already computes), used here as a logit-margin proxy for the
 probability-margin constant $L$ of Corollary~\ref{cor:cert}. Corollary~\ref{cor:cert} contrapositively gives a
 \emph{theoretical floor on the certifiable unlearning budget}:
 \[
-  \epsilon_c \;\geq\; \frac{\gamma - L\cdot \mathrm{median}(\hat r)}{2}.
+  \epsilon_c + \delta \;\geq\; \frac{\gamma - L\cdot \mathrm{median}(\hat r)}{2}.
 \]
 Because $\hat L$ is a \emph{local} Jacobian proxy for the (NP-hard) global
 Lipschitz constant, and local proxies on ViTs tend to under-estimate the
@@ -399,7 +393,7 @@ behavior on perturbed inputs. Equation~\eqref{eq:smoothed} above is, to my
 knowledge, the first machine-unlearning objective that yields a per-input
 \emph{input-space} certified lower bound on recovery radius, and Corollary~\ref{cor:gen} transports the per-input
 guarantee to the forget distribution at standard PAC rates. The existing
-audit machinery in this repository provides the matched empirical
+recovery-radius audit provides the matched empirical
 counterpart: a predicted-vs-realized radius plot is now a direct
 consistency check on \eqref{eq:smoothed}'s training (an $L_2$ check; the
 $L_\infty$ audit relates to it only up to the $\sqrt{d}$ conversion).

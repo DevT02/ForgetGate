@@ -1,0 +1,41 @@
+{
+  "description": "Cross-architecture CIFAR-100 unlearning check (forget class 0, seed 42): forget/retain accuracy and weight-perturbation (AWP) recovery gap across three methods and two architectures.",
+  "rows": [
+    {
+      "method": "smoothed-margin",
+      "arch": "ViT-Small",
+      "dataset": "cifar100",
+      "forget_before": 0.78,
+      "forget_after": 0.0,
+      "retain_before": 0.547,
+      "retain_after": 0.477,
+      "audit": "certified L2 R=0.193 + input recovery",
+      "awp_recovery_gap": null,
+      "note": "lightly-trained base (val 54%)"
+    },
+    {
+      "method": "RURK",
+      "arch": "ViT-Small",
+      "dataset": "cifar100",
+      "forget_before": 0.881,
+      "forget_after": 0.0,
+      "retain_before": 0.943,
+      "retain_after": 0.937,
+      "audit": "AWP weight-perturbation",
+      "awp_recovery_gap": 0.009,
+      "awp_eps": 0.001
+    },
+    {
+      "method": "SalUn",
+      "arch": "ResNet18",
+      "dataset": "cifar100",
+      "forget_before": 0.922,
+      "forget_after": 0.0,
+      "retain_before": 0.946,
+      "retain_after": 0.915,
+      "audit": "AWP weight-perturbation",
+      "awp_recovery_gap": 0.0,
+      "awp_eps": 0.001
+    }
+  ]
+}

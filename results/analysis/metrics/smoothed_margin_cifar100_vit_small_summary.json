@@ -1,0 +1,48 @@
+{
+  "suite": "unlearn_smoothed_margin_vit_small_cifar100_forget0",
+  "dataset": "cifar100",
+  "model": "vit_small",
+  "seed": 42,
+  "training": {
+    "base_checkpoint": "checkpoints/base/base_vit_small_cifar100_seed_42_final.pt",
+    "forget_acc_before": 0.78,
+    "retain_acc_before": 0.5465656565656566,
+    "forget_acc_after": 0.0,
+    "retain_acc_after": 0.4772727272727273,
+    "epochs": 10,
+    "lora_rank": 8,
+    "sigma": 0.1,
+    "n_noise_train": 4
+  },
+  "certified_radius_l2": {
+    "n_forget": 64,
+    "n_retain": 64,
+    "median_forget": 0.19329266188310254,
+    "median_retain": 0.19329266188310254,
+    "frac_positive_forget": 1.0,
+    "frac_positive_retain": 1.0,
+    "n_noise_cert": 256
+  },
+  "recovery_radius_linf": {
+    "n_forget": 64,
+    "n_retain": 64,
+    "forget_success_rate": 1.0,
+    "retain_success_rate": 0.984375,
+    "forget_median_radius": 0.005821078550070524,
+    "retain_median_radius": 0.005392157007008791,
+    "forget_mean_radius": 0.00628350954502821,
+    "retain_mean_radius": 0.005982531234622002
+  },
+  "recovery_radius_l2": {
+    "n_forget": 64,
+    "n_retain": 64,
+    "eps_max": 2.0,
+    "forget_success_rate": 0.53125,
+    "retain_success_rate": 0.578125,
+    "forget_median_radius": 1.390625,
+    "retain_median_radius": 1.40625,
+    "forget_mean_radius": 1.372931957244873,
+    "retain_mean_radius": 1.3830236196517944
+  },
+  "interpretation": "Cross-dataset/architecture feasibility check: the smoothed-margin objective cleanly suppresses CIFAR-100 class 0 on ViT-small and attaches a non-trivial native L2 certificate, but forget and retain recovery radii are similar, so this row is not evidence of a selective recovery gap."
+}

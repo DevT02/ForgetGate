@@ -1,0 +1,13 @@
+{
+  "suite": "unlearn_salun_resnet18_cifar100_forget0",
+  "seed": 42,
+  "eps": 0.001,
+  "steps": 10,
+  "samples": 500,
+  "clean_forget_acc": 0.0,
+  "clean_retain_acc": 0.9538888888888889,
+  "pert_forget_acc": 0.0,
+  "pert_retain_acc": 0.8654444444444445,
+  "recovery_gap": 0.0,
+  "timestamp": "2026-04-22T05:13:32.596586Z"
+}

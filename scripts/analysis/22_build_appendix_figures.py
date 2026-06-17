@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
+plt.style.use(str(ROOT / "results" / "analysis" / "figures" / "paper_style.mplstyle"))
 OUT = ROOT / "results" / "analysis" / "figures"
 OUT.mkdir(parents=True, exist_ok=True)
 

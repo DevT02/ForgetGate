@@ -13,23 +13,9 @@ from typing import Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
-plt.rcParams.update(
-    {
-        "font.size": 10,
-        "axes.titlesize": 12,
-        "axes.labelsize": 10,
-        "legend.fontsize": 9,
-        "xtick.labelsize": 9,
-        "ytick.labelsize": 9,
-        "axes.spines.top": False,
-        "axes.spines.right": False,
-        "axes.grid": True,
-        "grid.alpha": 0.18,
-        "grid.linestyle": "-",
-    }
-)
+plt.style.use(str(Path(__file__).resolve().parents[2] / "results" / "analysis" / "figures" / "paper_style.mplstyle"))
 
 
 def load_json(path: Path) -> Dict:
@@ -60,7 +46,7 @@ def feature_rows() -> List[Dict]:
 
 
 def robust_rows() -> List[Dict]:
-    summary = load_json(ROOT / "results" / "analysis" / "recovery_tradeoff_summary.json")
+    summary = load_json(ROOT / "results" / "analysis" / "metrics" / "recovery_tradeoff_summary.json")
     rows = []
     for row in summary["rows"]:
         if row["group"] != "robust_base":
@@ -184,7 +170,7 @@ def plot_patch_regime(save_dir: Path) -> str:
             edgecolors="white",
             linewidths=0.7,
         )
-        if row["model"] in ("ORBIT", "SalUn"):
+        if row["model"] in ("ORBIT", "SalUn", "BalDRO"):
             ax.annotate(
                 f"{row['model']} {row['patch']}",
                 (row["area"], row["forget"]),
@@ -201,7 +187,7 @@ def plot_patch_regime(save_dir: Path) -> str:
         plt.Line2D([], [], color="#555555", marker=markers["32x32"], linestyle="", label="32x32"),
         plt.Line2D([], [], color="#555555", marker=markers["48x48"], linestyle="", label="48x48"),
     ]
-    ax.legend(handles=legend_handles + patch_handles, frameon=False, ncol=2, loc="upper left")
+    ax.legend(handles=legend_handles + patch_handles, frameon=False, ncol=2, loc="best")
     out = save_dir / "conditional_patch_regime.png"
     fig.tight_layout()
     fig.savefig(out, dpi=220)

@@ -31,6 +31,9 @@ Patch-aware stage-2 defenses reduce 32x32 conditional patch recovery on ORBIT (7
 **3. Defenses are partial and method-specific.**
 Feature-subspace stage-2 gives the first consistent improvement to recovery radii on BalDRO, SalUn, and ORBIT without collapsing clean accuracy. RURK resists both attack families. SCRUB looks like generic adversarial fragility under most seeds; a strong attack on one seed exposes a transient selective gap, so its selectivity is not robust.
 
+**4. Cross-dataset check is feasible but not yet broad.**
+A ViT-Small/CIFAR-100 smoothed-margin row drives class-0 forget accuracy from 78.0% to 0.0% and keeps retain accuracy at 47.7% from a 54.7% base. The native L2 certificate remains non-vacuous (certified R=0.193, measured L2 recovery radius about 1.4), but forget and retain recovery radii are nearly identical, so this is a feasibility check rather than a new selective-leakage claim.
+
 ## Methods Evaluated
 
 | Method | Status |

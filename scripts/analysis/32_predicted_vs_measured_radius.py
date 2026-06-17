@@ -120,6 +120,7 @@ def join_and_plot(smoothed_path, measured_path, suite, input_dim, out_png, out_j
         import matplotlib
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
+        plt.style.use(os.path.join(os.path.dirname(__file__), "..", "..", "results", "analysis", "figures", "paper_style.mplstyle"))
     except ImportError:
         print("matplotlib not available; wrote JSON only.")
         return
