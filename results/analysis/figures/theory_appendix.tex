@@ -563,8 +563,11 @@ checked or diagnosed empirically in Section~\ref{sec:validation}:
     large rate gaps force a quantitative KL lower bound, while near-zero rate
     gaps do not certify absence of leakage. The larger-$n$ oracle-null audit
     is the stronger empirical calibration: SalUn and the smoothed-margin row
-    separate from the retain-only null, while SCRUB is seed-sensitive and
-    typical-but-not-universal generic fragility under this event and budget.
+    separate from the retain-only null, while SCRUB's signed selectivity is
+    \emph{unstable across seeds} (selective on 42, significantly anti-selective
+    on 123, at parity on 456; bootstrap CIs in Section~\ref{sec:validation}),
+    so no stable selective or generic-fragile label survives a single-seed
+    reading.
   \item \textbf{Local-delivery negative (Thm 3).} The theorem rules out
     exact worst-case invariance over a coordinate-covering delivery family.
     The mixed-surface stage-2 failure is consistent with that obstruction, but

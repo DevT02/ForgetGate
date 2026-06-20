@@ -1,0 +1,116 @@
+{
+  "elasticity": {
+    "slope_logrF_on_logrR": 1.3102532535942144,
+    "slope_ci95_clustered": [
+      1.1108340627119584,
+      2.038434165387893
+    ],
+    "intercept": 0.728362108556637,
+    "interpretation": "b>1 => forget radius more fragility-elastic than retain"
+  },
+  "taxonomy": {
+    "selectivity_on_logfragility_slope": -0.3102532535942145,
+    "by_family_sorted_by_adjusted": {
+      "salun": {
+        "n": 20,
+        "raw_selectivity_mean": 1.38498720337462,
+        "adj_selectivity_mean": 0.49704758604191096,
+        "adj_selectivity_ci95": [
+          0.07689707441378991,
+          0.9083100216043354
+        ]
+      },
+      "smoothed_margin": {
+        "n": 4,
+        "raw_selectivity_mean": 0.9065143045359098,
+        "adj_selectivity_mean": 0.46040117648616136,
+        "adj_selectivity_ci95": [
+          0.1812432305099581,
+          0.7283204295930055
+        ]
+      },
+      "rurk": {
+        "n": 12,
+        "raw_selectivity_mean": 1.262059581811447,
+        "adj_selectivity_mean": 0.43792291356540286,
+        "adj_selectivity_ci95": [
+          0.20525335322290642,
+          0.6201430112089173
+        ]
+      },
+      "orthoreg": {
+        "n": 2,
+        "raw_selectivity_mean": 1.223201305293822,
+        "adj_selectivity_mean": 0.429705871999178,
+        "adj_selectivity_ci95": [
+          0.38566271637153415,
+          0.4737490276268218
+        ]
+      },
+      "baldro": {
+        "n": 16,
+        "raw_selectivity_mean": 0.8254425466849613,
+        "adj_selectivity_mean": 0.046459627999182074,
+        "adj_selectivity_ci95": [
+          -0.12340984650235745,
+          0.25089852538126073
+        ]
+      },
+      "ceu": {
+        "n": 17,
+        "raw_selectivity_mean": 0.7941133797721069,
+        "adj_selectivity_mean": -0.022550179112940993,
+        "adj_selectivity_ci95": [
+          -0.05556157728946196,
+          0.011540376306728148
+        ]
+      },
+      "orbit": {
+        "n": 30,
+        "raw_selectivity_mean": 0.6104966904446117,
+        "adj_selectivity_mean": -0.13501635729361747,
+        "adj_selectivity_ci95": [
+          -0.2051398802233322,
+          -0.0520264686438104
+        ]
+      },
+      "kl": {
+        "n": 6,
+        "raw_selectivity_mean": 0.7650395937931863,
+        "adj_selectivity_mean": -0.1917164396480103,
+        "adj_selectivity_ci95": [
+          -0.570256325132835,
+          0.20388036454460653
+        ]
+      },
+      "sga": {
+        "n": 4,
+        "raw_selectivity_mean": 0.33161490401200766,
+        "adj_selectivity_mean": -0.4471572900190823,
+        "adj_selectivity_ci95": [
+          -0.8147894725729665,
+          -0.07952510746519798
+        ]
+      },
+      "oracle": {
+        "n": 3,
+        "raw_selectivity_mean": -0.008609962166101782,
+        "adj_selectivity_mean": -0.6560633778234156,
+        "adj_selectivity_ci95": [
+          -0.8098147626607238,
+          -0.5061152841426564
+        ]
+      },
+      "scrub": {
+        "n": 17,
+        "raw_selectivity_mean": -0.03297307620185797,
+        "adj_selectivity_mean": -0.7630095478596844,
+        "adj_selectivity_ci95": [
+          -0.9828695154855307,
+          -0.5946835056972652
+        ]
+      }
+    }
+  },
+  "n_rows": 132
+}
