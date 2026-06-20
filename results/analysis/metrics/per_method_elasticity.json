@@ -1,0 +1,66 @@
+{
+  "per_method": {
+    "salun": {
+      "n": 20,
+      "fragility_spread": 0.7377793345807131,
+      "b": 2.5517305375339268,
+      "b_ci95": [
+        -2.214965214925598,
+        5.2756905590595355
+      ],
+      "adj_selectivity": 0.49704758604191096
+    },
+    "baldro": {
+      "n": 16,
+      "fragility_spread": 0.7099542988763261,
+      "b": 1.210695011118166,
+      "b_ci95": [
+        -0.354571018049517,
+        2.9647056158862553
+      ],
+      "adj_selectivity": 0.046459627999182074
+    },
+    "orbit": {
+      "n": 30,
+      "fragility_spread": 1.1671322351048659,
+      "b": 0.835915712212745,
+      "b_ci95": [
+        0.5780563855438541,
+        1.0617213832246668
+      ],
+      "adj_selectivity": -0.13501635729361747
+    },
+    "scrub": {
+      "n": 17,
+      "fragility_spread": 2.249714759957616,
+      "b": 0.7131234498319732,
+      "b_ci95": [
+        0.37124629767269907,
+        1.6086204628906893
+      ],
+      "adj_selectivity": -0.7630095478596844
+    },
+    "rurk": {
+      "n": 12,
+      "fragility_spread": 0.485919084551635,
+      "b": null,
+      "note": "insufficient fragility range"
+    },
+    "ceu": {
+      "n": 17,
+      "fragility_spread": 0.45378368537897185,
+      "b": null,
+      "note": "insufficient fragility range"
+    }
+  },
+  "b_vs_adjusted_selectivity": {
+    "pearson_r": 0.8619900958158146,
+    "spearman_rho": 1.0,
+    "families": [
+      "scrub",
+      "salun",
+      "baldro",
+      "orbit"
+    ]
+  }
+}
