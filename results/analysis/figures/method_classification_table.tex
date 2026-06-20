@@ -8,11 +8,11 @@
     \midrule
     SalUn (faithful full-ft) & faithful & main text & core literature anchor \\
     SCRUB distill & reasonably faithful & main text & literature baseline; hard negative / generic fragility \\
-    ORBIT & repo-defined & main text & internal benchmark row; best later defense row \\
-    RURK & reasonably faithful & main text & recent method; hard negative / resistant case \\
-    SGA & adapted recent method & auxiliary & generic-fragility cross-domain benchmark row \\
-    BalDRO & adapted recent method & main text & main cross-domain benchmark row \\
-    CE-U & reasonably faithful & main text & recent related-work addition \\
+    ORBIT & diagnostic baseline & main text & stress-test objective introduced here; best later defense row \\
+    RURK & RURK-\emph{style} (random noise) & main text & robustness term uses random, not adversarial, perturbations \\
+    SGA & label-smoothed GA (faithful core) & auxiliary & generic-fragility cross-domain benchmark row \\
+    BalDRO & BalDRO-\emph{style} (loss reweighting) & main text & softmax hard-sample reweighting, not min--max DRO \\
+    CE-ascent (labeled CE-U) & GA baseline, \emph{not} CE-U & main text & implements gradient ascent, not the corrected-target CE-U objective \\
     robust-base SalUn & faithful frontier & main text & utility-vs-recovery frontier \\
     Uniform KL & bridge / supporting & appendix & seed-sensitive bridge target \\
     Prune+KL & supporting & appendix & auxiliary clean-forgetting row \\

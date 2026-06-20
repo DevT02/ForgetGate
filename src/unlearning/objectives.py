@@ -100,6 +100,256 @@ class CrossEntropyAscent(UnlearningObjective):
         return modified_loss.mean()
 
 
+# --- Restored adapted-method objectives (BalDRO/FaLW/RURK/SGA) ---
+# Implementation-fidelity caveats are in the paper Adaptation appendix;
+# these are "X-style" adaptations, not faithful reproductions.
+class SmoothedGradientAscent(UnlearningObjective):
+    """SGA (Pang et al. 2025): smooth GA by mixing forget loss with normal data losses."""
+
+    def __init__(self, forget_class: int, num_classes: int = 10,
+                 smoothing_rate: float = 0.5, num_normal_samples: int = 1,
+                 retain_weight: float = 0.1, target_weight: float = 1.0):
+        super().__init__(forget_class, num_classes)
+        self.smoothing_rate = smoothing_rate
+        self.num_normal_samples = max(int(num_normal_samples), 1)
+        self.retain_weight = retain_weight
+        self.target_weight = target_weight
+
+    def compute_forget_loss(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        ce_loss = F.cross_entropy(logits, labels, reduction='mean')
+        return ce_loss
+
+    def compute_normal_loss(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        ce_loss = F.cross_entropy(logits, labels, reduction='mean')
+        return ce_loss
+
+    def combine_losses(self, forget_loss: torch.Tensor, normal_loss: torch.Tensor) -> torch.Tensor:
+        # L_SGA = (1 - r + r/K) * L_f + (r/K) * sum_k L_p^k  (Paper Eq. 4)
+        r = self.smoothing_rate
+        k = self.num_normal_samples
+        forget_term = (1.0 - r + r / k) * (-forget_loss)  # ascent on forget
+        normal_term = (r / k) * normal_loss  # descent on normal
+        return forget_term + normal_term
+
+    def forward(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        # Default to ascent loss only (trainer combines with normal loss).
+        return -F.cross_entropy(logits, labels, reduction='mean')
+
+
+class BalDROUnlearning(UnlearningObjective):
+    """BalDRO (Shao et al. 2026): log-sum-exp reweighting over hard forget samples."""
+
+    def __init__(self, forget_class: int, num_classes: int = 10,
+                 retain_weight: float = 0.1, target_weight: float = 1.0,
+                 beta: float = 1.0, top_fraction: float = 1.0):
+        super().__init__(forget_class, num_classes)
+        self.retain_weight = retain_weight
+        self.target_weight = target_weight
+        self.beta = max(beta, 1e-6)
+        self.top_fraction = float(top_fraction)
+
+    def _log_mean_exp(self, losses: torch.Tensor) -> torch.Tensor:
+        # beta * log( (1/N) * sum exp(loss / beta) )
+        scaled = losses / self.beta
+        return self.beta * (torch.logsumexp(scaled, dim=0) - torch.log(torch.tensor(losses.numel(), device=losses.device)))
+
+    def forward(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        ce_loss = F.cross_entropy(logits, labels, reduction='none')
+        forget_mask = (labels == self.forget_class)
+        retain_mask = ~forget_mask
+
+        total = 0.0
+        parts = 0
+
+        if forget_mask.any():
+            forget_losses = ce_loss[forget_mask]
+            if self.top_fraction < 1.0:
+                k = max(1, int(forget_losses.numel() * self.top_fraction))
+                forget_losses = torch.topk(forget_losses, k=k, largest=True).values
+            forget_term = self._log_mean_exp(forget_losses)
+            total += -self.target_weight * forget_term
+            parts += 1
+
+        if retain_mask.any():
+            retain_term = ce_loss[retain_mask].mean()
+            total += self.retain_weight * retain_term
+            parts += 1
+
+        if parts == 0:
+            return torch.tensor(0.0, device=logits.device)
+
+        return total / parts
+
+
+class FaLWUnlearning(UnlearningObjective):
+    """FaLW (Yu et al. 2026): forgetting-aware loss reweighting for long-tailed data."""
+
+    def __init__(self, forget_class: int, num_classes: int = 10,
+                 retain_weight: float = 0.1, target_weight: float = 1.0,
+                 class_counts: Optional[Dict[int, int]] = None,
+                 total_samples: Optional[int] = None,
+                 tau: float = 1.0):
+        super().__init__(forget_class, num_classes)
+        self.retain_weight = retain_weight
+        self.target_weight = target_weight
+        self.class_counts = class_counts or {}
+        self.total_samples = total_samples
+        self.tau = tau
+        self.class_mu = {}
+        self.class_sigma = {}
+
+    def set_class_stats(self, class_mu: Dict[int, float], class_sigma: Dict[int, float]):
+        self.class_mu = class_mu
+        self.class_sigma = class_sigma
+
+    def _balance_factor(self, label: torch.Tensor) -> torch.Tensor:
+        if not self.class_counts or self.total_samples is None:
+            return torch.ones_like(label, dtype=torch.float32)
+        counts = torch.tensor([self.class_counts.get(int(y), 1) for y in label],
+                              device=label.device, dtype=torch.float32)
+        num_classes = max(self.num_classes, 1)
+        nf = float(sum(self.class_counts.values()))
+        b = (nf / (num_classes * counts)).pow(self.tau)
+        return b
+
+    def _falw_weight(self, probs: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        # Paper Eq. 7: w_i = 1 + sign(z_i) * (tanh(|z_i|))^(1/B_i)
+        # where B_i is the balance factor from Eq. 6
+        mu = torch.tensor([self.class_mu.get(int(y), 0.0) for y in labels],
+                          device=labels.device, dtype=torch.float32)
+        sigma = torch.tensor([self.class_sigma.get(int(y), 1.0) for y in labels],
+                             device=labels.device, dtype=torch.float32)
+        z = (probs - mu) / (sigma + 1e-8)
+        b = self._balance_factor(labels)  # B_i from Eq. 6
+        w = 1.0 + torch.sign(z) * torch.tanh(torch.abs(z)).pow(1.0 / (b + 1e-8))
+        return w
+
+    def forward(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        probs = F.softmax(logits, dim=-1)
+        p_true = probs.gather(1, labels.view(-1, 1)).squeeze(1)
+        ce_loss = F.cross_entropy(logits, labels, reduction='none')
+        weights = self._falw_weight(p_true, labels)
+
+        forget_mask = (labels == self.forget_class)
+        retain_mask = ~forget_mask
+
+        total = 0.0
+        parts = 0
+
+        if forget_mask.any():
+            forget_loss = (ce_loss[forget_mask] * weights[forget_mask]).mean()
+            total += -self.target_weight * forget_loss
+            parts += 1
+
+        if retain_mask.any():
+            retain_loss = (ce_loss[retain_mask] * weights[retain_mask]).mean()
+            total += self.retain_weight * retain_loss
+            parts += 1
+
+        if parts == 0:
+            return torch.tensor(0.0, device=logits.device)
+
+        return total / parts
+
+
+class RURKUnlearning(UnlearningObjective):
+    """Robust unlearning via perturbation loss on forget samples (RURK-style)."""
+
+    def __init__(self, forget_class: int, num_classes: int = 10,
+                 retain_weight: float = 0.1, target_weight: float = 1.0,
+                 adv_eps: float = 8/255, adv_alpha: float = 2/255,
+                 adv_steps: int = 3, adv_samples: int = 1,
+                 adv_lambda: float = 1.0, random_start: bool = True):
+        super().__init__(forget_class, num_classes)
+        self.retain_weight = retain_weight
+        self.target_weight = target_weight
+        self.adv_eps = adv_eps
+        self.adv_alpha = adv_alpha
+        self.adv_steps = adv_steps
+        self.adv_samples = max(int(adv_samples), 1)
+        self.adv_lambda = adv_lambda
+        self.random_start = random_start
+        self.model = None
+
+    def set_model(self, model: nn.Module):
+        self.model = model
+
+    def _pgd_minimize_loss(self, inputs: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        """PGD to minimize CE loss (keep correct classification) within L_inf ball."""
+        if self.adv_steps <= 0 or self.adv_eps <= 0:
+            return inputs.detach()
+
+        x = inputs.detach()
+        best_adv = x.clone()
+        best_loss = torch.full((x.size(0),), float("inf"), device=x.device)
+
+        for _ in range(self.adv_samples):
+            if self.random_start:
+                adv = x + torch.empty_like(x).uniform_(-self.adv_eps, self.adv_eps)
+                adv = torch.clamp(adv, 0.0, 1.0)
+            else:
+                adv = x.clone()
+
+            for _ in range(self.adv_steps):
+                adv = adv.detach().requires_grad_(True)
+                logits = self.model(adv)
+                loss = F.cross_entropy(logits, labels, reduction='sum')
+                grad = torch.autograd.grad(loss, adv, retain_graph=False, create_graph=False)[0]
+                adv = adv - self.adv_alpha * torch.sign(grad)
+                delta = torch.clamp(adv - x, min=-self.adv_eps, max=self.adv_eps)
+                adv = torch.clamp(x + delta, 0.0, 1.0)
+
+            with torch.no_grad():
+                logits = self.model(adv)
+                per_loss = F.cross_entropy(logits, labels, reduction='none')
+                better = per_loss < best_loss
+                if better.any():
+                    best_loss = torch.where(better, per_loss, best_loss)
+                    better_view = better.view(-1, *([1] * (adv.ndim - 1)))
+                    best_adv = torch.where(better_view, adv, best_adv)
+
+        return best_adv.detach()
+
+    def forward(self, logits: torch.Tensor, labels: torch.Tensor,
+                inputs: Optional[torch.Tensor] = None) -> torch.Tensor:
+        if self.model is None:
+            raise ValueError("RURKUnlearning requires model to be set via set_model().")
+        if inputs is None:
+            raise ValueError("RURKUnlearning requires inputs for perturbation loss.")
+
+        ce_loss = F.cross_entropy(logits, labels, reduction='none')
+        forget_mask = (labels == self.forget_class)
+        retain_mask = ~forget_mask
+
+        total = 0.0
+        parts = 0
+
+        if forget_mask.any():
+            forget_inputs = inputs[forget_mask]
+            forget_labels = labels[forget_mask]
+            if torch.is_grad_enabled():
+                adv_inputs = self._pgd_minimize_loss(forget_inputs, forget_labels)
+                adv_logits = self.model(adv_inputs)
+                adv_loss = F.cross_entropy(adv_logits, forget_labels, reduction='mean')
+            else:
+                # Validation runs under no_grad; skip adversarial search.
+                adv_loss = torch.tensor(0.0, device=logits.device)
+            clean_loss = ce_loss[forget_mask].mean()
+            forget_term = clean_loss + (self.adv_lambda * adv_loss)
+            total += -self.target_weight * forget_term
+            parts += 1
+
+        if retain_mask.any():
+            retain_term = ce_loss[retain_mask].mean()
+            total += self.retain_weight * retain_term
+            parts += 1
+
+        if parts == 0:
+            return torch.tensor(0.0, device=logits.device)
+
+        return total / parts
+
+
 class UniformKL(UnlearningObjective):
     """KL divergence to uniform distribution on forget class"""
 
@@ -240,7 +490,7 @@ class NegativeGradient(UnlearningObjective):
 
 class SalUn(UnlearningObjective):
     """
-    Saliency-based Unlearning (Chundawat et al. 2023)
+    Saliency-based Unlearning (Fan et al., ICLR 2024)
     Uses gradient-based saliency to identify important LoRA parameters,
     then applies random labeling to forget samples.
     """
@@ -483,15 +733,14 @@ class SmoothedMarginUnlearning(UnlearningObjective):
 
     For each forget input x with true label t (the forget class), the loss
     samples m Gaussian noise vectors delta_1..delta_m ~ N(0, sigma^2 I) and
-    averages the hinge penalty
+    applies the hinge to the Monte-Carlo smoothed target margin
 
-        max(0, m_t(x + delta_k; theta) + gamma)
+        max(0, mean_k m_t(x + delta_k; theta) + gamma)
 
     where m_t(x; theta) = f_t(x) - max_{j != t} f_j(x) is the target margin.
-    The empirical minimizer of this objective inherits a Cohen-Rosenfeld-Kolter
-    certified radius on the *smoothed* classifier: any L_2 perturbation of size
-    r < sigma * Phi^{-1}(p_top_smooth) leaves the smoothed classifier's
-    prediction outside the forget class.
+    The strict Cohen-Rosenfeld-Kolter certificate is for an unclipped Gaussian
+    smoothed detector; clipping noisy training inputs to the image cube is an
+    implementation choice and must be stated separately in certification audits.
 
     Retain side: classic CE (the smoothing on the forget set already protects
     retain accuracy because retain examples are not perturbed by this term).
@@ -502,7 +751,8 @@ class SmoothedMarginUnlearning(UnlearningObjective):
     Args:
         forget_class:    int, target class to forget.
         num_classes:     int, K.
-        sigma:           float, noise std (in input pixel space, post-norm).
+        sigma:           float, noise std in the objective's input space
+                         (pixel space when the model wrapper normalizes).
         n_noise:         int, number of noise samples per forward pass.
         gamma:           float, safety margin (>= 0). Theorem 4 uses gamma as
                          the offset that pushes the smoothed margin to <= -gamma.
@@ -641,6 +891,19 @@ def create_unlearning_objective(objective_name: str, forget_class: int,
     elif objective_name == "smoothed_margin":
         return SmoothedMarginUnlearning(forget_class, num_classes, **kwargs)
 
+    # Restored adapted-method objectives ("X-style"; see paper Adaptation appendix).
+    elif objective_name == "sga":
+        return SmoothedGradientAscent(forget_class, num_classes, **kwargs)
+
+    elif objective_name == "bal_dro":
+        return BalDROUnlearning(forget_class, num_classes, **kwargs)
+
+    elif objective_name == "falw":
+        return FaLWUnlearning(forget_class, num_classes, **kwargs)
+
+    elif objective_name == "rurk":
+        return RURKUnlearning(forget_class, num_classes, **kwargs)
+
     else:
         raise ValueError(f"Unknown unlearning objective: {objective_name}")
 
@@ -666,8 +929,12 @@ def get_forget_retain_loss(objective: UnlearningObjective,
     forget_inputs, forget_labels = forget_batch
     forget_outputs = model(forget_inputs)
 
-    # Forget loss
-    forget_loss = objective(forget_outputs, forget_labels)
+    # Forget loss. Some objectives (SCRUB, smoothed margin) need the inputs for
+    # teacher or noisy forwards; older objectives accept logits/labels only.
+    try:
+        forget_loss = objective(forget_outputs, forget_labels, inputs=forget_inputs)
+    except TypeError:
+        forget_loss = objective(forget_outputs, forget_labels)
 
     total_loss = forget_loss
 

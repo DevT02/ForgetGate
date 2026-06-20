@@ -9,16 +9,16 @@
 
 ---
 
-ForgetGate argues that machine unlearning should be audited by one measurable quantity, the per-example *recovery radius*: the smallest input change that re-elicits a forgotten class. If a small perturbation recovers the forgotten class, the information was never really erased, so clean forget accuracy is the wrong test. The paper builds this into a small theory (four theorems) and validates each on an eight-method CIFAR-10 benchmark.
+ForgetGate argues that machine unlearning should be audited by one measurable quantity, the per-example *recovery radius*: the smallest input change that re-elicits a forgotten class. If a small perturbation recovers the forgotten class, clean forget accuracy is the wrong test. The paper builds this into a small theory (four theorems) and checks the claims on an eight-method CIFAR-10 benchmark.
 
 > A method can pass clean-accuracy and even rate-based audits and still leak under the recovery radius, and that radius is what an unlearning *certificate* must answer to.
 
 ## The theory (four theorems)
 
-1. **Recovery-certification gap.** A method's measured recovery radius implies a floor that any certified-unlearning budget must respect, so an oracle-free audit can already challenge an over-tight certificate. It is a necessary condition rather than a strict certificate, since the Lipschitz term uses a local proxy.
-2. **Selective-leakage test.** Calibrated against a zero-knowledge oracle null (a model retrained without the forgotten class), it separates genuine residual knowledge from generic adversarial fragility. The null has no intrinsic forget-vs-retain asymmetry, so a gap over it is real leakage.
-3. **Covering-family impossibility.** Worst-case robustness to all patch and border-frame delivery surfaces at once forces a constant classifier, which is why mixed-surface patch defenses cannot transfer. The constructive target is stochastic (non-covering) delivery priors.
-4. **Smoothed certified-recovery objective.** A Gaussian-smoothed objective attaches a randomized-smoothing certificate to unlearning. Trained end-to-end over 3 seeds it drives forget accuracy to 9-12% with retain preserved, and certifies an L2 radius of 0.193 that, in its own norm, sits below where the class re-emerges. A sigma sweep exposes a certification-utility tradeoff.
+1. **Recovery-certification gap.** A method's measured recovery radius gives a necessary diagnostic for certified-unlearning budget claims. The plotted evidence is a heuristic ranking because the Lipschitz term uses a local proxy rather than a certified global upper bound.
+2. **Selective-leakage test.** Calibrated against a retain-only oracle null (a model retrained without the forgotten class), it separates genuine residual knowledge from generic adversarial fragility. The null is an operational baseline for target-label fragility; a gap over it is evidence of residual leakage.
+3. **Covering-family impossibility.** Exact worst-case robustness to all patch and border-frame delivery surfaces at once forces a constant classifier. The constructive target is distributional local-delivery robustness, not global worst-case invariance.
+4. **Smoothed certified-recovery objective.** A Gaussian-smoothed objective is paired with a post-training randomized-smoothing certificate for a binary forgotten-class detector. Trained end-to-end over 3 seeds it drives forget accuracy to 9-12% with retain preserved, and certifies an L2 detector-radius scale of 0.193 that, in its own norm, sits below where the class re-emerges. A sigma sweep exposes a certification-utility tradeoff.
 
 ## Empirical findings
 
@@ -26,10 +26,10 @@ ForgetGate argues that machine unlearning should be audited by one measurable qu
 Non-robust methods remain conditionally recoverable even when universal perturbations largely fail. This holds across SalUn, SCRUB, CE-U, SGA, and BalDRO.
 
 **2. Local-delivery robustness is not a single property.**
-Patch-aware stage-2 defenses reduce 32x32 conditional patch recovery on ORBIT (78.1% to 31.2%) and CE-U (68.8% to 43.8%), but fail to transfer to border-frame and multi-patch delivery surfaces. This is the empirical witness for Theorem 3.
+Patch-aware stage-2 defenses reduce 32x32 conditional patch recovery on ORBIT (78.1% to 31.2%) and CE-U (68.8% to 43.8%), but fail to transfer to border-frame and multi-patch delivery surfaces. This is empirical context for Theorem 3's worst-case obstruction.
 
 **3. Defenses are partial and method-specific.**
-Feature-subspace stage-2 gives the first consistent improvement to recovery radii on BalDRO, SalUn, and ORBIT without collapsing clean accuracy. RURK resists both attack families. SCRUB looks like generic adversarial fragility under most seeds; a strong attack on one seed exposes a transient selective gap, so its selectivity is not robust.
+Feature-subspace stage-2 gives positive point-estimate shifts on BalDRO, SalUn, and ORBIT without collapsing clean accuracy, clearest on ORBIT and SalUn and tiny on BalDRO. RURK resists both attack families. SCRUB looks like generic adversarial fragility under most seeds; a strong attack on one seed exposes a transient selective gap, so its selectivity is not robust.
 
 **4. Cross-dataset check is feasible but not yet broad.**
 A ViT-Small/CIFAR-100 smoothed-margin row drives class-0 forget accuracy from 78.0% to 0.0% and keeps retain accuracy at 47.7% from a 54.7% base. The native L2 certificate remains non-vacuous (certified R=0.193, measured L2 recovery radius about 1.4), but forget and retain recovery radii are nearly identical, so this is a feasibility check rather than a new selective-leakage claim.
@@ -44,7 +44,7 @@ A ViT-Small/CIFAR-100 smoothed-margin row drives class-0 forget accuracy from 78
 | CE-U | Newer literature method |
 | SGA | Adapted recent method |
 | BalDRO | Adapted recent method |
-| ORBIT | Repo-defined benchmark method |
+| ORBIT | Diagnostic stress-test method introduced here |
 | Robust-base SalUn | Defense frontier |
 
 **ORBIT** (oracle-aligned, representation-dispersive unlearning) is defined in this repository. It combines margin-based forget-logit suppression, masked dark-knowledge distillation from a frozen oracle, feature alignment on forget inputs, and a dispersion penalty to weaken linear and prototype recovery channels. See `src/unlearning/objectives.py`.

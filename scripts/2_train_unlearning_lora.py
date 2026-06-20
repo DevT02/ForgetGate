@@ -166,12 +166,15 @@ def main():
         full_train_dataset, forget_class, train_ratio=0.8
     )
 
-    # Create data loaders
+    # Create data loaders. num_workers is env-configurable: objectives that run a
+    # nested model forward inside the loss (e.g. RURK) can deadlock with Windows
+    # DataLoader worker processes, so set FG_NUM_WORKERS=0 for those.
+    _nw = int(os.environ.get("FG_NUM_WORKERS", "4"))
     forget_loader = DataLoader(
         forget_train,
         batch_size=unlearning_config['lora_unlearn'].get('batch_size', 128),
         shuffle=True,
-        num_workers=4,
+        num_workers=_nw,
         pin_memory=True
     )
 
@@ -179,7 +182,7 @@ def main():
         retain_train,
         batch_size=unlearning_config['lora_unlearn'].get('batch_size', 128),
         shuffle=True,
-        num_workers=4,
+        num_workers=_nw,
         pin_memory=True
     )
 
@@ -193,7 +196,7 @@ def main():
         val_dataset,
         batch_size=unlearning_config['lora_unlearn'].get('batch_size', 128),
         shuffle=False,  # No shuffle for validation
-        num_workers=4,
+        num_workers=_nw,
         pin_memory=True
     )
 

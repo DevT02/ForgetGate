@@ -1,0 +1,16 @@
+# Faithful SalUn reproduction from the committed recipe (objective:salun,
+# rank 8, 50 epochs, lr 1e-3). Writes to a *_repro_* checkpoint dir so it does
+# NOT overwrite the existing (provenance-broken) seed-42 SalUn baseline.
+base_vit_cifar10:
+  model: vit_tiny
+  dataset: cifar10
+unlearn_salun_repro_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: salun
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+  seeds: [42, 123, 456]

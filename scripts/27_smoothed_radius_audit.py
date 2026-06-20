@@ -10,9 +10,12 @@ radius
 
     R = sigma * Phi^{-1}(p_lower)
 
-inside which the *smoothed* classifier provably does not predict the
-forgotten class. Pair training-time sigma in
-configs/unlearning.yaml::smoothed_margin with audit-time sigma here.
+inside which the binary Gaussian-smoothed forget detector provably does not
+predict the forgotten class. By default the noisy certification forwards are
+unclipped, matching the Cohen-Rosenfeld-Kolter Gaussian certificate. Pass
+--clip-noisy-inputs only for a clipped-distribution implementation diagnostic.
+Pair training-time sigma in configs/unlearning.yaml::smoothed_margin with
+audit-time sigma here.
 
 Output JSON has the same forget_recovery / retain_control shape as
 17_recovery_radius_audit.py so downstream analysis scripts can consume
@@ -194,6 +197,7 @@ def _smoothed_predict_counts(
     n_noise: int,
     forget_class: int,
     batch_chunk: int = 64,
+    clip_noisy_inputs: bool = False,
 ) -> Tuple[int, int]:
     """Returns (n_nonforget, n_noise): number of noisy forwards that
     predicted any class other than forget_class. Inputs assumed [1, ...]."""
@@ -204,7 +208,9 @@ def _smoothed_predict_counts(
         m = min(batch_chunk, n_remaining)
         x = inputs.expand(m, *inputs.shape[1:]).contiguous()
         noise = torch.randn_like(x) * sigma
-        x_noisy = (x + noise).clamp(0.0, 1.0)
+        x_noisy = x + noise
+        if clip_noisy_inputs:
+            x_noisy = x_noisy.clamp(0.0, 1.0)
         logits = model(normalizer(x_noisy))
         preds = logits.argmax(dim=1)
         n_nonforget += int((preds != forget_class).sum().item())
@@ -221,6 +227,7 @@ def _certify_one(
     alpha: float,
     forget_class: int,
     batch_chunk: int,
+    clip_noisy_inputs: bool,
 ) -> Dict:
     k, n = _smoothed_predict_counts(
         model=model,
@@ -230,6 +237,7 @@ def _certify_one(
         n_noise=n_noise,
         forget_class=forget_class,
         batch_chunk=batch_chunk,
+        clip_noisy_inputs=clip_noisy_inputs,
     )
     p_hat = k / n
     p_lower = cp_lower_bound(k, n, alpha)
@@ -242,6 +250,7 @@ def _certify_one(
         "certified_radius_l2": float(R),
         "sigma": float(sigma),
         "alpha": float(alpha),
+        "clip_noisy_inputs": bool(clip_noisy_inputs),
     }
 
 
@@ -277,6 +286,8 @@ def main():
     p.add_argument("--alpha", type=float, default=1e-3, help="Clopper-Pearson confidence level")
     p.add_argument("--batch-chunk", type=int, default=64,
                    help="GPU minibatch size for noisy forward passes per sample")
+    p.add_argument("--clip-noisy-inputs", action="store_true",
+                   help="Clip x+noise into [0,1]. Omit for the unclipped Gaussian certificate.")
     p.add_argument("--skip-retain-control", action="store_true")
     p.add_argument("--output", default=None,
                    help="Optional explicit output JSON path; else auto-named under results/analysis/metrics")
@@ -297,6 +308,7 @@ def main():
             "sigma": args.sigma,
             "n_noise": args.n_noise,
             "alpha": args.alpha,
+            "clip_noisy_inputs": bool(args.clip_noisy_inputs),
             "audit_type": "smoothed_certified_radius_l2",
             "theorem": "Theorem 4 of theory_appendix.tex",
         },
@@ -336,6 +348,7 @@ def main():
                 alpha=args.alpha,
                 forget_class=args.forget_class,
                 batch_chunk=args.batch_chunk,
+                clip_noisy_inputs=args.clip_noisy_inputs,
             )
             rec["sample_index"] = idx
             records.append(rec)
@@ -371,6 +384,7 @@ def main():
                     alpha=args.alpha,
                     forget_class=args.forget_class,
                     batch_chunk=args.batch_chunk,
+                    clip_noisy_inputs=args.clip_noisy_inputs,
                 )
                 rec["sample_index"] = idx
                 control_records.append(rec)

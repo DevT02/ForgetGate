@@ -12,29 +12,13 @@ Outputs:
   - results/analysis/figures/predicted_vs_measured_radius.png
   - results/analysis/metrics/predicted_vs_measured_radius.json
 
-The Theorem 4 read is *not* a direct certificate check on the un-smoothed
-model -- the certified radius is for the smoothed classifier
-f_smooth(x) = E_{delta ~ N(0, sigma^2 I)}[f(x + delta)], while the
-recovery audit attacks the un-smoothed f. This plot therefore shows the
-GAP between the smoothed certificate and what an attacker against f
-actually finds. Three cases:
-
-  (i)  measured > predicted (points above y = x): smoothing buys real
-       robustness in the audited region; f and f_smooth largely agree on
-       these inputs and Theorem 4 looks tight.
-
-  (ii) measured == 0 with predicted > 0 (points on the y-axis at log scale):
-       the un-smoothed f *already* predicts the forgotten class on the
-       clean input (residual selective leakage), but f_smooth on 256/256
-       noise draws predicts non-forget -- so the smoothed certificate is
-       protecting exactly where the un-smoothed model leaks. This is a
-       positive signal for smoothing, not a violation.
-
-  (iii) measured < predicted with measured > 0 (sub-y=x): smoothing's
-        protection of f_smooth does not extend to f at the audited
-        sample. Note: a true certificate violation would require
-        attacking f_smooth itself (n_noise averaging at every forward
-        of the recovery audit), not f.
+This is a cross-norm diagnostic, not a direct certificate check. The certificate
+is for the binary smoothed detector under Gaussian noise, while the measured
+radius here attacks the deterministic base model in L_inf. Points below the
+visual y=x guide are therefore not certificate violations; they show where the
+converted L2 detector scale is larger than the deterministic L_inf radius found
+by the separate audit. A direct certificate test would attack the same smoothed
+binary detector in the same L2 norm.
 """
 
 import argparse
@@ -103,7 +87,7 @@ def join_and_plot(smoothed_path, measured_path, suite, input_dim, out_png, out_j
                 "predicted_radius_l2": r_pred_l2,
                 "predicted_radius_linf_lb": r_pred_linf_lb,
                 "measured_radius_linf": r_meas_linf,
-                "violation": r_pred_linf_lb > r_meas_linf,
+                "below_crossnorm_guide": r_pred_linf_lb > r_meas_linf,
             })
 
     os.makedirs(os.path.dirname(out_png), exist_ok=True)
@@ -135,23 +119,23 @@ def join_and_plot(smoothed_path, measured_path, suite, input_dim, out_png, out_j
     if all_vals:
         lo = max(min(all_vals) * 0.5, 1e-5)
         hi = max(all_vals) * 2.0
-        ax.plot([lo, hi], [lo, hi], "k--", alpha=0.5, label="y = x  (Thm 4 boundary)")
+        ax.plot([lo, hi], [lo, hi], "k--", alpha=0.5, label="y = x visual guide")
         ax.set_xlim(lo, hi); ax.set_ylim(lo, hi)
 
     ax.set_xscale("log"); ax.set_yscale("log")
-    ax.set_xlabel(r"Predicted $L_\infty$ radius LB  ($\sigma\,\Phi^{-1}(p_{\rm lower})/\sqrt{d}$, Thm 4)")
-    ax.set_ylabel(r"Measured $L_\infty$ recovery radius ($\hat r$)")
-    ax.set_title(f"Predicted vs Measured Recovery Radius\nsuite={suite}, sigma={sm['sigma']}")
-    n_viol = sum(1 for r in rows if r["violation"])
+    ax.set_xlabel(r"Converted detector scale  ($L_2$ radius / $\sqrt{d}$)")
+    ax.set_ylabel(r"Deterministic $L_\infty$ recovery radius ($\hat r$)")
+    ax.set_title(f"Cross-norm diagnostic only\nsuite={suite}, sigma={sm['sigma']}")
+    n_below = sum(1 for r in rows if r["below_crossnorm_guide"])
     ax.text(0.02, 0.98,
-            f"n={len(rows)}  violations={n_viol}  (above y=x is Theorem 4 holding)",
+            f"n={len(rows)}  below guide={n_below}\nnot a certificate test",
             transform=ax.transAxes, va="top", fontsize=8, alpha=0.7)
     ax.legend(loc="lower right", fontsize=9)
     fig.tight_layout()
     fig.savefig(out_png, dpi=160)
     print(f"Wrote {out_png}")
     print(f"Wrote {out_json}")
-    print(f"  joined n={len(rows)} (forget+retain), violations={n_viol}")
+    print(f"  joined n={len(rows)} (forget+retain), below_guide={n_below}")
 
 
 def main():

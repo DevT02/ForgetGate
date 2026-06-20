@@ -1,0 +1,17 @@
+# RECONSTRUCTED BalDRO / RURK baselines. The original proto baseline recipes
+# were never committed (only _smoke: rank4/5ep). These scale the smoke recipe
+# to SalUn-baseline conventions (rank 8, 50 epochs, lr 1e-3). They are NOT the
+# original checkpoints and will not match the original Table 3 numbers; treat
+# as reconstructions with a fidelity caveat. Objectives are the restored
+# "X-style" adaptations (see paper Adaptation appendix).
+base_vit_cifar10:
+  model: vit_tiny
+  dataset: cifar10
+unlearn_baldro_recon_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning: { method: lora, objective: bal_dro, forget_class: 0, lora_rank: 8, epochs: 50, lr: 1e-3 }
+  seeds: [42, 123, 456]
+unlearn_rurk_recon_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning: { method: lora, objective: rurk, forget_class: 0, lora_rank: 8, epochs: 50, lr: 1e-3 }
+  seeds: [42, 123, 456]

@@ -1,0 +1,3 @@
+seed 42 | forget: clean=0.000 median=0.00349 succ=1.000 | retain median=0.00527 | results/analysis/recovery_radius_cifar10_vit_tiny_forget0_seed_42_test_with_retain_adam_margin_s40_salun-repro.json
+seed 123 | forget: clean=0.000 median=0.00368 succ=1.000 | retain median=0.00564 | results/analysis/recovery_radius_cifar10_vit_tiny_forget0_seed_123_test_with_retain_adam_margin_s40_salun-repro.json
+seed 456 | forget: clean=0.000 median=0.00417 succ=1.000 | retain median=0.00460 | results/analysis/recovery_radius_cifar10_vit_tiny_forget0_seed_456_test_with_retain_adam_margin_s40_salun-repro.json

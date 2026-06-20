@@ -10,11 +10,11 @@ Walks every recovery_radius_*.json in results/analysis/metrics/ and, for each
 Writes a Markdown table to results/analysis/reports/pinsker_kl_table.md and a
 machine-readable JSON to results/analysis/metrics/pinsker_kl_table.json.
 
-The headline interpretation matches Corollary 2.1: rows with |p_F - p_R|
-near zero formally certify the method as a generic-fragility regime at the
-audit scale (no selective leakage), even when its raw attack-success rate
-is high. Rows with a positive KL lower bound carry quantitative
-variational information about forget-set membership at the audit scale.
+The valid direction is one-sided: rows with a positive forget-vs-retain gap
+carry quantitative variational information about forget-set membership at the
+audit scale. Near-zero gaps do not upper-bound leakage; any generic-fragility
+reading must come from the measured equality and oracle/null controls, not from
+Pinsker itself.
 """
 
 import argparse

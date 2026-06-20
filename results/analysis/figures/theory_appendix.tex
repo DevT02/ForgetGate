@@ -19,16 +19,16 @@ basis. This section names that object, ties it quantitatively to certified
 unlearning, separates selective leakage from generic adversarial fragility,
 and gives a constructive impossibility result for the open
 ``local-delivery transfer'' problem. The benchmark sections that follow are
-re-cast as empirical validation of these statements rather than as standalone
-attack curves.
+used as empirical checks and diagnostics for these statements rather than as
+standalone attack curves.
 
-\subsection{Setup and the residual forget-channel capacity}
+\subsection{Setup and the selective recovery gap}
 
 \paragraph{Notation.} Let $\mathcal{X} = [0,1]^d$ be the input space and
 $\mathcal{Y} = [K]$ the label set. Fix the forget class $t \in [K]$. Let
 $D = D_R \cup D_F$ with $D_F = \{(x_i, t)\}_{i=1}^{n_f}$. Let $\mathcal{A}$ be
 an unlearning algorithm producing $\theta_u = \mathcal{A}(D, t)$. Let
-$\theta_o$ denote a from-scratch oracle trained on $D_R$. Let
+$\theta_o$ denote a retain-only oracle trained on $D_R$. Let
 $f_\theta : \mathcal{X} \to \mathbb{R}^K$ be the logit map and define the
 forget-class \emph{target margin}
 \begin{equation}
@@ -42,13 +42,20 @@ $m_t(x;\theta_u) > 0$.
   r_t(x;\theta) \;:=\; \inf\bigl\{\epsilon \geq 0 \mid \exists\, x' \in \mathcal{X}, \|x' - x\|_\infty \leq \epsilon,\ m_t(x';\theta) > 0\bigr\},
 \end{equation}
 with $r_t(x;\theta) = 0$ when the clean prediction already matches. A
-per-example audit returns a finite-budget estimator $\hat r_t(x;\theta_u)$ via
-probe-then-binary search with PGD / APGD inner loops.
+per-example finite-budget audit returns an estimator $\hat r_t(x;\theta_u)$ via
+probe-then-binary search with PGD / APGD inner loops. Clean forgotten-class
+predictions are recorded as radius $0$; successful attacks inside
+$\epsilon_{\max}$ receive a finite radius estimate; failures are right-censored
+as $r_t(x;\theta_u)>\epsilon_{\max}$. Consequently, empirical tables distinguish
+recovery rate at $\epsilon_{\max}$, censored all-sample medians, and
+success-conditioned medians. The theoretical statements below concern the
+all-sample radius distribution; success-conditioned medians are auxiliary
+descriptive statistics.
 
 \paragraph{The right population object.} Let $\mu_t$ denote the
 forget-class input distribution and $\mu_{\neg t}$ the matched non-forget
 control distribution used throughout the paper. Define the
-\emph{residual forget-channel capacity} at scale $\epsilon$:
+\emph{selective recovery gap} at scale $\epsilon$:
 \begin{equation}
   \boxed{\;\mathcal{R}_\epsilon(\theta_u)
   \;:=\;
@@ -63,19 +70,19 @@ gap reported throughout the paper is exactly the empirical estimator of
 $\mathcal{R}_\epsilon$. Two qualitative regimes the paper invokes informally
 become precise statements about $\mathcal{R}_\epsilon$:
 \begin{itemize}[leftmargin=1.5em,topsep=0pt]
-  \item \textbf{Selective leakage} (paper's ORBIT/CE-U story):
-    $\mathcal{R}_\epsilon(\theta_u) > 0$ — forget inputs are strictly easier
+  \item \textbf{Selective leakage} (large forget-vs-retain recovery gap):
+    $\mathcal{R}_\epsilon(\theta_u) > 0$ --- forget inputs are strictly easier
     to recover than retain controls.
-  \item \textbf{Generic fragility} (paper's SCRUB story):
-    $\mathcal{R}_\epsilon(\theta_u) \approx 0$ — the model is adversarially
+  \item \textbf{Generic fragility} (near-zero forget-vs-retain gap):
+    $\mathcal{R}_\epsilon(\theta_u) \approx 0$ --- the model is adversarially
     fragile, but not selectively so on the forget class.
 \end{itemize}
 
 \subsection{Theorem 1: the recovery--certification gap}
 \label{sec:thm1}
 
-I bridge the per-example recovery radius to any \emph{certified-unlearning}
-budget the method might claim.
+This bridges the per-example recovery radius to any
+\emph{certified-unlearning} budget the method might claim.
 
 \begin{theorem}[Recovery--certification gap]
 \label{thm:gap}
@@ -105,6 +112,39 @@ $\epsilon > -m_t(x;\theta_u)/L$, which proves \eqref{eq:thm1-pointwise}.
 Then \eqref{eq:thm1-population} follows by integrating against $\mu_t$.
 \end{proof}
 
+Theorem~\ref{thm:gap} upper-bounds the recovery probability through the
+margin; the audit supplies the matching \emph{lower} bound, and---unlike the
+Lipschitz proxy---it requires no assumption on the inner optimizer.
+
+\begin{corollary}[Attack-observable recovery lower bound]
+\label{cor:attack-observable}
+Suppose a finite-budget audit exhibits, for an $\alpha$ fraction of sampled
+forget inputs, an explicit perturbation $x'$ with $\|x'-x\|_\infty \leq \rho$
+and $m_t(x';\theta_u) > 0$. Then, with no assumption that the optimizer is
+complete or that $\hat r_t$ is exact,
+\begin{equation}
+  \Pr_{x \sim \mu_t}\!\bigl[r_t(x;\theta_u) \leq \rho\bigr] \;\geq\; \alpha
+  \quad\text{(in expectation over the sampled forget inputs).}
+\end{equation}
+\end{corollary}
+
+\begin{proof}
+Each witnessed perturbation satisfies the recovery event at distance
+$\leq \rho$, so by the infimum definition $r_t(x;\theta_u) \leq \rho$ for that
+input---a one-sided fact that an incomplete optimizer cannot violate. The
+empirical recovery frequency at scale $\rho$ is therefore an unbiased estimator
+of a quantity that is itself $\leq \Pr_{\mu_t}[r_t \leq \rho]$, since every
+audit failure is genuinely right-censored above $\rho$ rather than miscounted.
+\end{proof}
+
+\noindent This is the clean form of the audit's evidentiary status: successful
+attacks are valid upper bounds on the true radius and failures are honest
+right-censorings, so the measured recovery rate is attack-valid without
+claiming attack optimality. Theorem~\ref{thm:gap} and
+Corollary~\ref{cor:attack-observable} sandwich the population recovery
+probability $\Pr_{\mu_t}[r_t \leq \epsilon]$ between the observed audit rate
+(below) and the Lipschitz--margin bound (above).
+
 \begin{corollary}[Certified unlearning needs separated margins]
 \label{cor:cert}
 Instantiate Theorem~\ref{thm:gap} with the \emph{probability margin}
@@ -120,11 +160,13 @@ conditional TV sense,
 \leq \epsilon_c\Bigr] \;\geq\; 1 - \delta,
 \]
 and suppose the oracle is separated on average,
-$\mathbb{E}_{\mu_t}\!\bigl[-\bar m_t(x;\theta_o)\bigr] \geq \gamma > 0$. Then
+$\mathbb{E}_{\mu_t}\!\bigl[-\bar m_t(x;\theta_o)\bigr] \geq \gamma > 0$. Then,
+whenever $\gamma - 2(\epsilon_c+\delta)>0$,
 \begin{equation}
   \mathbb{E}_{x \sim \mu_t}\!\bigl[\,r_t(x;\theta_u)\,\bigr]
   \;\geq\; \frac{\gamma - 2(\epsilon_c + \delta)}{L}.
 \end{equation}
+If the numerator is non-positive, the lower bound is vacuous.
 \end{corollary}
 
 \begin{proof}
@@ -151,24 +193,54 @@ Jacobian-access audit already computes), used here as a logit-margin proxy for t
 probability-margin constant $L$ of Corollary~\ref{cor:cert}. Corollary~\ref{cor:cert} contrapositively gives a
 \emph{theoretical floor on the certifiable unlearning budget}:
 \[
-  \epsilon_c + \delta \;\geq\; \frac{\gamma - L\cdot \mathrm{median}(\hat r)}{2}.
+  \epsilon_c + \delta \;\geq\; \frac{\gamma - L\cdot \mathbb{E}[\hat r]}{2},
 \]
-Because $\hat L$ is a \emph{local} Jacobian proxy for the (NP-hard) global
-Lipschitz constant, and local proxies on ViTs tend to under-estimate the
-global constant---which inflates the floor and could in principle produce a
-false rejection---I treat this as an audit-estimable \emph{necessary
-condition} rather than a strict falsification test: a method whose median
-recovery radius is small relative to the oracle margin is unlikely to be
-honestly marketable at small $\epsilon_c$, and the bound serves as a heuristic
-ranking and baseline reality-check that audits with no access to the oracle
-distribution can already perform. This converts the paper's empirical numbers into a stake in
-the certified-unlearning literature
-\cite{chien2024langevin,hsu2025rurk,yu2025impossibility,heinzler2026retain}:
-a modern data-removal certificate such as the retain-sensitivity calibration
-of \cite{heinzler2026retain} supplies exactly the $(\epsilon_c,\delta)$ budget
-that Corollary~\ref{cor:cert} turns into a recovery-radius lower bound.
+estimated per method from its recovery-radius audit; the scatter of
+Section~\ref{sec:validation} plots the more robust median $\hat r$ as a stand-in
+for the mean.
+Two gaps separate $\hat L$ from the constant Corollary~\ref{cor:cert} requires.
+First, a \emph{norm} gap: the $L_\infty$-Lipschitz constant of the scalar
+margin is controlled by the dual norm $\|\nabla m\|_1$, whereas the spectral
+Jacobian proxy reports $\|\nabla m\|_2 \leq \|\nabla m\|_1$ and can therefore
+understate it by up to a $\sqrt{d}$ factor; a tighter audit would estimate
+$\|\nabla m\|_1$ directly. Second, a \emph{locality} gap: $\hat L$ is a local
+proxy for the (NP-hard) global Lipschitz constant, and local proxies on ViTs
+tend to under-estimate it. Both gaps push the heuristic floor estimate the same
+way---they inflate it and could in principle produce a false rejection---so this is treated as an
+audit-estimable \emph{necessary condition} rather than a strict falsification
+test: a method whose median recovery radius is small relative to the oracle
+margin is unlikely to be honestly marketable at small $\epsilon_c$, and the
+estimate serves as a heuristic ranking and baseline reality-check that audits with
+no access to the oracle distribution can already perform. \paragraph{Two certificate types, and which one the radius probes.}
+Corollary~\ref{cor:cert} consumes a \emph{conditional-predictive} budget: a
+bound on the per-input TV distance between the deployed model's class
+distribution $\pi_{\theta_u}(\cdot\mid x)$ and the oracle's. This is
+deliberately \emph{not} the object that the mainstream certified-unlearning
+literature provides. Langevin unlearning \cite{chien2024langevin},
+Rewind-to-Delete \cite{mu2025rewind}, the neural-network certificates of
+\cite{koloskova2025certified}, and retain-sensitivity calibration
+\cite{heinzler2026retain} all certify a \emph{parameter-distribution}
+$(\epsilon,\delta)$: statistical indistinguishability, in the
+differential-privacy sense, between the \emph{distribution} over unlearned
+weights and the retrain-from-scratch distribution. A recent verification survey
+\cite{xue2026survey} draws the same line---parameter-distribution certificates
+leave individual prediction stability and input-perturbation resurfacing at the
+forgotten point uncertified. Converting a parameter-distribution
+$(\epsilon,\delta)$ into the conditional-predictive TV that
+Corollary~\ref{cor:cert} requires is not free: it needs the model to be
+Lipschitz in its parameters and certifies the \emph{distribution} over realized
+models, not the single deployed checkpoint an attacker actually faces. The
+recovery radius therefore measures exactly the axis these certificates do not
+bound---whether one deployed model resurfaces the forgotten class under a small
+input perturbation---so Corollary~\ref{cor:cert} is read not as a falsification
+of existing certificates (which make a different claim) but as the floor a
+\emph{predictive-type} certificate would have to respect, and as the formal
+reason the recovery--certification gap is structural rather than incidental.
+Where a method does expose a usable predictive $(\epsilon_c,\delta)$, the same
+inequality converts it into a recovery-radius lower bound
+\cite{chien2024langevin,hsu2025rurk,yu2025impossibility,heinzler2026retain}.
 
-\subsection{Theorem 2: selective leakage is a Pinsker test}
+\subsection{Theorem 2: selective leakage and oracle-null calibration}
 \label{sec:thm2}
 
 \begin{theorem}[Pinsker bound on selective leakage]
@@ -191,27 +263,68 @@ Pinsker's inequality applied to the two Bernoulli laws on the binary outcome
 $\mathbf{1}\{r_t \leq \epsilon\}$.
 \end{proof}
 
-\begin{corollary}[SCRUB is a generic-fragility regime]
+\begin{corollary}[Operational read of the gap]
+\label{cor:bayes-acc}
+With equal priors over forget and matched-control inputs, the Bayes-optimal
+classifier that observes only the binary recovery event
+$\mathbf{1}\{r_t \leq \epsilon\}$ attains accuracy
+\begin{equation}
+  \tfrac{1}{2}\bigl(1 + |p_F - p_R|\bigr)
+  \;=\;
+  \tfrac{1}{2}\bigl(1 + |\mathcal{R}_\epsilon(\theta_u)|\bigr).
+\end{equation}
+\end{corollary}
+
+\begin{proof}
+The total variation distance between $\mathrm{Ber}(p_F)$ and
+$\mathrm{Ber}(p_R)$ on the binary outcome is exactly $|p_F - p_R|$, and the
+Bayes accuracy of distinguishing two equiprobable hypotheses equals
+$\tfrac{1}{2}(1 + \mathrm{TV})$.
+\end{proof}
+
+\noindent This gives the gap a direct operational meaning: a forget--retain
+recovery gap of $|\mathcal{R}_\epsilon|$ is exactly the advantage over chance
+with which an observer can decide ``forget vs.\ retain'' from the single
+recovery bit. The Pinsker statement above is then the secondary
+information-theoretic consequence.
+
+\paragraph{Oracle-null calibration.} The theorem concerns the raw
+forget--retain gap of one unlearned model. The empirical oracle null used in
+Section~\ref{sec:validation} is a separate calibration step. For a retain-only
+oracle $\theta_o$, define
+\[
+S_\epsilon(\theta_u,\theta_o)
+\;:=\;
+\bigl[p_F(\theta_u)-p_R(\theta_u)\bigr]
+\;-\;
+\bigl[p_F(\theta_o)-p_R(\theta_o)\bigr].
+\]
+Theorem~\ref{thm:pinsker} gives a variational interpretation to the first
+bracket when it is large; the null subtraction checks whether the observed gap
+exceeds the baseline asymmetry of driving any input toward the forgotten class.
+
+\begin{corollary}[Near-zero gaps give no selective signal]
 \label{cor:scrub}
 If $\mathcal{R}_\epsilon(\theta_u) \to 0$ as $n_f \to \infty$ at some
 audit scale $\epsilon$, no unlearning claim about $\mu_t$-specific
-information removal is empirically supported at that scale: the
-data-conditional binary leakage event is indistinguishable from the
-retain-control baseline.
+information removal is empirically supported by this recovery event at that
+scale: the data-conditional binary leakage event is indistinguishable from the
+retain-control baseline. This does not rule out other budgets, attacks, or
+leakage channels.
 \end{corollary}
 
 \paragraph{Why this matters.} The paper's qualitative observation that SCRUB
-``exhibits generic adversarial fragility rather than selective forgetting
-leakage'' becomes a variational-information comparison (not a finite-sample
-hypothesis test; see the small-$n$ caveat in the limitations): the binary
+usually behaves like generic adversarial fragility under this audit becomes a
+variational-information comparison (not a finite-sample hypothesis test; see
+the small-$n$ caveat in the limitations): the binary
 recoverability outcomes on forget and retain controls are samples from
 $\mathrm{Ber}(p_F)$ and $\mathrm{Ber}(p_R)$, and Theorem~\ref{thm:pinsker}
 turns an observed gap into a \emph{lower} bound on the KL it carries about the
-forget condition. The direction matters: a large measured gap (ORBIT/CE-U)
-\emph{forces} a quantitative KL and is genuine selective signal, whereas a
-near-zero gap (SCRUB) leaves the KL unconstrained from above, so the
-generic-fragility reading rests on the direct equality of the measured rates,
-not on Pinsker.
+forget condition. The direction matters: a large measured gap
+\emph{forces} a quantitative KL and is selective signal, whereas a
+near-zero gap leaves the KL unconstrained from above, so any
+generic-fragility reading rests on the direct equality of the measured rates
+and null comparison, not on Pinsker.
 
 \subsection{Theorem 3: local-delivery transfer impossibility}
 \label{sec:thm3}
@@ -225,7 +338,11 @@ $\mathcal{D} \subseteq 2^{[d]}$ is \emph{coordinate-covering} if every input
 coordinate lies in at least one of its masks, $\bigcup_{M \in \mathcal{D}} M =
 [d]$. A delivery-conditional perturbation under $\mathcal{D}$ with budget
 $\epsilon$ is a $\delta \in \mathbb{R}^d$ with $\mathrm{supp}(\delta) \subseteq
-M$ for some $M \in \mathcal{D}$ and $\|\delta\|_\infty \leq \epsilon$.
+M$ for some $M \in \mathcal{D}$ and $\|\delta\|_\infty \leq \epsilon$. This is
+a strong worst-case support-subset model: any subset of a delivery mask,
+including a single coordinate, is admissible. Structured visible patches or
+sampled mask distributions are weaker average-case settings and are not ruled
+out by the theorem.
 
 \begin{lemma}[Patches alone are coordinate-covering]
 \label{lem:cover}
@@ -273,7 +390,8 @@ is finite for every $\epsilon > 0$.
 For \emph{any} budget $\epsilon > 0$, no fine-tune of a non-constant
 classifier on $[0,1]^d$ can be worst-case invariant on a coordinate-covering
 delivery family (e.g.\ all $32\times 32$ patches, with or without $16$-pixel
-border frames) while keeping clean accuracy strictly above chance. In
+border frames) while solving a balanced $K$-class task strictly above uniform
+chance. In
 particular the impossibility holds at the small budgets $\epsilon \approx
 8/255$ the audits use, not only in a large-budget limit.
 \end{corollary}
@@ -284,101 +402,128 @@ equivalent to input-invariance, which forces the classifier to be constant
 \emph{at every budget}---the chaining argument needs only that each coordinate
 be reachable, so the obstruction is present already at the $\epsilon \approx
 8/255$ the audits use, not merely in a large-budget limit. The empirical
-failure of \emph{mixed-surface stage-2} reported in the defense and
-validation sections of this paper is
-not an engineering artifact: it is the only thing that can happen for a
-non-trivial classifier under worst-case multi-surface training. The constructive consequence is that ``local-delivery
-transfer'' should be retargeted from worst-case invariance to \emph{realistic
-delivery distributions} — i.e.\ stochastic mask priors that are \emph{not}
-covering. This paper implements one such relaxation by sampling patch
-positions rather than taking a worst case over them; I name this a
-\emph{$\rho$-thin delivery defense} and treat it as the appropriate target
-for local-delivery robustness, since it is the only version of the problem
-not foreclosed by Theorem~\ref{thm:transfer}.
+failure of \emph{mixed-surface stage-2} is consistent with this obstruction,
+but the theorem is deliberately narrower than the practical defense problem:
+it rules out exact global worst-case invariance, not average-case robustness on
+the data manifold or under sampled delivery masks. The constructive consequence
+is that ``local-delivery transfer'' should be retargeted from worst-case
+invariance to \emph{distributional} delivery robustness, where the defense
+optimizes over sampled mask/content priors instead of requiring invariance to
+every submask-supported perturbation. This paper treats such distributional
+local-delivery robustness as the appropriate open target, because it is not
+foreclosed by Theorem~\ref{thm:transfer}.
 
 \subsection{Theorem 4: a smoothed certified-recovery objective}
 \label{sec:thm4}
 
-This paper's proposed objective~\eqref{eq:proposed} is a targeted-margin
-adversarial unlearning objective with inner-loop attack $\delta^*(x)$. I
-upgrade it to a
-\emph{certified} counterpart by replacing the inner loop with Gaussian
-smoothing of the margin penalty, and prove the resulting objective enjoys a
-randomized-smoothing certificate inherited from the
-Cohen-Rosenfeld-Kolter framework on the smoothed margin function.
+The proposed objective~\eqref{eq:proposed} is a targeted-margin adversarial
+unlearning objective with inner-loop attack $\delta^*(x)$. The certified
+counterpart replaces the inner loop with Gaussian smoothing of the margin
+penalty; the post-training theorem below certifies the associated binary
+forgotten-class detector through the Cohen--Rosenfeld--Kolter framework.
 
 \paragraph{Smoothed objective.} Let $\phi(z) = \max\{0, z\}$ and fix
-$\sigma > 0$.
+$\sigma > 0$. Define the Gaussian-smoothed margin
+\[
+  \tilde m_t^\sigma(x;\theta)
+  :=
+  \mathbb{E}_{\delta \sim N(0,\sigma^2 I)}
+  \bigl[m_t(x+\delta;\theta)\bigr].
+\]
 \begin{equation}
   \mathcal{L}_\sigma(\theta) \;:=\;
   \mathbb{E}_{x \sim D_R}\!\bigl[L_{\rm ret}(x;\theta)\bigr] \;+\;
   \lambda_f\, \mathbb{E}_{x \sim D_F}\!\bigl[L_{\rm forg}(x;\theta)\bigr]
   \;+\; \lambda_m \,
-  \mathbb{E}_{x \sim D_F}\,
-  \mathbb{E}_{\delta \sim N(0,\sigma^2 I)}\,
-  \phi\!\bigl(m_t(x+\delta;\theta) + \gamma\bigr).
+  \mathbb{E}_{x \sim D_F}
+  \phi\!\bigl(\tilde m_t^\sigma(x;\theta) + \gamma\bigr).
   \label{eq:smoothed}
 \end{equation}
 Let $\theta_\sigma^*$ minimize~\eqref{eq:smoothed}, and define the
-\emph{smoothed margin}
-\begin{equation}
-  \bar m_t(x;\theta) \;:=\; \mathbb{E}_{\delta \sim N(0,\sigma^2 I)}\!
-  \bigl[m_t(x+\delta;\theta)\bigr].
-\end{equation}
+\emph{smoothed margin} as $\tilde m_t^\sigma(x;\theta)$. This is the objective
+implemented in \texttt{SmoothedMarginUnlearning}: the Monte-Carlo margins are
+averaged first and the hinge is applied to the smoothed margin. The certificate
+below is a property of the binary Gaussian-smoothed forget detector; if an
+implementation clips noisy inputs to the image cube during training or auditing,
+that clipped distribution is an implementation diagnostic rather than the exact
+Cohen--Rosenfeld--Kolter Gaussian certificate.
 
 \begin{theorem}[Certified recovery radius from smoothing]
 \label{thm:smooth}
 Fix $x \in \mathcal{X}$ and let
 \[
-  \bar p_t(x;\theta) \;:=\; \Pr_{\delta \sim N(0,\sigma^2 I)}\!
-  \bigl[m_t(x+\delta;\theta) > 0\bigr]
+  q_t(x;\theta) \;:=\; \Pr_{\eta \sim N(0,\sigma^2 I)}\!
+  \bigl[m_t(x+\eta;\theta) > 0\bigr]
 \]
 be the probability that the forgotten class is the base model's \emph{top}
 logit under noise (the event $m_t > 0$). Define the \emph{binary smoothed
-forget-detector} $g(x) := \mathbf{1}\{\bar p_t(x;\theta) > 1/2\}$, which
-reports the forgotten class only when it is the majority outcome of the noisy
-base model. Suppose $\bar p_t(x;\theta) \leq \bar p < 1/2$, so $g(x) = 0$. Then
-for every $x' \in \mathbb{R}^d$ with $\|x' - x\|_2 \leq R$ where
+forget-detector} $g_t(x) := \mathbf{1}\{q_t(x;\theta) > 1/2\}$, which reports
+the forgotten class only when the event ``the forgotten class is the top logit''
+is the majority outcome of the noisy base model. Let
+$\widehat u_t^{(m)}(x;\alpha)$ be a one-sided Clopper--Pearson upper confidence
+bound for $q_t(x;\theta)$ from $m$ Monte-Carlo draws. If
+$\widehat u_t^{(m)}(x;\alpha) \leq \tau < 1/2$, then with probability at least
+$1-\alpha$ over the Monte-Carlo draw we have $q_t(x;\theta)\leq\tau$, and for
+every $x' \in \mathbb{R}^d$ with $\|x' - x\|_2 \leq R$ where
 \begin{equation}
-  R \;=\; \sigma \cdot \Phi^{-1}(1 - \bar p),
+  R \;=\; \sigma \cdot \Phi^{-1}(1 - \tau),
 \end{equation}
-we still have $\bar p_t(x';\theta) < 1/2$, hence $g(x') = 0$: no $L_2$
-perturbation of size $\leq R$ makes the forgotten class the majority prediction
-of the noisy base model. Consequently the forget-detector's recovery radius
+we still have $q_t(x';\theta) < 1/2$, hence $g_t(x') = 0$: no $L_2$
+perturbation of size $\leq R$ makes the forgotten-class-top-logit event the
+majority outcome of the noisy base model. Consequently the binary
+forget-detector's recovery radius
 satisfies $\bar r_t(x;\theta) \geq R$.
 \end{theorem}
 
 \begin{proof}
-Apply \cite{cohen2019certified}, Theorem 1, to the binary smoothed classifier
-$g$ over the two outcomes \{forgotten class is the top logit, it is not\}: the
-majority outcome at $x$ is ``not the top logit'' with probability
-$1 - \bar p_t(x;\theta) > 1/2$, which Cohen's bound certifies over the $L_2$
-ball of radius $\sigma\,\Phi^{-1}(1 - \bar p)$.
+The Clopper--Pearson bound gives $q_t(x;\theta)\leq\tau$ with probability
+$1-\alpha$ over the Monte-Carlo samples. Conditional on that event, apply
+\cite{cohen2019certified}, Theorem 1, to the binary smoothed classifier over
+the two outcomes \{forgotten class is the top logit, it is not\}. The majority
+outcome at $x$ is ``not the top logit'' with probability at least $1-\tau$,
+while the other outcome has probability at most $\tau$. The binary Cohen radius
+is therefore
+\[
+\frac{\sigma}{2}\bigl(\Phi^{-1}(1-\tau)-\Phi^{-1}(\tau)\bigr)
+=\sigma\,\Phi^{-1}(1-\tau),
+\]
+which proves the claim.
 \end{proof}
 
 \paragraph{Remark (binary vs.\ multiclass).} The certified event is
-binary---\emph{the forgotten class is not the noisy model's top prediction}---which
-is exactly the security-relevant condition (an attacker recovering the
-forgotten label). It is \emph{not} a statement about the full multiclass
-smoothed argmax: $\bar p_t < 1/2$ leaves open which non-forget class is
-predicted, but guarantees the forgotten one is not the plurality. A
+binary---\emph{the forgotten-class-top-logit event is not the majority outcome
+under noise}---which is exactly the security-relevant condition (an attacker
+recovering the forgotten label). It is \emph{not} a statement about the full multiclass
+smoothed argmax: $q_t < 1/2$ leaves open which non-forget class is
+predicted, and the forgotten class could still be the largest single
+multiclass probability below $1/2$. The theorem guarantees only that the
+forgotten-class-top-logit event is not the majority outcome of the binary
+detector. A
 multiclass-argmax certificate would additionally require the usual
 top-vs-runner-up smoothing gap.
 
-\begin{corollary}[Generalization of certified radius]
+\begin{corollary}[Generalization of the certified-recovery fraction]
 \label{cor:gen}
-Let $\widehat{\mathcal L}_\sigma$ be the empirical Monte-Carlo estimator of
-\eqref{eq:smoothed} on $n_f$ forget samples with $m$ noise draws each. Under
-standard Rademacher complexity assumptions on the margin-function class
-$\mathcal F$,
+Fix a target level $\tau < 1/2$ and let $R = \sigma\,\Phi^{-1}(1-\tau)$ be
+the corresponding certified radius from Theorem~\ref{thm:smooth}. For a fixed
+trained model and fixed threshold, define the empirical certification indicator
 \[
-\bigl|\mathcal L_\sigma(\theta) - \widehat{\mathcal L}_\sigma(\theta)\bigr|
-\;\leq\; 2 \mathfrak R_{n_f m}(\mathcal F) + B \sqrt{\tfrac{\log(2/\delta)}{2 n_f m}}
-\quad\text{w.p.\ } \geq 1 - \delta.
+  \widehat C_\tau(x) := \mathbf{1}\{\widehat u_t^{(m)}(x;\alpha_i)\leq\tau\}.
 \]
-Combined with Theorem~\ref{thm:smooth}, the certified radius $R$ generalizes:
-the population fraction of forget inputs with smoothed recovery radius at
-least $R$ is at least the empirical fraction minus the right-hand side above.
+Let $Q_\tau := \Pr_{x \sim \mu_t}[\widehat C_\tau(x)=1]$ be the population
+fraction of forget inputs that the Monte-Carlo audit would certify under the
+same procedure, and let $\widehat Q_\tau$ be its empirical value on $n_f$
+i.i.d.\ forget samples. Then Hoeffding's inequality gives, with probability at
+least $1-\delta$ over the sampled inputs,
+\[
+Q_\tau \;\geq\; \widehat Q_\tau
+\;-\; \sqrt{\tfrac{\log(1/\delta)}{2 n_f}}.
+\]
+Per-input Monte-Carlo validity is separate: each certified point has
+probability at least $1-\alpha_i$ of satisfying the true detector guarantee in
+Theorem~\ref{thm:smooth}. For simultaneous validity over the $n_f$ audited
+inputs, set $\alpha_i=\alpha/n_f$ and union bound; otherwise the guarantee is
+per-input.
 \end{corollary}
 
 \paragraph{Why this is the missing piece.} The objective
@@ -389,46 +534,50 @@ no certificate. Prior work already connects randomized smoothing to
 certified unlearning \cite{zhang2022pcmu}, but it certifies the stability of
 \emph{quantized gradients} under data removal---a parameter-space guarantee
 about the unlearning \emph{operation}---rather than a guarantee about model
-behavior on perturbed inputs. Equation~\eqref{eq:smoothed} above is, to my
-knowledge, the first machine-unlearning objective that yields a per-input
-\emph{input-space} certified lower bound on recovery radius, and Corollary~\ref{cor:gen} transports the per-input
-guarantee to the forget distribution at standard PAC rates. The existing
-recovery-radius audit provides the matched empirical
-counterpart: a predicted-vs-realized radius plot is now a direct
-consistency check on \eqref{eq:smoothed}'s training (an $L_2$ check; the
-$L_\infty$ audit relates to it only up to the $\sqrt{d}$ conversion).
+behavior on perturbed inputs. To my knowledge, Eq.~\eqref{eq:smoothed} is an
+early unlearning objective that yields a per-input \emph{input-space}
+randomized-smoothing lower bound on forgotten-class recovery radius, and
+Corollary~\ref{cor:gen} transports the fixed-threshold certification fraction
+to the forget distribution with a standard binomial/Hoeffding interval. The
+existing recovery-radius audit provides the matched empirical companion:
+predicted-vs-realized radii are a consistency diagnostic for
+\eqref{eq:smoothed}'s training (an $L_2$ diagnostic; the $L_\infty$ audit
+relates to it only up to the $\sqrt{d}$ conversion).
 
-\subsection{Empirical claims, restated as theorem checks}
+\subsection{Empirical claims, restated as theorem diagnostics}
 \label{sec:restated}
 
 The four theorems above re-cast the benchmark results of this paper, and are
-checked empirically in Section~\ref{sec:validation}:
+checked or diagnosed empirically in Section~\ref{sec:validation}:
 
 \begin{enumerate}[leftmargin=1.5em,topsep=0pt]
   \item \textbf{Recovery--certification scatter (Thm 1).} The
-    cross-method ($\hat L, \mathrm{median}(\hat r)$) scatter plot directly
-    tests \eqref{eq:thm1-pointwise}. Methods on or above the line
-    $\hat r = -\bar m / \hat L$ are tight; methods strictly above it have
-    margin headroom (an \emph{actionable} signal that more aggressive
-    unlearning is feasible without crossing the certificate).
+    cross-method ($\hat L, \mathrm{median}(\hat r)$) scatter plot ranks
+    methods under \eqref{eq:thm1-pointwise}: a larger $\hat L$ at comparable
+    margin forces a smaller certifiable radius. Drawing the bound line
+    $\hat r = -\bar m / \hat L$ itself would need the per-method oracle margin
+    $\bar m$, which an oracle-free auditor lacks, so the figure is a ranking
+    diagnostic rather than a tightness test.
   \item \textbf{Selective vs.\ generic (Thm 2).} The forget--retain $\hat
     p_F, \hat p_R$ table per method becomes a Pinsker-bounded KL comparison;
-    the SCRUB row has \emph{measured} forget and retain rates that are
-    statistically indistinguishable (generic fragility, by direct
-    measurement), while the ORBIT/CE-U/BalDRO rows show a large enough gap to
-    \emph{force} a quantitative KL lower bound.
-  \item \textbf{Local-delivery negative (Thm 3).} The mixed-surface
-    stage-2 failure is not a bug-report — it is the only possible outcome
-    under the covering assumption (Lemma~\ref{lem:cover}). Mixed-surface
-    stage-2 is therefore not an open problem for future work but
-    \emph{provably} the wrong target.
+    large rate gaps force a quantitative KL lower bound, while near-zero rate
+    gaps do not certify absence of leakage. The larger-$n$ oracle-null audit
+    is the stronger empirical calibration: SalUn and the smoothed-margin row
+    separate from the retain-only null, while SCRUB is seed-sensitive and
+    typical-but-not-universal generic fragility under this event and budget.
+  \item \textbf{Local-delivery negative (Thm 3).} The theorem rules out
+    exact worst-case invariance over a coordinate-covering delivery family.
+    The mixed-surface stage-2 failure is consistent with that obstruction, but
+    average-case transfer under realistic sampled mask distributions remains
+    an open defense target.
   \item \textbf{Certified objective (Thm 4).} The smoothed objective
     \eqref{eq:smoothed} replaces the inner attack in the empirical
     objective~\eqref{eq:proposed}. Trained end-to-end ($\sigma = 0.10$)
-    across seeds 42, 123, and 456, it yields a \emph{predicted} certified
-    radius from Theorem~\ref{thm:smooth}, which the existing audit matches
-    with a \emph{measured} recovery radius; their predicted-vs-measured plot
-    (Section~\ref{sec:validation}) is the new headline figure.
+    across seeds 42, 123, and 456, it yields a post-training $L_2$ certificate
+    for the binary smoothed forgotten-class detector. The native $L_2$
+    deterministic recovery audit is a companion diagnostic whose measured
+    medians sit above the detector-radius scale; the converted $L_\infty$
+    plot is only a norm-mismatch caveat.
 \end{enumerate}
 
 \subsection{Relation to prior inevitability, impossibility, and certification results}
@@ -444,7 +593,7 @@ certification work:
   \item \cite{yu2025impossibility} establishes path-dependence
     impossibility for retrain equivalence in multi-stage training;
     Theorem~\ref{thm:transfer} establishes a \emph{different} impossibility
-    — multi-surface worst-case invariance — for the same end-goal
+    --- multi-surface worst-case invariance --- for the same end-goal
     (distinguishability), but with a coverage/connectivity rather than
     path-dependent mechanism.
   \item AMUN \cite{krishna2025amun} uses adversarial examples as an
