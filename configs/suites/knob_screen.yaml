@@ -1,0 +1,57 @@
+# Fast knob-screening for a controlled recovery-radius elasticity.
+# After weight decay came back a first-stage null (rank-8 adapter weight norm is
+# too weak a lever; the frozen base dominates the radius), we screen knobs that
+# change the adapter's FUNCTION more directly. Reduced epochs + cheap audits;
+# any knob whose first stage moves r_R gets escalated to a full seeded sweep.
+base_vit_cifar10:
+  model: vit_tiny
+  dataset: cifar10
+
+# ---- KNOB: retain_lambda (forget/retain margin tradeoff) ----
+unlearn_salun_rl0_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: salun
+    forget_class: 0
+    lora_rank: 8
+    epochs: 8
+    lr: 1e-3
+    retain_lambda: 0.0
+  seeds: [42]
+
+unlearn_salun_rl1_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: salun
+    forget_class: 0
+    lora_rank: 8
+    epochs: 8
+    lr: 1e-3
+    retain_lambda: 1.0
+  seeds: [42]
+
+unlearn_salun_rl5_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: salun
+    forget_class: 0
+    lora_rank: 8
+    epochs: 8
+    lr: 1e-3
+    retain_lambda: 5.0
+  seeds: [42]
+
+unlearn_salun_rl20_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: salun
+    forget_class: 0
+    lora_rank: 8
+    epochs: 8
+    lr: 1e-3
+    retain_lambda: 20.0
+  seeds: [42]

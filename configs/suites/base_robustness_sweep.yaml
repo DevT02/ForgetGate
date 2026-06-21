@@ -1,0 +1,59 @@
+# CONTROLLED base-robustness elasticity sweep (STAGED -- run when GPU is free).
+#
+# The weight-decay instrument was a first-stage null because the recovery radius
+# is governed by the BASE input-space geometry, not the adapter (script 46 +
+# the eta^2 decomposition in script 47: base seed 0.002, method 0.25, adapter
+# reg ~0). The correct exogenous knob is therefore the base smoothness itself.
+# PGD-adversarial pre-training sets the base Lipschitz/smoothness directly, and
+# we already have ViT-tiny CIFAR-10 bases at five adversarial strengths
+# (clean -> smoke -> mid -> high -> ultra), seeds 42 & 123.
+#
+# Holding the unlearning method (SalUn LoRA, forget class 0) fixed and varying
+# only the base robustness gives a CAUSAL within-method estimate of the
+# forget-radius elasticity b = d log r_F / d log r_R (Proposition: super-
+# elasticity). Unlike weight decay, this knob is expected to move r_R, because
+# adversarial training changes exactly the base geometry that sets the scale.
+#
+# Run:  FG_NUM_WORKERS=0 bash scripts/analysis/run_base_robustness_sweep.sh
+# Then: conda run -n forgetgate python scripts/analysis/49_base_robustness_elasticity.py
+
+base_vit_cifar10:
+  model: vit_tiny
+  dataset: cifar10
+base_vit_cifar10_pgdtrain_smoke:
+  model: vit_tiny
+  dataset: cifar10
+base_vit_cifar10_pgdtrain_mid:
+  model: vit_tiny
+  dataset: cifar10
+base_vit_cifar10_pgdtrain_high:
+  model: vit_tiny
+  dataset: cifar10
+base_vit_cifar10_pgdtrain_ultra:
+  model: vit_tiny
+  dataset: cifar10
+
+unlearn_salun_advclean_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 8, epochs: 50, lr: 1e-3}
+  seeds: [42, 123]
+
+unlearn_salun_advsmoke_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10_pgdtrain_smoke
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 8, epochs: 50, lr: 1e-3}
+  seeds: [42, 123]
+
+unlearn_salun_advmid_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10_pgdtrain_mid
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 8, epochs: 50, lr: 1e-3}
+  seeds: [42, 123]
+
+unlearn_salun_advhigh_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10_pgdtrain_high
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 8, epochs: 50, lr: 1e-3}
+  seeds: [42, 123]
+
+unlearn_salun_advultra_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10_pgdtrain_ultra
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 8, epochs: 50, lr: 1e-3}
+  seeds: [42, 123]

@@ -208,8 +208,11 @@ def main():
         steps_per_epoch=len(retain_loader)  # full pass over retain each epoch
     )
 
-    # Create unlearning trainer
-    retain_lambda = unlearning_config['lora_unlearn'].get('retain_lambda', 1.0)
+    # Create unlearning trainer. retain_lambda is suite-overridable so it can be
+    # used as a controlled robustness knob (forget/retain margin tradeoff).
+    retain_lambda = unlearning_params.get(
+        'retain_lambda',
+        unlearning_config['lora_unlearn'].get('retain_lambda', 1.0))
     trainer = create_unlearning_trainer(
         model=lora_model,
         objective_name=objective_name,
@@ -229,10 +232,16 @@ def main():
         trainer.set_teacher_model(teacher_model)
         print(f"Teacher model set successfully!")
 
-    # Configure optimizer and scheduler
+    # Configure optimizer and scheduler. weight_decay is suite-overridable so a
+    # controlled robustness-knob sweep can vary global smoothness while holding
+    # the unlearning method fixed (falls back to the global default).
+    wd = unlearning_params.get(
+        'weight_decay',
+        unlearning_config['lora_unlearn'].get('weight_decay', 0.01))
+    print(f"Weight decay: {wd}")
     trainer.configure_optimizer(
         lr=unlearning_params.get('lr', 1e-3),
-        weight_decay=unlearning_config['lora_unlearn'].get('weight_decay', 0.01)
+        weight_decay=wd
     )
 
     # Training parameters

@@ -1,0 +1,105 @@
+{
+  "status": "OK",
+  "n_points": 10,
+  "first_stage_rR_range_over_mean": 1.8395308797351164,
+  "first_stage_spearman_adv_vs_rR": 0.006060606060606061,
+  "structural_b": 1.3608923498964307,
+  "structural_b_ci95": [
+    1.307426372157731,
+    1.8348751666995735
+  ],
+  "intercept": 0.5751948689570157,
+  "observational_cross_method_b": 1.31,
+  "points": [
+    {
+      "tag": "salun-advclean",
+      "seed": 42,
+      "adv": 0,
+      "rF_mean": 0.0016632080078125,
+      "rF_med": 0.00146484375,
+      "rR_mean": 0.0057423911057412624,
+      "rR_med": 0.00537109375
+    },
+    {
+      "tag": "salun-advclean",
+      "seed": 123,
+      "adv": 0,
+      "rF_mean": 0.0015665689716115594,
+      "rF_med": 0.001708984375,
+      "rR_mean": 0.0056813559494912624,
+      "rR_med": 0.005859375
+    },
+    {
+      "tag": "salun-advsmoke",
+      "seed": 42,
+      "adv": 1,
+      "rF_mean": 0.12507767975330353,
+      "rF_med": 0.1181640625,
+      "rR_mean": 0.13343878090381622,
+      "rR_med": 0.12109375
+    },
+    {
+      "tag": "salun-advsmoke",
+      "seed": 123,
+      "adv": 1,
+      "rF_mean": 0.1208394393324852,
+      "rF_med": 0.1044921875,
+      "rR_mean": 0.13557234406471252,
+      "rR_med": 0.13671875
+    },
+    {
+      "tag": "salun-advmid",
+      "seed": 42,
+      "adv": 2,
+      "rF_mean": 0.0672709122300148,
+      "rF_med": 0.0634765625,
+      "rR_mean": 0.08880615234375,
+      "rR_med": 0.0791015625
+    },
+    {
+      "tag": "salun-advmid",
+      "seed": 123,
+      "adv": 2,
+      "rF_mean": 0.0658976212143898,
+      "rF_med": 0.0576171875,
+      "rR_mean": 0.07855224609375,
+      "rR_med": 0.0693359375
+    },
+    {
+      "tag": "salun-advhigh",
+      "seed": 42,
+      "adv": 3,
+      "rF_mean": 0.0455474853515625,
+      "rF_med": 0.0439453125,
+      "rR_mean": 0.0667928084731102,
+      "rR_med": 0.060546875
+    },
+    {
+      "tag": "salun-advhigh",
+      "seed": 123,
+      "adv": 3,
+      "rF_mean": 0.0380961112678051,
+      "rF_med": 0.041015625,
+      "rR_mean": 0.0675303116440773,
+      "rR_med": 0.0634765625
+    },
+    {
+      "tag": "salun-advultra",
+      "seed": 42,
+      "adv": 4,
+      "rF_mean": 0.0397593192756176,
+      "rF_med": 0.04052734375,
+      "rR_mean": 0.06072998046875,
+      "rR_med": 0.05517578125
+    },
+    {
+      "tag": "salun-advultra",
+      "seed": 123,
+      "adv": 4,
+      "rF_mean": 0.0335845947265625,
+      "rF_med": 0.03564453125,
+      "rR_mean": 0.063262939453125,
+      "rR_med": 0.0595703125
+    }
+  ]
+}

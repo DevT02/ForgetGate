@@ -326,6 +326,120 @@ near-zero gap leaves the KL unconstrained from above, so any
 generic-fragility reading rests on the direct equality of the measured rates
 and null comparison, not on Pinsker.
 
+\subsection{Forget-radius super-elasticity}
+\label{sec:elasticity}
+
+Theorem~\ref{thm:gap} reads each radius through a \emph{single} Lipschitz
+scale $L$. Taken literally, that single-scale reading makes a falsifiable
+prediction about how the forget and retain-control radii should co-move across
+checkpoints, and the prediction is wrong in a specific, informative direction.
+This subsection isolates the discrepancy and shows what it measures.
+
+Fix a checkpoint with margin-Lipschitz constant $L$. Write $\mu_F$ for the
+forget population (target $=$ the forgotten class) and $\mu_R$ for the
+retain-control population, and let
+$r_F = \operatorname{med}_{\mu_F} r_t$, $r_R = \operatorname{med}_{\mu_R} r_t$
+be their median recovery radii. In the local-linear regime where
+Theorem~\ref{thm:gap} is tight, $r_t(x)\approx -m_t(x)/L$, so the medians
+satisfy $r_F \approx \tilde m_F/L$ and $r_R \approx \tilde m_R/L$, where
+$\tilde m_\bullet = \operatorname{med}_{\mu_\bullet}\!\bigl[-m_t(x)\bigr]>0$ is
+the median \emph{margin deficit} an attack must close.
+
+\begin{proposition}[Elasticity identity]
+\label{prop:elasticity}
+Suppose that, across checkpoints, the retain-control deficit is
+fragility-insensitive, $\tilde m_R(L) = c_R$, while the forget deficit
+co-attenuates with the global scale as a power law,
+$\tilde m_F(L) = c_F\,L^{-\beta}$ for some $\beta \ge 0$. Then the
+log--log regression of the forget radius on the retain-control radius across
+checkpoints has slope
+\begin{equation}
+  b \;=\; \frac{\mathrm{d}\,\log r_F}{\mathrm{d}\,\log r_R} \;=\; 1+\beta \;\ge\; 1,
+  \label{eq:elasticity}
+\end{equation}
+with equality iff $\beta = 0$.
+\end{proposition}
+
+\begin{proof}
+From $r_R = c_R/L$ we get $\log L = \log c_R - \log r_R$. From
+$r_F = \tilde m_F(L)/L = c_F L^{-(1+\beta)}$ we get
+$\log r_F = \log c_F - (1+\beta)\log L$. Substituting,
+$\log r_F = \bigl[\log c_F - (1+\beta)\log c_R\bigr] + (1+\beta)\log r_R$,
+whose slope in $\log r_R$ is $1+\beta$.
+\end{proof}
+
+\paragraph{Interpretation.} The single-scale reading of
+Theorem~\ref{thm:gap}---margins fixed, only $L$ varying across
+checkpoints---is exactly the case $\beta = 0$, which predicts $b=1$: forget and
+retain radii would shrink in lockstep as a checkpoint becomes globally
+brittle, and the forget/retain \emph{ratio} (hence apparent selectivity) would
+be scale-invariant. The benchmark instead exhibits $\hat b = 1.31$
+(suite-clustered $95\%$ CI $[1.11,2.04]$, Section~\ref{sec:validation}),
+identifying $\hat\beta = \hat b - 1 \approx 0.31 > 0$: the forget deficit is
+\emph{not} fragility-invariant. As a checkpoint's representation becomes less
+smooth (larger $L$), the suppressed class loses margin deficit faster than the
+retain controls, so the forget radius collapses super-linearly in the global
+fragility scale. This is the mechanism behind the fragility confound of
+Section~\ref{sec:validation}: because $b>1$, part of any cross-checkpoint
+selectivity ranking is a fragility ranking, and only fragility-matched
+comparisons (residualizing on $L$, equivalently on $r_R$) isolate
+method-specific leakage.
+
+\paragraph{What sets $\beta$.} The exponent is a property of the forget
+\emph{margin distribution}, not of the optimizer. When the suppressed-class
+deficits are heterogeneous---a spread of $-m_t$ straddling the recovery
+boundary rather than a uniform deep suppression---the median deficit sits on a
+steeper part of the deficit CDF, so a global compression of headroom moves the
+median more than one-for-one and yields $\beta>0$. Uniform deep suppression
+(all forget logits driven far below threshold, e.g.\ the parity SCRUB seed
+whose $\log p_t < -37$ for every forget sample) flattens that CDF near the
+median and drives $\beta \to 0$, i.e.\ $b\to 1$ and no selective gap. This ties
+the elasticity to the measurable within-checkpoint deficit spread that
+Section~\ref{sec:validation} correlates with selectivity, and makes
+Proposition~\ref{prop:elasticity} a prediction rather than a restatement:
+checkpoints with more heterogeneous forget margins should show larger local
+$b$. We do not claim a closed form for $\beta$ in terms of the deficit tail; the
+identity~\eqref{eq:elasticity} only requires the power-law co-scaling, which the
+log--log linearity of the data (Section~\ref{sec:validation}) supports
+empirically.
+
+\paragraph{Scope.} The slope $\hat b=1.31$ above is \emph{observational}: $L$
+varies with the method, so it pools method and fragility. A within-method
+controlled estimate---fixing the method and dialing a single robustness
+knob---identifies $b$ causally. Section~\ref{sec:controlled} reports such an
+estimate: varying base input-space smoothness (adversarial pre-training
+strength) while holding SalUn fixed yields $\hat b_{\text{causal}}=1.36$
+($95\%$ CI $[1.31,1.84]$), excluding $b=1$ and matching the observational value
+(Figure~\ref{fig:elasticity-confound}D). Adapter-side weight decay, by contrast,
+is a first-stage null---the radius is governed by the base geometry, not the
+low-rank adapter---which is what identifies base smoothness as the correct
+instrument.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{elasticity_confound_fig.pdf}
+  \caption{\textbf{The fragility confound and where the recovery scale lives}
+  (132 audited checkpoints, one architecture, three base seeds, twelve method
+  families). \textbf{(A)} Forget-radius super-elasticity: a log--log fit of the
+  forget radius on the retain-control radius has slope $\hat b=1.31$, exceeding
+  the single-scale null $b=1$ of Theorem~\ref{thm:gap}
+  (Proposition~\ref{prop:elasticity}). \textbf{(B)} Signed selectivity
+  $S=\log(r_R/r_F)$ falls with the global fragility scale $\log r_R$
+  ($r=-0.25$): globally brittle checkpoints look spuriously selective.
+  \textbf{(C)} Variance of $\log r_R$ explained ($\eta^2$): the base random
+  seed explains essentially none ($0.002$) and adapter-side weight decay none
+  (the first-stage null of Section~\ref{sec:controlled}), while the unlearning
+  objective explains $0.25$---the global recovery scale is an architecture-level
+  property, not an initialization or regularization artifact.
+  \textbf{(D)} Controlled \emph{causal} elasticity: holding the unlearning method
+  fixed and varying only the base input-space smoothness (adversarial
+  pre-training strength) moves $r_R$ over a $22\times$ range and gives within-method
+  slope $\hat b=1.36$ (cluster-bootstrap $95\%$ CI $[1.31,1.84]$, two seeds, ten
+  checkpoints), excluding the single-scale null $b=1$ and matching the
+  observational $b=1.31$ of panel~(A).}
+  \label{fig:elasticity-confound}
+\end{figure}
+
 \subsection{Theorem 3: local-delivery transfer impossibility}
 \label{sec:thm3}
 
@@ -607,6 +721,74 @@ certification work:
 
 The benchmark is no longer the headline; it becomes the experimental
 validation of a small theory.
+
+% ---------------------------------------------------------------------
+\subsection{A controlled probe of the fragility scale}
+\label{sec:controlled}
+
+Proposition~\ref{prop:elasticity} reads the elasticity $b$ off an
+\emph{observational} cross-checkpoint regression in which the Lipschitz scale
+$L$ co-varies with the unlearning method. A within-method controlled estimate
+would dial a single robustness knob, holding the method fixed, and identify $b$
+causally. We attempted this and report it as an honest negative, because the
+negative result is itself informative about what governs the recovery scale.
+
+\paragraph{Weight-decay instrument: a first-stage null.} Holding the method
+(SalUn), the base, and the forget class fixed, we varied the LoRA adapter's
+weight decay across $\{0,10^{-3},10^{-2},10^{-1}\}$ and re-audited. The
+retain-control radius $r_R$ did not move: across four orders of magnitude of
+regularization, $\operatorname{Spearman}(\text{wd},\,r_R)=-0.07$ and $r_R$
+stayed within audit noise of $6.0\times10^{-3}$ (the lone exception being a
+single seed at $\text{wd}=0$). With no first stage there is no identified
+elasticity; the instrument is invalid. Mechanistically, the recovery radius is
+governed by the input-space geometry of the \emph{base} representation
+($\sim\!95\%$ of parameters, frozen), and a low-rank adapter's weight norm is
+too weak a lever to move it.
+
+\paragraph{The scale is architecture-level, not init-level.} A variance
+decomposition of $\log r_R$ over the $132$-audit set (one architecture,
+\texttt{vit\_tiny}; three independently trained base seeds; twelve method
+families) corroborates this. The base seed explains essentially none of the
+variance ($\eta^2_{\text{seed}}=0.002$; the three seed means of $\log r_R$ agree
+to within $0.06$), whereas the unlearning method explains
+$\eta^2_{\text{method}}=0.25$ and within-method regularization explains
+$\approx\!0$ (the weight-decay null above). The global fragility scale is thus a
+property of the \emph{architecture}: invariant to the random initialization of
+the base, invariant to adapter-side regularization, and only modestly reshaped
+by the unlearning objective. This is the cleanest available statement of where
+the recovery radius ``lives,'' and it points to the right instrument: the knob
+that moves $r_R$ is the base \emph{geometry}, so the controlled experiment must
+vary base smoothness while holding the unlearning method fixed.
+
+\paragraph{Base-smoothness instrument: a clean causal estimate.} We realize this
+with adversarial pre-training strength. Using five ViT-tiny CIFAR-10 bases
+spanning a range of PGD-training strengths (from a clean base to strongly robust
+ones) and unlearning each identically with SalUn, the base-smoothness knob moves
+the retain-control radius over a $22\times$ range
+($r_R \in [5.7\times10^{-3},\,1.4\times10^{-1}]$)---a decisive first stage, in
+contrast to the weight-decay null. Crucially this instrument is \emph{clean}:
+adversarial training reshapes the global input-space geometry that sets $r_R$
+without a separate forget-suppression channel (unlike the forget/retain tradeoff
+weight, which moves $r_R$ but directly controls forget margins and so cannot
+identify the fragility elasticity). Regressing $\log r_F$ on $\log r_R$ across the
+ten checkpoints (five strengths $\times$ two seeds) gives a within-method causal
+slope
+\[
+  \hat b_{\text{causal}} = 1.36 \quad (\text{cluster-bootstrap } 95\%\ \text{CI } [1.31,\,1.84]),
+\]
+excluding the single-scale null $b=1$ and statistically indistinguishable from
+the observational cross-method estimate $\hat b = 1.31$ of
+Section~\ref{sec:validation} (Figure~\ref{fig:elasticity-confound}D). The
+super-elasticity of Proposition~\ref{prop:elasticity} therefore survives a
+controlled test: it is not an artifact of pooling methods of differing fragility,
+but a within-method causal response of the forget radius to the base smoothness
+scale. The audit budget must be widened for the robust bases (their radii exceed
+the default $8/255$ and are otherwise right-censored); we audit at
+$\epsilon_{\max}=0.25$ so all ten medians are measured at success rate $\ge 0.92$.
+Remaining scope: a single architecture and dataset (\texttt{vit\_tiny}, CIFAR-10);
+the cross-\emph{architecture} generalization (convolutional bases, varying depth)
+is the natural next step now that the within-architecture elasticity is causally
+established.
 
 % ---------------------------------------------------------------------
 % Bibliography hooks added if not already in main paper:

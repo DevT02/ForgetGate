@@ -1,0 +1,41 @@
+# Backup knobs if retain_lambda is also a first-stage null.
+# KNOB: LoRA rank (adapter capacity -> how far the function can move off base).
+# KNOB: unlearning strength via lr (deeper unlearning perturbs the geometry more).
+base_vit_cifar10:
+  model: vit_tiny
+  dataset: cifar10
+
+unlearn_salun_rank1_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 1, epochs: 8, lr: 1e-3}
+  seeds: [42]
+
+unlearn_salun_rank4_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 4, epochs: 8, lr: 1e-3}
+  seeds: [42]
+
+unlearn_salun_rank16_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 16, epochs: 8, lr: 1e-3}
+  seeds: [42]
+
+unlearn_salun_rank64_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 64, epochs: 8, lr: 1e-3}
+  seeds: [42]
+
+unlearn_salun_lrlo_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 8, epochs: 8, lr: 2e-4}
+  seeds: [42]
+
+unlearn_salun_lrhi_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 8, epochs: 8, lr: 5e-3}
+  seeds: [42]
+
+unlearn_salun_lrxhi_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 8, epochs: 8, lr: 2e-2}
+  seeds: [42]

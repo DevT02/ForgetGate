@@ -1,0 +1,104 @@
+{
+  "status": "FIRST_STAGE_NULL",
+  "verdict": "FIRST-STAGE NULL: weight decay does not move the recovery radius (|spearman| < 0.5); causal elasticity NOT identified. Likely cause: the recovery radius is set by base-model geometry and class margins, and a rank-8 LoRA adapter's weight norm (all WD controls) is too small a lever to shift input-space smoothness.",
+  "design": "SalUn fixed; weight decay varied as exogenous fragility knob",
+  "n_points": 7,
+  "first_stage": {
+    "spearman_wd_vs_rR": -0.07142857142857144,
+    "ols_logrR_on_logwd_slope": -0.004437866480833332,
+    "ols_logrR_on_logwd_intercept": -5.115194329653555,
+    "interpretation": "knob is valid if |spearman| is large / CI of structural fit usable"
+  },
+  "structural": {
+    "slope_logrF_on_logrR": 7.843994059580701,
+    "slope_ci95_clustered_by_wd": [
+      -2.86158134831016,
+      8.001286493593852
+    ],
+    "intercept": 34.42734165221845,
+    "spearman_logrR_vs_logrF": 0.4642857142857144,
+    "n_used": 7,
+    "n_dropped_censored": 0,
+    "observational_cross_method_b": 1.31,
+    "interpretation": "b>1 => forget radius super-elastic to fragility, within method"
+  },
+  "points": [
+    {
+      "tag": "salun-wd0",
+      "seed": 42,
+      "wd": 0.0,
+      "rF_mean": 0.0010995902121067047,
+      "rF_med": 0.0007965686381794512,
+      "rR_mean": 0.0052255671471357346,
+      "rR_med": 0.0049019609577953815,
+      "rF_clean_success": 0.15625,
+      "rR_clean_success": 0.0
+    },
+    {
+      "tag": "salun-wd0",
+      "seed": 123,
+      "wd": 0.0,
+      "rF_mean": 0.004066617228090763,
+      "rF_med": 0.0037683823611587286,
+      "rR_mean": 0.006211463827639818,
+      "rR_med": 0.0058823530562222,
+      "rF_clean_success": 0.0,
+      "rR_clean_success": 0.0
+    },
+    {
+      "tag": "salun-wd1e3",
+      "seed": 42,
+      "wd": 0.001,
+      "rF_mean": 0.004193234723061323,
+      "rF_med": 0.003860294120386243,
+      "rR_mean": 0.0061442055739462376,
+      "rR_med": 0.005821078550070524,
+      "rF_clean_success": 0.0,
+      "rR_clean_success": 0.0
+    },
+    {
+      "tag": "salun-wd1e3",
+      "seed": 123,
+      "wd": 0.001,
+      "rF_mean": 0.004062787629663944,
+      "rF_med": 0.0037683823611587286,
+      "rR_mean": 0.006209788378328085,
+      "rR_med": 0.0058823530562222,
+      "rF_clean_success": 0.0,
+      "rR_clean_success": 0.0
+    },
+    {
+      "tag": "salun-wd1e2",
+      "seed": 42,
+      "wd": 0.01,
+      "rF_mean": 0.004174326080828905,
+      "rF_med": 0.0038296568673104048,
+      "rR_mean": 0.006130562629550695,
+      "rR_med": 0.005759804043918848,
+      "rF_clean_success": 0.0,
+      "rR_clean_success": 0.0
+    },
+    {
+      "tag": "salun-wd1e2",
+      "seed": 123,
+      "wd": 0.01,
+      "rF_mean": 0.004034782759845257,
+      "rF_med": 0.0037377451080828905,
+      "rR_mean": 0.006186092738062143,
+      "rR_med": 0.0058823530562222,
+      "rF_clean_success": 0.0,
+      "rR_clean_success": 0.0
+    },
+    {
+      "tag": "salun-wd1e1",
+      "seed": 42,
+      "wd": 0.1,
+      "rF_mean": 0.003977338317781687,
+      "rF_med": 0.0036764706019312143,
+      "rR_mean": 0.006037454586476088,
+      "rR_med": 0.005698529537767172,
+      "rF_clean_success": 0.0,
+      "rR_clean_success": 0.0
+    }
+  ]
+}

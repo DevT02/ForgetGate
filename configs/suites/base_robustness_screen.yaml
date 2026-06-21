@@ -1,0 +1,41 @@
+# FAST screen of the PGD-base robustness knob (seed 42, 8 epochs, cheap audit).
+# Confirms that adversarial-training strength of the BASE moves the recovery
+# scale r_R cleanly -- the clean instrument the weight-decay null pointed to and
+# that retain_lambda only confounds. If it moves r_R, escalate to the full
+# seeded sweep (base_robustness_sweep.yaml).
+base_vit_cifar10:
+  model: vit_tiny
+  dataset: cifar10
+base_vit_cifar10_pgdtrain_smoke:
+  model: vit_tiny
+  dataset: cifar10
+base_vit_cifar10_pgdtrain_mid:
+  model: vit_tiny
+  dataset: cifar10
+base_vit_cifar10_pgdtrain_high:
+  model: vit_tiny
+  dataset: cifar10
+base_vit_cifar10_pgdtrain_ultra:
+  model: vit_tiny
+  dataset: cifar10
+
+unlearn_salun_advclean_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 8, epochs: 8, lr: 1e-3}
+  seeds: [42]
+unlearn_salun_advsmoke_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10_pgdtrain_smoke
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 8, epochs: 8, lr: 1e-3}
+  seeds: [42]
+unlearn_salun_advmid_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10_pgdtrain_mid
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 8, epochs: 8, lr: 1e-3}
+  seeds: [42]
+unlearn_salun_advhigh_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10_pgdtrain_high
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 8, epochs: 8, lr: 1e-3}
+  seeds: [42]
+unlearn_salun_advultra_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10_pgdtrain_ultra
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 8, epochs: 8, lr: 1e-3}
+  seeds: [42]

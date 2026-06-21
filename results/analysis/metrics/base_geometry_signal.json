@@ -1,0 +1,15 @@
+{
+  "n_rows": 132,
+  "n_seeds": 3,
+  "n_method_families": 12,
+  "eta2_logrR_by_base_seed": 0.0015558578938782818,
+  "eta2_logrR_by_method": 0.25263719068537777,
+  "within_method_cross_seed_sd_logrR": 0.2523170414884926,
+  "within_seed_cross_method_sd_logrR": 0.49991358353266174,
+  "seed_means_logrR": {
+    "42": -4.869438568054846,
+    "123": -4.918338368543671,
+    "456": -4.855846448768015
+  },
+  "note": "higher eta2_by_base_seed vs eta2_by_method => base geometry governs the global recovery scale more than the method"
+}

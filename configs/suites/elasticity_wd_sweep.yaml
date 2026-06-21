@@ -1,0 +1,69 @@
+# Controlled robustness-knob sweep for per-method elasticity.
+# Same method (SalUn) and same clean base; only weight decay varies, dialing
+# global smoothness/fragility while holding the unlearning objective fixed.
+# Fitting log r_F on log r_R across these points gives a CAUSAL within-method
+# elasticity (vs the observational cross-method b=1.31), converting the
+# fragility confound into a controlled result.
+base_vit_cifar10:
+  model: vit_tiny
+  dataset: cifar10
+
+unlearn_salun_wd0_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: salun
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+    weight_decay: 0.0
+  seeds: [42, 123]
+
+unlearn_salun_wd1e3_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: salun
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+    weight_decay: 0.001
+  seeds: [42, 123]
+
+unlearn_salun_wd1e2_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: salun
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+    weight_decay: 0.01
+  seeds: [42, 123]
+
+unlearn_salun_wd1e1_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: salun
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+    weight_decay: 0.1
+  seeds: [42, 123]
+
+unlearn_salun_wd5e1_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: salun
+    forget_class: 0
+    lora_rank: 8
+    epochs: 50
+    lr: 1e-3
+    weight_decay: 0.5
+  seeds: [42, 123]
