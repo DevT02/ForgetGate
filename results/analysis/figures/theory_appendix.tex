@@ -687,14 +687,25 @@ checked or diagnosed empirically in Section~\ref{sec:validation}:
     The mixed-surface stage-2 failure is consistent with that obstruction, but
     average-case transfer under realistic sampled mask distributions remains
     an open defense target.
-  \item \textbf{Certified objective (Thm 4).} The smoothed objective
-    \eqref{eq:smoothed} replaces the inner attack in the empirical
-    objective~\eqref{eq:proposed}. Trained end-to-end ($\sigma = 0.10$)
-    across seeds 42, 123, and 456, it yields a post-training $L_2$ certificate
-    for the binary smoothed forgotten-class detector. The native $L_2$
-    deterministic recovery audit is a companion diagnostic whose measured
-    medians sit above the detector-radius scale; the converted $L_\infty$
-    plot is only a norm-mismatch caveat.
+  \item \textbf{Certified objective (Thm 4)---the constructive result.} The
+    smoothed objective \eqref{eq:smoothed} replaces the inner attack in the
+    empirical objective~\eqref{eq:proposed} and, unlike it, carries a
+    certificate. Trained end-to-end ($\sigma = 0.10$) across seeds 42, 123, and
+    456, it attaches a positive post-training $L_2$ certificate to \emph{every}
+    audited forget point ($R=0.193$) at a preserved retain accuracy of $93.8\%$,
+    with zero certificate violations on the retain controls. The floor is
+    validated \emph{in the same norm}: a native $L_2$ recovery audit puts the
+    realized forget radius at $0.46$--$0.57$ across seeds, above $R$, so the
+    floor is respected rather than merely consistent
+    (Figure~\ref{fig:thm4-constructive}); a smoothing-scale sweep traces the
+    certification--utility frontier. This is the sense in which the paper does
+    not only \emph{measure} the recovery--certification gap but exhibits an
+    objective that provably narrows it on the audited axis---the deterministic
+    methods it is benchmarked against carry a certified floor of $0$ there. The
+    boundary is stated honestly: the certificate is for the binary forget
+    detector under unclipped Gaussian noise, and the cross-architecture row
+    (Section~\ref{sec:controlled}) shows the certificate still attaches but the
+    forget-vs-retain \emph{selectivity} does not transfer.
 \end{enumerate}
 
 \subsection{Relation to prior inevitability, impossibility, and certification results}
