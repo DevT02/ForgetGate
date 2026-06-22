@@ -785,27 +785,33 @@ but a within-method causal response of the forget radius to the base smoothness
 scale. The audit budget must be widened for the robust bases (their radii exceed
 the default $8/255$ and are otherwise right-censored); we audit at
 $\epsilon_{\max}=0.25$ so all ten medians are measured at success rate $\ge 0.92$.
-\paragraph{Cross-architecture replication.} The causal estimate above is
-within a single architecture and dataset (\texttt{vit\_tiny}, CIFAR-10). To test
-whether the mechanism is architecture-bound we re-run the \emph{observational}
-cross-method fit on two new architecture/dataset pairs---ResNet-18 (a
-convolutional network) and ViT-Small, both on CIFAR-100---with six LoRA
-unlearning methods each (SalUn, SCRUB, CE-ascent, Uniform-KL, feature-scrub,
-smoothed-margin) under the identical recovery-radius protocol. Pooling the
-per-method points ($n=11$; one SalUn/ViT-Small point is dropped because its
-forget radius collapses to exactly $0$, undefined on a log axis and itself
-direction-consistent) reproduces both halves of the mechanism: the elasticity is
-$\hat b = 1.98$ (case-resample $95\%$ CI $[1.34,\,3.13]$, with $b>1$ in every
-leave-one-out fit, range $[1.73,\,2.26]$) and the selectivity--fragility confound
-is $r = -0.74$ (CI $[-0.92,\,-0.47]$, $r<0$ in every leave-one-out fit, range
-$[-0.80,\,-0.68]$). This is an observational fit at a single seed per cell, so it
-pins the \emph{direction}---super-elasticity ($b>1$) and a negative confound on a
-CNN and a second ViT over a new dataset---rather than the exponent, which here
-($\approx 2$) exceeds both the CIFAR-10 benchmark ($1.31$) and the within-method
-causal estimate ($1.36$); a multi-seed cross-architecture \emph{causal}
-instrument is the remaining step. Numbers in
-\texttt{results/analysis/metrics/crossarch\_pooled.json} (script
-\texttt{scripts/analysis/51\_crossarch\_pooled.py}).
+\paragraph{Cross-architecture check: a cautionary negative.} The causal estimate
+above is within a single architecture and dataset (\texttt{vit\_tiny}, CIFAR-10).
+We attempted to extend the \emph{observational} cross-method fit to two new
+architecture/dataset pairs---ResNet-18 (a convolutional network) and ViT-Small,
+both on CIFAR-100---with six LoRA unlearning methods each (SalUn, SCRUB,
+CE-ascent, Uniform-KL, feature-scrub, smoothed-margin) under the identical
+recovery-radius protocol, and report it as an honest negative. Pooling one seed
+per cell ($n=11$; one SalUn/ViT-Small point drops with forget radius $0$)
+\emph{appeared} to reproduce both halves of the mechanism ($\hat b=1.98$,
+$r=-0.74$). But this does not survive a second seed. Re-running the ResNet-18
+cell at seed 123 produces a low-quality cell: three of six methods (SalUn,
+Uniform-KL, smoothed-margin) leave the forget class recoverable at radius $0$ (no
+measurable unlearning on that base), and the other three have robust retain
+controls---high $r_R$, confirmed after widening the audit budget to
+$\epsilon_{\max}=0.25$ to remove right-censoring---together with high
+selectivity, the high-fragility/high-selectivity corner the confound predicts
+should be empty. Pooling both ResNet-18 seeds with the ViT-Small cell ($n=14$)
+flips the fit to $\hat b = 0.51$ (leave-one-out $[0.40,\,0.71]$, never $>1$) and
+$r = +0.44$ (leave-one-out $[0.24,\,0.57]$, never $<0$). Distinct base
+checkpoints occupy different $(r_R,\,\text{selectivity})$ regimes, so a
+cross-population pooled correlation is not a safe generalization of the
+within-benchmark mechanism. We therefore treat the super-elasticity and the
+confound as established \emph{within} the benchmark (132 rows, three seeds) and
+by the controlled causal experiment above, and the cross-architecture pool as a
+cautionary check rather than a breadth result. Numbers in
+\texttt{results/analysis/metrics/crossarch\_pooled\_2seed.json} (scripts
+\texttt{51} and \texttt{53\_crossarch\_pooled\_2seed.py}).
 
 % ---------------------------------------------------------------------
 % Bibliography hooks added if not already in main paper:

@@ -1,0 +1,1024 @@
+{
+  "meta": {
+    "seed": 123,
+    "split": "test",
+    "dataset": "cifar100",
+    "model": "resnet18",
+    "forget_class": 0,
+    "model_suites": [
+      "unlearn_scrub_resnet18_ca_forget0"
+    ],
+    "norm": "l_inf",
+    "eps_max": 0.25,
+    "steps": 20,
+    "restarts": 2,
+    "search_steps": 6,
+    "attack_loss": "adam_margin",
+    "oracle_feature_weight": 0.5,
+    "apgd_rho": 0.5,
+    "apgd_momentum": 0.75,
+    "bundle_margin_gate": -3.0,
+    "debug_attack_geometry": false,
+    "debug_max_samples": 2,
+    "debug_max_steps": 20,
+    "debug_topk": 5
+  },
+  "forget_recovery": {
+    "unlearn_scrub_resnet18_ca_forget0": {
+      "summary": {
+        "n_samples": 48,
+        "success_rate": 1.0,
+        "clean_success_rate": 0.020833333333333332,
+        "median_radius": 0.00146484375,
+        "mean_radius": 0.0022633869666606188,
+        "min_radius": 0.0,
+        "max_radius": 0.008056640625,
+        "p25_radius": 0.000732421875,
+        "p75_radius": 0.00299072265625,
+        "mean_target_prob_gain": 0.4120525121688843,
+        "median_target_prob_gain": 0.4171605408191681
+      },
+      "per_sample": [
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00732421875,
+          "actual_delta": 0.007324248552322388,
+          "clean_target_prob": 5.675927176179707e-12,
+          "adv_target_prob": 0.2793114185333252,
+          "adv_pred": 0,
+          "sample_index": 0
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.003173828125,
+          "actual_delta": 0.0031738579273223877,
+          "clean_target_prob": 6.566419301634596e-07,
+          "adv_target_prob": 0.28718385100364685,
+          "adv_pred": 0,
+          "sample_index": 1
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.001953125,
+          "actual_delta": 0.001953125,
+          "clean_target_prob": 0.0004958914360031486,
+          "adv_target_prob": 0.4534139037132263,
+          "adv_pred": 0,
+          "sample_index": 2
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.008056640625,
+          "actual_delta": 0.008056670427322388,
+          "clean_target_prob": 4.193354996573362e-08,
+          "adv_target_prob": 0.21524322032928467,
+          "adv_pred": 0,
+          "sample_index": 3
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.000244140625,
+          "actual_delta": 0.000244140625,
+          "clean_target_prob": 0.24274782836437225,
+          "adv_target_prob": 0.5529710650444031,
+          "adv_pred": 0,
+          "sample_index": 4
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0009765625,
+          "actual_delta": 0.0009765625,
+          "clean_target_prob": 0.0031264368444681168,
+          "adv_target_prob": 0.5663100481033325,
+          "adv_pred": 0,
+          "sample_index": 5
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00048828125,
+          "actual_delta": 0.00048828125,
+          "clean_target_prob": 0.0667724609375,
+          "adv_target_prob": 0.5560505986213684,
+          "adv_pred": 0,
+          "sample_index": 6
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.001953125,
+          "actual_delta": 0.001953125,
+          "clean_target_prob": 0.001404271344654262,
+          "adv_target_prob": 0.36818060278892517,
+          "adv_pred": 0,
+          "sample_index": 7
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.002197265625,
+          "actual_delta": 0.0021972954273223877,
+          "clean_target_prob": 0.00014038269000593573,
+          "adv_target_prob": 0.3379324972629547,
+          "adv_pred": 0,
+          "sample_index": 8
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.001953125,
+          "actual_delta": 0.001953125,
+          "clean_target_prob": 0.00042186694918200374,
+          "adv_target_prob": 0.34876537322998047,
+          "adv_pred": 0,
+          "sample_index": 9
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00634765625,
+          "actual_delta": 0.006347686052322388,
+          "clean_target_prob": 4.0850611071618914e-07,
+          "adv_target_prob": 0.48345857858657837,
+          "adv_pred": 0,
+          "sample_index": 10
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.002197265625,
+          "actual_delta": 0.0021972954273223877,
+          "clean_target_prob": 0.0010435587028041482,
+          "adv_target_prob": 0.442042738199234,
+          "adv_pred": 0,
+          "sample_index": 11
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00341796875,
+          "actual_delta": 0.0034179985523223877,
+          "clean_target_prob": 1.6803977587187546e-06,
+          "adv_target_prob": 0.375041127204895,
+          "adv_pred": 0,
+          "sample_index": 12
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.000244140625,
+          "actual_delta": 0.000244140625,
+          "clean_target_prob": 0.15480904281139374,
+          "adv_target_prob": 0.381857305765152,
+          "adv_pred": 0,
+          "sample_index": 13
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00048828125,
+          "actual_delta": 0.00048828125,
+          "clean_target_prob": 0.03466036543250084,
+          "adv_target_prob": 0.4892977178096771,
+          "adv_pred": 0,
+          "sample_index": 14
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.001220703125,
+          "actual_delta": 0.001220703125,
+          "clean_target_prob": 0.006136768963187933,
+          "adv_target_prob": 0.3116661012172699,
+          "adv_pred": 0,
+          "sample_index": 15
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.003173828125,
+          "actual_delta": 0.0031738579273223877,
+          "clean_target_prob": 1.798080666048918e-05,
+          "adv_target_prob": 0.423252671957016,
+          "adv_pred": 0,
+          "sample_index": 16
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.001953125,
+          "actual_delta": 0.001953125,
+          "clean_target_prob": 1.2703062566288281e-06,
+          "adv_target_prob": 0.5214812755584717,
+          "adv_pred": 0,
+          "sample_index": 17
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.000732421875,
+          "actual_delta": 0.000732421875,
+          "clean_target_prob": 0.01715054363012314,
+          "adv_target_prob": 0.6670151352882385,
+          "adv_pred": 0,
+          "sample_index": 18
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.000732421875,
+          "actual_delta": 0.000732421875,
+          "clean_target_prob": 0.0009570567053742707,
+          "adv_target_prob": 0.34550294280052185,
+          "adv_pred": 0,
+          "sample_index": 19
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00341796875,
+          "actual_delta": 0.0034179985523223877,
+          "clean_target_prob": 1.6764425936344196e-06,
+          "adv_target_prob": 0.4282814860343933,
+          "adv_pred": 0,
+          "sample_index": 20
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0078125,
+          "actual_delta": 0.007812529802322388,
+          "clean_target_prob": 6.85312015469286e-11,
+          "adv_target_prob": 0.42663776874542236,
+          "adv_pred": 0,
+          "sample_index": 21
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.002685546875,
+          "actual_delta": 0.0026855766773223877,
+          "clean_target_prob": 1.659478776616652e-08,
+          "adv_target_prob": 0.2919885814189911,
+          "adv_pred": 0,
+          "sample_index": 22
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00048828125,
+          "actual_delta": 0.00048828125,
+          "clean_target_prob": 0.04343957453966141,
+          "adv_target_prob": 0.5594752430915833,
+          "adv_pred": 0,
+          "sample_index": 23
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00341796875,
+          "actual_delta": 0.0034179985523223877,
+          "clean_target_prob": 9.464637696510181e-05,
+          "adv_target_prob": 0.32707494497299194,
+          "adv_pred": 0,
+          "sample_index": 24
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00048828125,
+          "actual_delta": 0.00048828125,
+          "clean_target_prob": 0.026808835566043854,
+          "adv_target_prob": 0.4705410301685333,
+          "adv_pred": 0,
+          "sample_index": 25
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.001220703125,
+          "actual_delta": 0.001220703125,
+          "clean_target_prob": 0.0021287896670401096,
+          "adv_target_prob": 0.39649859070777893,
+          "adv_pred": 0,
+          "sample_index": 26
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.000732421875,
+          "actual_delta": 0.000732421875,
+          "clean_target_prob": 0.018451392650604248,
+          "adv_target_prob": 0.5643070340156555,
+          "adv_pred": 0,
+          "sample_index": 27
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.002685546875,
+          "actual_delta": 0.0026855766773223877,
+          "clean_target_prob": 0.00024630731786601245,
+          "adv_target_prob": 0.4609197676181793,
+          "adv_pred": 0,
+          "sample_index": 28
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.001953125,
+          "actual_delta": 0.001953125,
+          "clean_target_prob": 8.983425686892588e-06,
+          "adv_target_prob": 0.3811207115650177,
+          "adv_pred": 0,
+          "sample_index": 29
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.000732421875,
+          "actual_delta": 0.000732421875,
+          "clean_target_prob": 0.02124144323170185,
+          "adv_target_prob": 0.438401997089386,
+          "adv_pred": 0,
+          "sample_index": 30
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.001953125,
+          "actual_delta": 0.001953125,
+          "clean_target_prob": 4.903657827526331e-05,
+          "adv_target_prob": 0.6400715708732605,
+          "adv_pred": 0,
+          "sample_index": 31
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00146484375,
+          "actual_delta": 0.00146484375,
+          "clean_target_prob": 0.0018343970878049731,
+          "adv_target_prob": 0.5335952639579773,
+          "adv_pred": 0,
+          "sample_index": 32
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0068359375,
+          "actual_delta": 0.006835967302322388,
+          "clean_target_prob": 1.757571652660772e-07,
+          "adv_target_prob": 0.4081636965274811,
+          "adv_pred": 0,
+          "sample_index": 33
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.005615234375,
+          "actual_delta": 0.005615264177322388,
+          "clean_target_prob": 6.368295224490339e-09,
+          "adv_target_prob": 0.3017398715019226,
+          "adv_pred": 0,
+          "sample_index": 34
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00146484375,
+          "actual_delta": 0.00146484375,
+          "clean_target_prob": 0.001245253486558795,
+          "adv_target_prob": 0.5758200287818909,
+          "adv_pred": 0,
+          "sample_index": 35
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.000732421875,
+          "actual_delta": 0.000732421875,
+          "clean_target_prob": 0.009051722474396229,
+          "adv_target_prob": 0.6708699464797974,
+          "adv_pred": 0,
+          "sample_index": 36
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.002685546875,
+          "actual_delta": 0.0026855766773223877,
+          "clean_target_prob": 1.033445823850343e-05,
+          "adv_target_prob": 0.34179261326789856,
+          "adv_pred": 0,
+          "sample_index": 37
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.000244140625,
+          "actual_delta": 0.000244140625,
+          "clean_target_prob": 0.051273904740810394,
+          "adv_target_prob": 0.2721351981163025,
+          "adv_pred": 0,
+          "sample_index": 38
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00048828125,
+          "actual_delta": 0.00048828125,
+          "clean_target_prob": 0.12484699487686157,
+          "adv_target_prob": 0.6702901721000671,
+          "adv_pred": 0,
+          "sample_index": 39
+        },
+        {
+          "success": true,
+          "clean_success": true,
+          "radius": 0.0,
+          "actual_delta": 0.0,
+          "clean_target_prob": 0.6329309344291687,
+          "adv_target_prob": 0.6329309344291687,
+          "adv_pred": 0,
+          "sample_index": 40
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.000732421875,
+          "actual_delta": 0.000732421875,
+          "clean_target_prob": 0.0070063392631709576,
+          "adv_target_prob": 0.31461605429649353,
+          "adv_pred": 0,
+          "sample_index": 41
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0029296875,
+          "actual_delta": 0.0029297173023223877,
+          "clean_target_prob": 7.0082453021314e-05,
+          "adv_target_prob": 0.2380571961402893,
+          "adv_pred": 0,
+          "sample_index": 42
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.001220703125,
+          "actual_delta": 0.001220703125,
+          "clean_target_prob": 0.0002461773983668536,
+          "adv_target_prob": 0.4917827546596527,
+          "adv_pred": 0,
+          "sample_index": 43
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.000732421875,
+          "actual_delta": 0.000732421875,
+          "clean_target_prob": 0.0014059287495911121,
+          "adv_target_prob": 0.5009430646896362,
+          "adv_pred": 0,
+          "sample_index": 44
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0009765625,
+          "actual_delta": 0.0009765625,
+          "clean_target_prob": 0.0014662808971479535,
+          "adv_target_prob": 0.5919471979141235,
+          "adv_pred": 0,
+          "sample_index": 45
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00048828125,
+          "actual_delta": 0.00048828125,
+          "clean_target_prob": 0.011523022316396236,
+          "adv_target_prob": 0.5724323391914368,
+          "adv_pred": 0,
+          "sample_index": 46
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.005615234375,
+          "actual_delta": 0.005615264177322388,
+          "clean_target_prob": 2.6079533199663274e-07,
+          "adv_target_prob": 0.3553791642189026,
+          "adv_pred": 0,
+          "sample_index": 47
+        }
+      ]
+    }
+  },
+  "retain_control": {
+    "unlearn_scrub_resnet18_ca_forget0": {
+      "summary": {
+        "n_samples": 48,
+        "success_rate": 0.9791666666666666,
+        "clean_success_rate": 0.0,
+        "median_radius": 0.01123046875,
+        "mean_radius": 0.013713430613279343,
+        "min_radius": 0.004150390625,
+        "max_radius": 0.03466796875,
+        "p25_radius": 0.0079345703125,
+        "p75_radius": 0.01904296875,
+        "mean_target_prob_gain": 0.1809370070695877,
+        "median_target_prob_gain": 0.15267862379550934
+      },
+      "per_sample": [
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.015869140625,
+          "actual_delta": 0.015869170427322388,
+          "clean_target_prob": 3.1225135324608466e-12,
+          "adv_target_prob": 0.3135227560997009,
+          "adv_pred": 0,
+          "sample_index": 0
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.004150390625,
+          "actual_delta": 0.004150420427322388,
+          "clean_target_prob": 5.217448651936851e-13,
+          "adv_target_prob": 0.1143595427274704,
+          "adv_pred": 0,
+          "sample_index": 1
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.010986328125,
+          "actual_delta": 0.010986357927322388,
+          "clean_target_prob": 3.01432873785559e-16,
+          "adv_target_prob": 0.14571793377399445,
+          "adv_pred": 0,
+          "sample_index": 2
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0048828125,
+          "actual_delta": 0.004882842302322388,
+          "clean_target_prob": 1.9298820354285429e-13,
+          "adv_target_prob": 0.20536945760250092,
+          "adv_pred": 0,
+          "sample_index": 3
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.005126953125,
+          "actual_delta": 0.005126982927322388,
+          "clean_target_prob": 1.5234802351951626e-15,
+          "adv_target_prob": 0.27578598260879517,
+          "adv_pred": 0,
+          "sample_index": 4
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.005859375,
+          "actual_delta": 0.005859404802322388,
+          "clean_target_prob": 4.76875865185189e-11,
+          "adv_target_prob": 0.13179056346416473,
+          "adv_pred": 0,
+          "sample_index": 5
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.01025390625,
+          "actual_delta": 0.010253936052322388,
+          "clean_target_prob": 8.704543346881678e-17,
+          "adv_target_prob": 0.15267862379550934,
+          "adv_pred": 0,
+          "sample_index": 6
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.01123046875,
+          "actual_delta": 0.011230498552322388,
+          "clean_target_prob": 1.3788247107927257e-14,
+          "adv_target_prob": 0.06546039134263992,
+          "adv_pred": 0,
+          "sample_index": 7
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.009765625,
+          "actual_delta": 0.009765654802322388,
+          "clean_target_prob": 1.4469793364804e-13,
+          "adv_target_prob": 0.3040487468242645,
+          "adv_pred": 0,
+          "sample_index": 8
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.02294921875,
+          "actual_delta": 0.022949248552322388,
+          "clean_target_prob": 5.980541345625926e-15,
+          "adv_target_prob": 0.08703260123729706,
+          "adv_pred": 0,
+          "sample_index": 9
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00732421875,
+          "actual_delta": 0.007324248552322388,
+          "clean_target_prob": 2.6789553214667805e-11,
+          "adv_target_prob": 0.15331633388996124,
+          "adv_pred": 0,
+          "sample_index": 10
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.01806640625,
+          "actual_delta": 0.018066436052322388,
+          "clean_target_prob": 3.4862174160642867e-22,
+          "adv_target_prob": 0.2343161702156067,
+          "adv_pred": 0,
+          "sample_index": 11
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.030517578125,
+          "actual_delta": 0.030517607927322388,
+          "clean_target_prob": 6.080185405704319e-19,
+          "adv_target_prob": 0.12948499619960785,
+          "adv_pred": 0,
+          "sample_index": 12
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.021484375,
+          "actual_delta": 0.021484404802322388,
+          "clean_target_prob": 2.5614759133749977e-15,
+          "adv_target_prob": 0.14087513089179993,
+          "adv_pred": 0,
+          "sample_index": 13
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0078125,
+          "actual_delta": 0.007812529802322388,
+          "clean_target_prob": 2.5757920558829488e-27,
+          "adv_target_prob": 0.16309179365634918,
+          "adv_pred": 0,
+          "sample_index": 14
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00830078125,
+          "actual_delta": 0.008300811052322388,
+          "clean_target_prob": 5.064819721494282e-22,
+          "adv_target_prob": 0.29353365302085876,
+          "adv_pred": 0,
+          "sample_index": 15
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00830078125,
+          "actual_delta": 0.008300811052322388,
+          "clean_target_prob": 2.0253236186199585e-20,
+          "adv_target_prob": 0.10794316977262497,
+          "adv_pred": 0,
+          "sample_index": 16
+        },
+        {
+          "success": false,
+          "clean_success": false,
+          "radius": null,
+          "actual_delta": 0.2500000298023224,
+          "clean_target_prob": 9.856436024998112e-18,
+          "adv_target_prob": 0.0578426830470562,
+          "adv_pred": 77,
+          "sample_index": 17
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.017822265625,
+          "actual_delta": 0.017822295427322388,
+          "clean_target_prob": 2.495454607927619e-14,
+          "adv_target_prob": 0.23864145576953888,
+          "adv_pred": 0,
+          "sample_index": 18
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.017578125,
+          "actual_delta": 0.017578154802322388,
+          "clean_target_prob": 1.6599675648961525e-22,
+          "adv_target_prob": 0.22782070934772491,
+          "adv_pred": 0,
+          "sample_index": 19
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.020751953125,
+          "actual_delta": 0.020751982927322388,
+          "clean_target_prob": 5.752273433300282e-19,
+          "adv_target_prob": 0.13122500479221344,
+          "adv_pred": 0,
+          "sample_index": 20
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.015625,
+          "actual_delta": 0.015625029802322388,
+          "clean_target_prob": 2.231094947463194e-15,
+          "adv_target_prob": 0.09680704027414322,
+          "adv_pred": 0,
+          "sample_index": 21
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00927734375,
+          "actual_delta": 0.009277373552322388,
+          "clean_target_prob": 4.322034809038644e-13,
+          "adv_target_prob": 0.16101737320423126,
+          "adv_pred": 0,
+          "sample_index": 22
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.005126953125,
+          "actual_delta": 0.005126982927322388,
+          "clean_target_prob": 6.817092683674428e-15,
+          "adv_target_prob": 0.10751423239707947,
+          "adv_pred": 0,
+          "sample_index": 23
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0087890625,
+          "actual_delta": 0.008789092302322388,
+          "clean_target_prob": 4.074143367162971e-20,
+          "adv_target_prob": 0.10060815513134003,
+          "adv_pred": 0,
+          "sample_index": 24
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.03466796875,
+          "actual_delta": 0.03466799855232239,
+          "clean_target_prob": 1.1790801280186348e-21,
+          "adv_target_prob": 0.3078148663043976,
+          "adv_pred": 0,
+          "sample_index": 25
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0126953125,
+          "actual_delta": 0.012695342302322388,
+          "clean_target_prob": 2.5860922972069573e-18,
+          "adv_target_prob": 0.135564386844635,
+          "adv_pred": 0,
+          "sample_index": 26
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.011962890625,
+          "actual_delta": 0.011962920427322388,
+          "clean_target_prob": 2.1999799551530863e-11,
+          "adv_target_prob": 0.4520030617713928,
+          "adv_pred": 0,
+          "sample_index": 27
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.012451171875,
+          "actual_delta": 0.012451201677322388,
+          "clean_target_prob": 9.720452741335261e-12,
+          "adv_target_prob": 0.12563706934452057,
+          "adv_pred": 0,
+          "sample_index": 28
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.022216796875,
+          "actual_delta": 0.022216826677322388,
+          "clean_target_prob": 3.1247349445397995e-21,
+          "adv_target_prob": 0.1413232386112213,
+          "adv_pred": 0,
+          "sample_index": 29
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0126953125,
+          "actual_delta": 0.012695342302322388,
+          "clean_target_prob": 3.35441396881464e-11,
+          "adv_target_prob": 0.22577615082263947,
+          "adv_pred": 0,
+          "sample_index": 30
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.020751953125,
+          "actual_delta": 0.020751982927322388,
+          "clean_target_prob": 8.38571681034293e-15,
+          "adv_target_prob": 0.13297602534294128,
+          "adv_pred": 0,
+          "sample_index": 31
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.019775390625,
+          "actual_delta": 0.019775420427322388,
+          "clean_target_prob": 1.2136444769354857e-15,
+          "adv_target_prob": 0.2515456974506378,
+          "adv_pred": 0,
+          "sample_index": 32
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.008056640625,
+          "actual_delta": 0.008056670427322388,
+          "clean_target_prob": 3.5305826378295543e-23,
+          "adv_target_prob": 0.15706512331962585,
+          "adv_pred": 0,
+          "sample_index": 33
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.008544921875,
+          "actual_delta": 0.008544951677322388,
+          "clean_target_prob": 5.555333082505313e-17,
+          "adv_target_prob": 0.33046388626098633,
+          "adv_pred": 0,
+          "sample_index": 34
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.007568359375,
+          "actual_delta": 0.007568389177322388,
+          "clean_target_prob": 4.327165355352976e-22,
+          "adv_target_prob": 0.14488229155540466,
+          "adv_pred": 0,
+          "sample_index": 35
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.007568359375,
+          "actual_delta": 0.007568389177322388,
+          "clean_target_prob": 3.1058362217765344e-17,
+          "adv_target_prob": 0.1736256331205368,
+          "adv_pred": 0,
+          "sample_index": 36
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.006103515625,
+          "actual_delta": 0.006103545427322388,
+          "clean_target_prob": 2.797859939064097e-15,
+          "adv_target_prob": 0.17764712870121002,
+          "adv_pred": 0,
+          "sample_index": 37
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.021484375,
+          "actual_delta": 0.021484404802322388,
+          "clean_target_prob": 2.1025550813450766e-19,
+          "adv_target_prob": 0.10455057770013809,
+          "adv_pred": 0,
+          "sample_index": 38
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.015380859375,
+          "actual_delta": 0.015380889177322388,
+          "clean_target_prob": 1.2921040376968201e-14,
+          "adv_target_prob": 0.3790440857410431,
+          "adv_pred": 0,
+          "sample_index": 39
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.02880859375,
+          "actual_delta": 0.028808623552322388,
+          "clean_target_prob": 7.04541199686437e-12,
+          "adv_target_prob": 0.1435791403055191,
+          "adv_pred": 0,
+          "sample_index": 40
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.007568359375,
+          "actual_delta": 0.007568389177322388,
+          "clean_target_prob": 1.159490431304407e-16,
+          "adv_target_prob": 0.10773974657058716,
+          "adv_pred": 0,
+          "sample_index": 41
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.00927734375,
+          "actual_delta": 0.009277373552322388,
+          "clean_target_prob": 1.5638435912988108e-13,
+          "adv_target_prob": 0.17825767397880554,
+          "adv_pred": 0,
+          "sample_index": 42
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.02197265625,
+          "actual_delta": 0.021972686052322388,
+          "clean_target_prob": 4.269243189276196e-27,
+          "adv_target_prob": 0.2496437430381775,
+          "adv_pred": 0,
+          "sample_index": 43
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.018310546875,
+          "actual_delta": 0.018310576677322388,
+          "clean_target_prob": 4.460438773421948e-17,
+          "adv_target_prob": 0.21413743495941162,
+          "adv_pred": 0,
+          "sample_index": 44
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.01025390625,
+          "actual_delta": 0.010253936052322388,
+          "clean_target_prob": 8.24000850869035e-15,
+          "adv_target_prob": 0.1702771931886673,
+          "adv_pred": 0,
+          "sample_index": 45
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.023681640625,
+          "actual_delta": 0.023681670427322388,
+          "clean_target_prob": 2.6466887700727218e-21,
+          "adv_target_prob": 0.11606289446353912,
+          "adv_pred": 0,
+          "sample_index": 46
+        },
+        {
+          "success": true,
+          "clean_success": false,
+          "radius": 0.0048828125,
+          "actual_delta": 0.004882842302322388,
+          "clean_target_prob": 3.088952149621349e-10,
+          "adv_target_prob": 0.1255548745393753,
+          "adv_pred": 0,
+          "sample_index": 47
+        }
+      ]
+    }
+  }
+}
