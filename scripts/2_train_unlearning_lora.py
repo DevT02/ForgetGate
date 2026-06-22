@@ -170,9 +170,13 @@ def main():
     # nested model forward inside the loss (e.g. RURK) can deadlock with Windows
     # DataLoader worker processes, so set FG_NUM_WORKERS=0 for those.
     _nw = int(os.environ.get("FG_NUM_WORKERS", "4"))
+    # batch_size is suite-overridable so heavier architectures (e.g. vit_small)
+    # can use a smaller batch that fits the GPU.
+    _bs = unlearning_params.get(
+        'batch_size', unlearning_config['lora_unlearn'].get('batch_size', 128))
     forget_loader = DataLoader(
         forget_train,
-        batch_size=unlearning_config['lora_unlearn'].get('batch_size', 128),
+        batch_size=_bs,
         shuffle=True,
         num_workers=_nw,
         pin_memory=True
@@ -180,7 +184,7 @@ def main():
 
     retain_loader = DataLoader(
         retain_train,
-        batch_size=unlearning_config['lora_unlearn'].get('batch_size', 128),
+        batch_size=_bs,
         shuffle=True,
         num_workers=_nw,
         pin_memory=True
@@ -194,7 +198,7 @@ def main():
     val_dataset = ConcatDataset([forget_test, retain_test])
     val_loader = DataLoader(
         val_dataset,
-        batch_size=unlearning_config['lora_unlearn'].get('batch_size', 128),
+        batch_size=_bs,
         shuffle=False,  # No shuffle for validation
         num_workers=_nw,
         pin_memory=True

@@ -1,0 +1,77 @@
+{
+  "n_methods": 6,
+  "points": [
+    {
+      "method": "salun",
+      "rR": 0.0030943627934902906,
+      "rF": 0.0012561274925246835,
+      "S": 0.9015484327024855,
+      "logF": -5.778173276597942,
+      "censored": false
+    },
+    {
+      "method": "scrub",
+      "rR": 0.00808823574334383,
+      "rF": 0.00508578447625041,
+      "S": 0.46396133837375647,
+      "logF": -4.817344650391037,
+      "censored": false
+    },
+    {
+      "method": "ceascent",
+      "rR": 0.0052083334885537624,
+      "rF": 0.0016544117825105786,
+      "S": 1.1468144095263597,
+      "logF": -5.25749534222546,
+      "censored": false
+    },
+    {
+      "method": "uniformkl",
+      "rR": 0.004411764908581972,
+      "rF": 0.0015318627702072263,
+      "S": 1.0577903237018234,
+      "logF": -5.423480463556797,
+      "censored": false
+    },
+    {
+      "method": "featurescrub",
+      "rR": 0.0030943627934902906,
+      "rF": 0.0010110294679179788,
+      "S": 1.1186129154729314,
+      "logF": -5.778173276597942,
+      "censored": false
+    },
+    {
+      "method": "smoothedmargin",
+      "rR": 0.004779411945492029,
+      "rF": 0.0015931372763589025,
+      "S": 1.0986123130257763,
+      "logF": -5.343437764002482,
+      "censored": false
+    }
+  ],
+  "dataset": "cifar100",
+  "architecture": "resnet18",
+  "elasticity_b": 1.4537437844380265,
+  "elasticity_intercept": 1.4855164892810373,
+  "elasticity_b_ci95": [
+    0.5301172132994205,
+    2.1498990958793156
+  ],
+  "elasticity_b_loo_range": [
+    0.7729930630090458,
+    1.6769485865564098
+  ],
+  "confound_pearson_S_vs_logF": -0.6288558649054948,
+  "confound_r_ci95": [
+    -0.9780798165171244,
+    0.9996779983976983
+  ],
+  "confound_r_loo_range": [
+    -0.8102634866808263,
+    0.5776923821511182
+  ],
+  "benchmark_b": 1.31,
+  "benchmark_confound_r": -0.25,
+  "note": "observational cross-method, n=6 single seed; directional replication check"
+}

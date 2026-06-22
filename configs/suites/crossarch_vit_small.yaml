@@ -1,0 +1,34 @@
+# Cross-architecture replication: does the fragility confound + forget-radius
+# super-elasticity hold on a DIFFERENT architecture and dataset (ResNet18 /
+# CIFAR-100) than the ViT-tiny/CIFAR-10 benchmark? Train several LoRA unlearning
+# methods on the same base, audit, and fit log r_F ~ log r_R (observational
+# cross-method elasticity) + selectivity vs fragility. No PGD-adversarial ResNet
+# bases exist, so this is the observational test, not the causal one.
+base_vit_small_cifar100:
+  model: vit_small
+  dataset: cifar100
+
+unlearn_salun_vit_small_ca_forget0:
+  base_model_suite: base_vit_small_cifar100
+  unlearning: {method: lora, objective: salun, forget_class: 0, lora_rank: 8, epochs: 10, lr: 1e-3, batch_size: 32}
+  seeds: [42]
+unlearn_scrub_vit_small_ca_forget0:
+  base_model_suite: base_vit_small_cifar100
+  unlearning: {method: lora, objective: scrub, forget_class: 0, lora_rank: 8, epochs: 10, lr: 1e-3, batch_size: 32}
+  seeds: [42]
+unlearn_ceascent_vit_small_ca_forget0:
+  base_model_suite: base_vit_small_cifar100
+  unlearning: {method: lora, objective: ce_ascent, forget_class: 0, lora_rank: 8, epochs: 10, lr: 1e-3, batch_size: 32}
+  seeds: [42]
+unlearn_uniformkl_vit_small_ca_forget0:
+  base_model_suite: base_vit_small_cifar100
+  unlearning: {method: lora, objective: uniform_kl, forget_class: 0, lora_rank: 8, epochs: 10, lr: 1e-3, batch_size: 32}
+  seeds: [42]
+unlearn_featurescrub_vit_small_ca_forget0:
+  base_model_suite: base_vit_small_cifar100
+  unlearning: {method: lora, objective: feature_scrub, forget_class: 0, lora_rank: 8, epochs: 10, lr: 1e-3, batch_size: 32}
+  seeds: [42]
+unlearn_smoothedmargin_vit_small_ca_forget0:
+  base_model_suite: base_vit_small_cifar100
+  unlearning: {method: lora, objective: smoothed_margin, forget_class: 0, lora_rank: 8, epochs: 10, lr: 1e-3, batch_size: 32}
+  seeds: [42]
