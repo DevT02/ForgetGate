@@ -1,0 +1,71 @@
+{
+  "description": "ResNet-18/CIFAR-100 breadth check for the Theorem 4 constructive result (forget class 0, sigma=0.10). A different architecture FAMILY (convolutional) and harder dataset than the CIFAR-10/ViT-tiny core.",
+  "n_seeds": 2,
+  "per_seed": [
+    {
+      "seed": 123,
+      "dataset": "cifar100",
+      "model": "resnet18",
+      "forget_acc_after": 0.03,
+      "retain_acc_after": 0.8850505050505051,
+      "forget_recovery_success": 1.0,
+      "forget_clean_leak": 0.041666666666666664,
+      "forget_median_radius_linf": 0.0009803922148421407,
+      "retain_median_radius_linf": 0.005147058982402086,
+      "selectivity_ratio_linf": 5.2499998515704736,
+      "certified_l2_median_R": 0.19329266188310254,
+      "certified_frac_positive": 0.9375
+    },
+    {
+      "seed": 456,
+      "dataset": "cifar100",
+      "model": "resnet18",
+      "forget_acc_after": 0.07,
+      "retain_acc_after": 0.8813131313131313,
+      "forget_recovery_success": 1.0,
+      "forget_clean_leak": 0.0,
+      "forget_median_radius_linf": 0.0010416667209938169,
+      "retain_median_radius_linf": 0.005392157007008791,
+      "selectivity_ratio_linf": 5.176470456754467,
+      "certified_l2_median_R": 0.19329266188310254,
+      "certified_frac_positive": 0.921875
+    }
+  ],
+  "aggregate": {
+    "forget_acc_after": {
+      "mean": 0.05,
+      "min": 0.03,
+      "max": 0.07
+    },
+    "retain_acc_after": {
+      "mean": 0.8831818181818182,
+      "min": 0.8813131313131313,
+      "max": 0.8850505050505051
+    },
+    "forget_median_radius_linf": {
+      "mean": 0.0010110294679179788,
+      "min": 0.0009803922148421407,
+      "max": 0.0010416667209938169
+    },
+    "retain_median_radius_linf": {
+      "mean": 0.005269607994705439,
+      "min": 0.005147058982402086,
+      "max": 0.005392157007008791
+    },
+    "selectivity_ratio_linf": {
+      "mean": 5.21323515416247,
+      "min": 5.176470456754467,
+      "max": 5.2499998515704736
+    },
+    "certified_l2_median_R": {
+      "mean": 0.19329266188310254,
+      "min": 0.19329266188310254,
+      "max": 0.19329266188310254
+    },
+    "certified_frac_positive": {
+      "mean": 0.9296875,
+      "min": 0.921875,
+      "max": 0.9375
+    }
+  }
+}

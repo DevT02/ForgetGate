@@ -45,8 +45,13 @@ with $r_t(x;\theta) = 0$ when the clean prediction already matches. A
 per-example finite-budget audit returns an estimator $\hat r_t(x;\theta_u)$ via
 probe-then-binary search with PGD / APGD inner loops. Clean forgotten-class
 predictions are recorded as radius $0$; successful attacks inside
-$\epsilon_{\max}$ receive a finite radius estimate; failures are right-censored
-as $r_t(x;\theta_u)>\epsilon_{\max}$. Consequently, empirical tables distinguish
+$\epsilon_{\max}$ receive a finite radius estimate; failures are recorded as
+non-recoveries at $\epsilon_{\max}$ and treated as right-censored at
+$\epsilon_{\max}$ for the medians. This censoring is \emph{algorithm-induced},
+not a guarantee that $r_t>\epsilon_{\max}$: an incomplete optimizer can fail at a
+point whose true radius is below $\epsilon_{\max}$, so the recovery rate is a
+one-sided lower bound on the true recoverable fraction (Cor.~\ref{cor:attack-observable}).
+Consequently, empirical tables distinguish
 recovery rate at $\epsilon_{\max}$, censored all-sample medians, and
 success-conditioned medians. The theoretical statements below concern the
 all-sample radius distribution; success-conditioned medians are auxiliary
@@ -131,16 +136,20 @@ complete or that $\hat r_t$ is exact,
 \begin{proof}
 Each witnessed perturbation satisfies the recovery event at distance
 $\leq \rho$, so by the infimum definition $r_t(x;\theta_u) \leq \rho$ for that
-input---a one-sided fact that an incomplete optimizer cannot violate. The
-empirical recovery frequency at scale $\rho$ is therefore an unbiased estimator
-of a quantity that is itself $\leq \Pr_{\mu_t}[r_t \leq \rho]$, since every
-audit failure is genuinely right-censored above $\rho$ rather than miscounted.
+input---a one-sided fact that an incomplete optimizer cannot violate. An audit
+\emph{failure}, by contrast, leaves the true radius unobserved: the point may
+still satisfy $r_t \leq \rho$ (an incomplete optimizer can miss a witness) or
+genuinely exceed $\rho$. Counting only witnessed successes therefore undercounts,
+so the empirical recovery frequency $\alpha$ is a \emph{conservative lower
+estimate} of $\Pr_{\mu_t}[r_t \leq \rho]$, which is the stated inequality.
 \end{proof}
 
 \noindent This is the clean form of the audit's evidentiary status: successful
-attacks are valid upper bounds on the true radius and failures are honest
-right-censorings, so the measured recovery rate is attack-valid without
-claiming attack optimality. Theorem~\ref{thm:gap} and
+attacks are valid upper bounds on the true radius, while failures are
+\emph{algorithm-censored, not truth-censored}---an incomplete optimizer can fail
+at a point whose true radius is below $\rho$. The measured recovery rate is
+therefore a one-sided lower bound on $\Pr_{\mu_t}[r_t \leq \rho]$, attack-valid
+without claiming attack optimality. Theorem~\ref{thm:gap} and
 Corollary~\ref{cor:attack-observable} sandwich the population recovery
 probability $\Pr_{\mu_t}[r_t \leq \epsilon]$ between the observed audit rate
 (below) and the Lipschitz--margin bound (above).
@@ -702,10 +711,15 @@ checked or diagnosed empirically in Section~\ref{sec:validation}:
     not only \emph{measure} the recovery--certification gap but exhibits an
     objective that provably narrows it on the audited axis---the deterministic
     methods it is benchmarked against carry a certified floor of $0$ there. The
-    boundary is stated honestly: the certificate is for the binary forget
-    detector under unclipped Gaussian noise, and the cross-architecture row
-    (Section~\ref{sec:controlled}) shows the certificate still attaches but the
-    forget-vs-retain \emph{selectivity} does not transfer.
+    result also generalizes: on a convolutional ResNet-18 / CIFAR-100 base (two
+    seeds), the same objective forgets at preserved utility, certifies a positive
+    $L_2$ floor on $92$--$94\%$ of forget points, and shows a \emph{stronger}
+    $5.2\times$ selective recovery gap than the CIFAR-10 headline
+    (Table~\ref{tab:breadth}). The boundary is stated honestly: the certificate
+    is for the binary forget detector under unclipped Gaussian noise, and this
+    breadth is for the \emph{constructive objective}---it does not revive the
+    observational super-elasticity/confound mechanism cross-architecture, whose
+    pooled test remains a cautionary negative (Section~\ref{sec:controlled}).
 \end{enumerate}
 
 \subsection{Relation to prior inevitability, impossibility, and certification results}

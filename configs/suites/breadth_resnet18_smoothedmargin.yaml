@@ -1,0 +1,17 @@
+# Breadth experiment for the constructive Theorem 4 result: does the smoothed
+# certified-recovery objective generalize to a DIFFERENT architecture family
+# (ResNet-18, convolutional) on a HARDER dataset (CIFAR-100)? The cross-arch run
+# showed smoothed_margin forgets on ResNet-18 but too slowly to finish in 10
+# epochs (forget 0.94->0.50). Here we give it the epochs/lr to actually forget at
+# preserved utility, then audit the certified floor + selectivity (multi-seed).
+base_resnet18_cifar100:
+  model: resnet18
+  dataset: cifar100
+
+# Tuned: 25 epochs (vs 10), retain_lambda up to protect utility while forgetting
+# harder. sigma/gamma use the SmoothedMarginUnlearning defaults (sigma=0.1) so the
+# certificate scale matches the CIFAR-10 headline run for a clean comparison.
+unlearn_smoothedmargin_resnet18_breadth_forget0:
+  base_model_suite: base_resnet18_cifar100
+  unlearning: {method: lora, objective: smoothed_margin, forget_class: 0, lora_rank: 8, epochs: 25, lr: 2e-3, retain_lambda: 1.0}
+  seeds: [123]

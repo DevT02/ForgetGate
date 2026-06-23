@@ -1357,3 +1357,22 @@ eval_backdoor_resurrection:
       - backdoor_asr  # Attack success rate
       - resurrection_asr  # Resurrected backdoor success
   seeds: [42, 123, 456]
+
+# Breadth experiment (Theorem 4): smoothed certified-recovery objective on a
+# DIFFERENT architecture family (ResNet-18, convolutional) + harder dataset
+# (CIFAR-100). Registered here so the certified smoothed-radius audit (script 27)
+# can resolve the suite. Trained via configs/suites/breadth_resnet18_smoothedmargin.yaml.
+base_resnet18_cifar100:
+  model: resnet18
+  dataset: cifar100
+
+unlearn_smoothedmargin_resnet18_breadth_forget0:
+  base_model_suite: base_resnet18_cifar100
+  unlearning:
+    method: lora
+    objective: smoothed_margin
+    forget_class: 0
+    lora_rank: 8
+    epochs: 25
+    lr: 2e-3
+    sigma: 0.10
