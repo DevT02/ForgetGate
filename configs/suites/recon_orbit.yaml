@@ -1,0 +1,18 @@
+# RECONSTRUCTED ORBIT objective. The original ORBIT objective code and recipe
+# were never committed (the run_orbit_method.ps1 pipeline referenced a suite and
+# objective that no longer exist; only orphaned result JSONs remained). This
+# re-implements ORBIT (oracle-aligned, representation-dispersive unlearning) from
+# its four-term paper specification and makes it runnable from committed code.
+# It is a fidelity-caveated reconstruction (like recon_baldro_rurk.yaml): it will
+# NOT match the original orphaned ORBIT numbers. The four terms (hinge-margin
+# suppression, masked oracle distillation, oracle feature alignment, dispersion)
+# act on the forget batch; the trainer adds retain CE separately. The frozen
+# retain-only oracle is loaded from checkpoints/oracle/oracle_vit_cifar10_forget0.
+base_vit_cifar10:
+  model: vit_tiny
+  dataset: cifar10
+
+unlearn_orbit_recon_vit_cifar10_forget0:
+  base_model_suite: base_vit_cifar10
+  unlearning: { method: lora, objective: orbit, forget_class: 0, lora_rank: 8, epochs: 10, lr: 1e-3 }
+  seeds: [42, 123, 456]

@@ -726,6 +726,110 @@ class SCRUB(UnlearningObjective):
         return total_loss / num_components if num_components > 0 else torch.tensor(0.0, device=logits.device)
 
 
+class OrbitUnlearning(UnlearningObjective):
+    """ORBIT (oracle-aligned, representation-dispersive unlearning) -- reconstruction.
+
+    Diagnostic stress-test objective from the paper, re-implemented from its
+    four-term specification. The original objective code was never committed, so
+    this is a fidelity-caveated *reconstruction* (in the spirit of the BalDRO/RURK
+    recon rows); it will not reproduce the orphaned ORBIT result numbers, but it
+    makes ORBIT runnable from committed code.
+
+    All four terms act on the FORGET batch (the trainer supplies retain CE
+    separately, weighted by retain_lambda):
+      (1) hinge-margin suppression of the forget-class logit below the top
+          non-forget logit by a margin gamma;
+      (2) masked dark-knowledge distillation from a frozen retain-only ORACLE on
+          the non-forget classes (the forget dimension is excluded from the KL);
+      (3) feature alignment pulling forget-input representations toward the
+          oracle's feature space (cosine);
+      (4) a dispersion penalty pushing forget features apart (mean pairwise
+          cosine) to weaken prototype / linear recovery channels.
+
+    The oracle is supplied through set_teacher_model() (the trainer passes the
+    frozen retain-only oracle); the student model is attached via set_model() for
+    feature extraction.
+    """
+
+    def __init__(self,
+                 forget_class: int,
+                 num_classes: int = 10,
+                 oracle_model: Optional[nn.Module] = None,
+                 margin_weight: float = 1.0,
+                 distill_weight: float = 1.0,
+                 align_weight: float = 0.5,
+                 disperse_weight: float = 0.5,
+                 gamma: float = 1.0,
+                 temperature: float = 2.0):
+        super().__init__(forget_class, num_classes)
+        self.oracle_model = oracle_model
+        self.margin_weight = margin_weight
+        self.distill_weight = distill_weight
+        self.align_weight = align_weight
+        self.disperse_weight = disperse_weight
+        self.gamma = gamma
+        self.temperature = temperature
+        self.student_model = None
+        if self.oracle_model is not None:
+            self._freeze(self.oracle_model)
+
+    @staticmethod
+    def _freeze(m: nn.Module) -> None:
+        m.eval()
+        for p in m.parameters():
+            p.requires_grad = False
+
+    def set_model(self, model: nn.Module) -> None:
+        """Attach the student (LoRA) model, used for forget-feature extraction."""
+        self.student_model = model
+
+    def set_teacher_model(self, teacher_model: nn.Module) -> None:
+        """Attach the frozen retain-only oracle (passed by the trainer)."""
+        self.oracle_model = teacher_model
+        self._freeze(self.oracle_model)
+
+    def forward(self, logits: torch.Tensor, labels: torch.Tensor,
+                inputs: Optional[torch.Tensor] = None) -> torch.Tensor:
+        t = self.forget_class
+
+        # (1) hinge-margin suppression: drive the forget logit below the top
+        # non-forget logit by at least gamma.
+        forget_logit = logits[:, t]
+        other = logits.clone()
+        other[:, t] = float("-inf")
+        top_other = other.max(dim=1).values
+        margin = forget_logit - top_other  # > 0 means forget class still wins
+        total = self.margin_weight * F.relu(margin + self.gamma).mean()
+
+        # (2) masked dark-knowledge distillation from the oracle on non-forget
+        # classes (exclude the forget dimension from the KL target).
+        if self.oracle_model is not None and inputs is not None:
+            with torch.no_grad():
+                oracle_logits = self.oracle_model(inputs)
+            keep = [j for j in range(self.num_classes) if j != t]
+            s = logits[:, keep] / self.temperature
+            o = oracle_logits[:, keep] / self.temperature
+            distill = F.kl_div(F.log_softmax(s, dim=-1), F.softmax(o, dim=-1),
+                               reduction="batchmean") * (self.temperature ** 2)
+            total = total + self.distill_weight * distill
+
+        # (3)+(4) feature alignment toward the oracle + dispersion of forget feats.
+        if (self.student_model is not None and self.oracle_model is not None
+                and inputs is not None):
+            sf = F.normalize(_extract_features(self.student_model, inputs), dim=1)
+            with torch.no_grad():
+                of = F.normalize(_extract_features(self.oracle_model, inputs), dim=1)
+            align = (1.0 - (sf * of).sum(dim=1)).mean()
+            total = total + self.align_weight * align
+            if sf.size(0) > 1:
+                sim = sf @ sf.t()
+                n = sim.size(0)
+                disperse = (sim.sum() - sim.diagonal().sum()) / (n * (n - 1))
+                total = total + self.disperse_weight * disperse
+
+        return total
+
+
 class SmoothedMarginUnlearning(UnlearningObjective):
     """
     Theorem 4 of theory_appendix.tex: a Gaussian-smoothed target-margin hinge
@@ -890,6 +994,9 @@ def create_unlearning_objective(objective_name: str, forget_class: int,
 
     elif objective_name == "smoothed_margin":
         return SmoothedMarginUnlearning(forget_class, num_classes, **kwargs)
+
+    elif objective_name == "orbit":
+        return OrbitUnlearning(forget_class, num_classes, **kwargs)
 
     # Restored adapted-method objectives ("X-style"; see paper Adaptation appendix).
     elif objective_name == "sga":

@@ -66,6 +66,38 @@ def load_base_model(experiment_suites: Dict, suite_config: Dict, device: torch.d
     return model
 
 
+def load_oracle_model(experiment_suites: Dict, suite_config: Dict, device: torch.device,
+                      seed: int, forget_class: int) -> nn.Module:
+    """Load the frozen retain-only ORACLE for ORBIT (same architecture as the base).
+
+    Oracle checkpoints follow checkpoints/oracle/oracle_<arch_dataset>_forget<c>_seed_<s>_final.pt;
+    the suite name is derived from the base suite (base_X -> oracle_X_forget<c>).
+    """
+    base_suite = suite_config.get('base_model_suite', '')
+    oracle_suite = base_suite.replace('base_', 'oracle_', 1) + f"_forget{forget_class}"
+    checkpoint_path = f"checkpoints/oracle/{oracle_suite}_seed_{seed}_final.pt"
+    if not os.path.exists(checkpoint_path):
+        raise FileNotFoundError(f"ORBIT oracle checkpoint not found: {checkpoint_path}")
+
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    data_config = load_config("configs/data.yaml")
+    model_config = load_config("configs/model.yaml")
+    base_suite_config = experiment_suites.get(base_suite, {})
+    dataset_info = data_config[base_suite_config.get('dataset', 'cifar10')]
+    model_type = base_suite_config.get('model', 'vit_tiny')
+
+    if model_type.startswith('vit'):
+        model = create_vit_model(model_config['vit'][model_type.replace('vit_', '')],
+                                 num_classes=dataset_info['num_classes'])
+    else:
+        model = create_cnn_model(model_config['cnn'][model_type],
+                                 num_classes=dataset_info['num_classes'])
+    model.load_state_dict(checkpoint['model_state_dict'])
+    model = model.to(device)
+    print(f"Loaded ORBIT oracle from: {checkpoint_path}")
+    return model
+
+
 def main():
     parser = argparse.ArgumentParser(description="Train LoRA unlearning adapter for ForgetGate-V")
     parser.add_argument("--config", type=str, required=True,
@@ -133,6 +165,14 @@ def main():
         for param in teacher_model.parameters():
             param.requires_grad = False
         print(f"Teacher model loaded and frozen: {type(teacher_model).__name__}")
+    elif objective_name == "orbit":
+        print("\nLoading frozen retain-only ORACLE as ORBIT teacher...")
+        teacher_model = load_oracle_model(experiment_suites, suite_config, device,
+                                          args.seed, forget_class)
+        teacher_model.eval()
+        for param in teacher_model.parameters():
+            param.requires_grad = False
+        print(f"ORBIT oracle loaded and frozen: {type(teacher_model).__name__}")
 
     # Get model type from base suite for LoRA target selection
     base_suite = suite_config.get('base_model_suite', '')
@@ -229,10 +269,10 @@ def main():
         objective_kwargs=objective_kwargs
     )
 
-    # Set teacher model for SCRUB (distillation-based unlearning)
-    if objective_name == "scrub":
-        print("\nSetting teacher model in SCRUB objective...")
-        # Use the separately loaded teacher model
+    # Set teacher model for distillation-based objectives (SCRUB: frozen base;
+    # ORBIT: frozen retain-only oracle).
+    if objective_name in ("scrub", "orbit") and teacher_model is not None:
+        print(f"\nSetting teacher model in {objective_name} objective...")
         trainer.set_teacher_model(teacher_model)
         print(f"Teacher model set successfully!")
 
