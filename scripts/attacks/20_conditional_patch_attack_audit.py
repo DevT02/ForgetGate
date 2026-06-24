@@ -25,7 +25,7 @@ from src.models.normalize import create_imagenet_normalizer
 from src.utils import get_device, load_config, save_dict_to_json, set_seed
 
 
-_AUDIT_PATH = os.path.join(os.path.dirname(__file__), "17_recovery_radius_audit.py")
+_AUDIT_PATH = os.path.join(os.path.dirname(__file__), "..", "audits", "17_recovery_radius_audit.py")
 _AUDIT_SPEC = importlib.util.spec_from_file_location("recovery_radius_audit", _AUDIT_PATH)
 if _AUDIT_SPEC is None or _AUDIT_SPEC.loader is None:
     raise ImportError(f"Unable to load recovery audit helpers from {_AUDIT_PATH}")
