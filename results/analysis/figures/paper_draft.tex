@@ -308,6 +308,28 @@ pooled cross-architecture regression slope.
   \label{tab:breadth}
 \end{table}
 
+\paragraph{Second forgotten class: the floor is not a class-0 artifact.}
+A natural objection to the headline construction is that it is reported almost
+entirely for forgotten class $0$, so the certified floor and the selective
+recovery gap could be a property of that one target label rather than of the
+method. To test this we repeat the \emph{entire} smoothed-margin pipeline---train,
+certify, audit recovery---on ViT-Tiny/CIFAR-10 with forgotten class $5$ held out
+instead (seed 42, $\sigma=0.10$, otherwise the identical recipe). Forgetting is
+clean and utility-preserving (forget accuracy $90.6\%\!\to\!0.2\%$, retain
+accuracy $94.5\%\!\to\!95.4\%$). The smoothed detector certifies a positive $L_2$
+recovery floor on \emph{every} one of the $64$ audited forget points, at exactly
+the class-0 scale $R=0.193$ ($\tau=0.027$, $\hat p_{\neg t}=1$ at $m=256$): the
+floor is fixed by $\sigma$ and the saturated non-forget event, so it transfers
+across the target label unchanged. The deterministic recovery audit reproduces the
+selective gap in the same direction, though more weakly than for class $0$---the
+median $L_\infty$ forget recovery radius ($0.0049$) is $1.6\times$ smaller than the
+matched retain-to-forget control radius ($0.0078$), versus $\approx\!3.5\times$ for
+class $0$. The certified floor is therefore a class-independent property of the
+construction, while the \emph{magnitude} of the selective gap is target-dependent,
+a distinction we do not oversell. Numbers in
+\texttt{smoothed\_radius\_seed\_42\_sigma\_0p1\_n256\_smoothed\_margin\_fc5\_*.json}
+and \texttt{recovery\_radius\_cifar10\_vit\_tiny\_forget5\_seed\_42\_*.json}.
+
 \paragraph{Earlier single-seed cross-checks.} A first cross-dataset attempt ran
 the same objective on a lightly-trained ViT-Small CIFAR-100 base (seed 42): it
 drove forget accuracy to $0.0\%$ but with a nontrivial retain drop

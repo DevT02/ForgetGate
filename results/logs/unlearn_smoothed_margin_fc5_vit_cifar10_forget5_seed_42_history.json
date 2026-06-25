@@ -1,0 +1,113 @@
+{
+  "args": {
+    "base_suite": "base_vit_cifar10",
+    "arch": "tiny",
+    "seed": 42,
+    "forget_class": 5,
+    "dataset": "cifar10",
+    "epochs": 10,
+    "batch_size": 64,
+    "num_workers": 2,
+    "lr": 0.001,
+    "weight_decay": 0.01,
+    "lora_rank": 8,
+    "max_retain": 0,
+    "max_forget": 0,
+    "sigma": 0.1,
+    "n_noise": 4,
+    "gamma": 1.0,
+    "forget_weight": 1.0,
+    "retain_weight": 1.0,
+    "suite_tag": "unlearn_smoothed_margin_fc5_vit_cifar10_forget5"
+  },
+  "history": [
+    {
+      "epoch": -1,
+      "forget_acc": 0.906,
+      "retain_acc": 0.9447777777777778,
+      "n_forget": 1000,
+      "n_retain": 9000
+    },
+    {
+      "epoch": 0,
+      "train_loss": 0.10392307485440537,
+      "forget_acc": 0.088,
+      "retain_acc": 0.9476666666666667,
+      "n_forget": 1000,
+      "n_retain": 9000
+    },
+    {
+      "epoch": 1,
+      "train_loss": 0.07092321259837338,
+      "forget_acc": 0.026,
+      "retain_acc": 0.9511111111111111,
+      "n_forget": 1000,
+      "n_retain": 9000
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.07293018453276238,
+      "forget_acc": 0.012,
+      "retain_acc": 0.9504444444444444,
+      "n_forget": 1000,
+      "n_retain": 9000
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.07024331593185207,
+      "forget_acc": 0.003,
+      "retain_acc": 0.951,
+      "n_forget": 1000,
+      "n_retain": 9000
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.07024285972289275,
+      "forget_acc": 0.0,
+      "retain_acc": 0.9531111111111111,
+      "n_forget": 1000,
+      "n_retain": 9000
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.06806534268346166,
+      "forget_acc": 0.0,
+      "retain_acc": 0.9535555555555556,
+      "n_forget": 1000,
+      "n_retain": 9000
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.0683957646338595,
+      "forget_acc": 0.001,
+      "retain_acc": 0.9535555555555556,
+      "n_forget": 1000,
+      "n_retain": 9000
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.06656917176907551,
+      "forget_acc": 0.001,
+      "retain_acc": 0.9538888888888889,
+      "n_forget": 1000,
+      "n_retain": 9000
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.06436297585849901,
+      "forget_acc": 0.002,
+      "retain_acc": 0.953,
+      "n_forget": 1000,
+      "n_retain": 9000
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.06417424835736306,
+      "forget_acc": 0.002,
+      "retain_acc": 0.9537777777777777,
+      "n_forget": 1000,
+      "n_retain": 9000
+    }
+  ],
+  "base_checkpoint": "checkpoints/base/base_vit_cifar10_seed_42_final.pt"
+}

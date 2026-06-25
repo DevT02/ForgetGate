@@ -1376,3 +1376,18 @@ unlearn_smoothedmargin_resnet18_breadth_forget0:
     epochs: 25
     lr: 2e-3
     sigma: 0.10
+
+# Forget-class generalization for the constructive Theorem 4 result: the headline
+# uses forget_class 0 everywhere; this repeats the smoothed certified-recovery
+# objective on a DIFFERENT forget class (5) on the same CIFAR-10/ViT-tiny base to
+# show the certified floor + selectivity are not class-0-specific.
+unlearn_smoothed_margin_fc5_vit_cifar10_forget5:
+  base_model_suite: base_vit_cifar10
+  unlearning:
+    method: lora
+    objective: smoothed_margin
+    forget_class: 5
+    lora_rank: 8
+    epochs: 10
+    lr: 1e-3
+    sigma: 0.10
