@@ -1,19 +1,23 @@
 # ForgetGate: The Recovery-Certification Gap
 
+*Auditing machine unlearning with the recovery radius: a fragility confound in selective-leakage metrics, plus a certified input-space recovery floor.*
+
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![arXiv](https://img.shields.io/badge/arXiv-coming%20soon-b31b1b.svg)]()
 
-**Paper:** *The Recovery-Certification Gap: A Theory of Adversarial Unlearning*, Devansh Tayal. **[Read the working paper (PDF)](results/analysis/figures/paper_draft.pdf)**
+**Paper:** *The Recovery-Certification Gap: Auditing Machine Unlearning Beyond Clean Forget Accuracy*, Devansh Tayal. **[Read the working paper (PDF)](results/analysis/figures/paper_draft.pdf)**
 
 ---
 
-ForgetGate argues that machine unlearning should be audited by one measurable quantity, the per-example *recovery radius*: the smallest input change that re-elicits a forgotten class. If a small perturbation recovers the forgotten class, clean forget accuracy is the wrong test. The paper builds this into a small theory (four theorems) and checks the claims on an eight-method CIFAR-10 benchmark.
+ForgetGate argues that machine unlearning should be audited by one measurable quantity, the per-example *recovery radius*: the smallest input change that re-elicits a forgotten class. If a small perturbation recovers the forgotten class, clean forget accuracy is the wrong test.
+
+**Headline finding.** The forget-vs-retain *selectivity* metric used across the unlearning-audit literature to tell residual knowledge from generic adversarial fragility is **confounded by a checkpoint's global brittleness**. Across 132 audits over 57 checkpoints, apparent selectivity correlates *negatively* with how fragile a model is overall, because the forget radius is *super-linearly elastic* to fragility (observational slope b=1.31; a controlled base-smoothness experiment gives a causal b=1.36, CI [1.31, 1.84]). The correction is a fragility-matched taxonomy that separates genuine leakers (SalUn, RURK) from brittleness artifacts (SCRUB). The eight-method CIFAR-10 benchmark and four supporting theorems are the evidence and formal footing for this finding, not the end in themselves.
 
 > A method can pass clean-accuracy and even rate-based audits and still leak under the recovery radius, and that radius is what an unlearning *certificate* must answer to.
 
-## The theory (four theorems)
+## Supporting results (four theorems)
 
 1. **Recovery-certification gap.** A method's measured recovery radius gives a necessary diagnostic for certified-unlearning budget claims. The plotted evidence is a heuristic ranking because the Lipschitz term uses a local proxy rather than a certified global upper bound.
 2. **Selective-leakage test.** Calibrated against a retain-only oracle null (a model retrained without the forgotten class), it separates genuine residual knowledge from generic adversarial fragility. The null is an operational baseline for target-label fragility; a gap over it is evidence of residual leakage.
@@ -22,17 +26,20 @@ ForgetGate argues that machine unlearning should be audited by one measurable qu
 
 ## Empirical findings
 
-**1. Per-example conditional recovery is the dominant broad threat.**
+**1. The selectivity metric is confounded by global fragility (central finding).**
+The standard forget-vs-retain selectivity gap partly measures how brittle a checkpoint is, not how much it leaks. Across 132 audits over 57 checkpoints, selectivity correlates negatively with global fragility, because the forget radius is super-linearly elastic to it (b=1.31; controlled causal b=1.36). Reporting fragility alongside selectivity, and using the fragility-matched taxonomy, separates genuine leakers (SalUn, RURK) from brittleness artifacts (SCRUB, which a retain-only oracle null places at the bottom).
+
+**2. Per-example conditional recovery is the dominant broad threat.**
 Non-robust methods remain conditionally recoverable even when universal perturbations largely fail. This holds across SalUn, SCRUB, CE-U, SGA, and BalDRO.
 
-**2. Local-delivery robustness is not a single property.**
+**3. Local-delivery robustness is not a single property.**
 Patch-aware stage-2 defenses reduce 32x32 conditional patch recovery on ORBIT (78.1% to 31.2%) and CE-U (68.8% to 43.8%), but fail to transfer to border-frame and multi-patch delivery surfaces. This is empirical context for Theorem 3's worst-case obstruction.
 
-**3. Defenses are partial and method-specific.**
+**4. Defenses are partial and method-specific.**
 Feature-subspace stage-2 gives positive point-estimate shifts on BalDRO, SalUn, and ORBIT without collapsing clean accuracy, clearest on ORBIT and SalUn and tiny on BalDRO. RURK resists both attack families. SCRUB looks like generic adversarial fragility under most seeds; a strong attack on one seed exposes a transient selective gap, so its selectivity is not robust.
 
-**4. Cross-dataset check is feasible but not yet broad.**
-A ViT-Small/CIFAR-100 smoothed-margin row drives class-0 forget accuracy from 78.0% to 0.0% and keeps retain accuracy at 47.7% from a 54.7% base. The native L2 certificate remains non-vacuous (certified R=0.193, measured L2 recovery radius about 1.4), but forget and retain recovery radii are nearly identical, so this is a feasibility check rather than a new selective-leakage claim.
+**5. The constructive certificate now has a limited cross-architecture replication.**
+The main smoothed-margin result is still CIFAR-10 / ViT-Tiny, but the constructive objective has a two-seed ResNet-18 / CIFAR-100 breadth check. It drives class-0 forget accuracy to 3-7% while preserving retain accuracy at about 88%, certifies an L2 detector-radius scale of 0.193 on 92-94% of audited forget points, and keeps a selective recovery gap of about 5.2x. Older single-seed ViT-Small/CIFAR-100 rows remain feasibility checks, not breadth claims.
 
 ## Methods Evaluated
 
@@ -40,8 +47,8 @@ A ViT-Small/CIFAR-100 smoothed-margin row drives class-0 forget accuracy from 78
 |---|---|
 | SalUn | Literature anchor |
 | SCRUB | Literature anchor |
-| RURK | Newer literature method |
-| CE-U | Newer literature method |
+| RURK-style | Objective-level adaptation; random-noise robustness rather than the original adversarial term |
+| CE-ascent (labeled CE-U) | Gradient-ascent baseline; not corrected-target CE-U |
 | SGA | Adapted recent method |
 | BalDRO | Adapted recent method |
 | ORBIT | Diagnostic stress-test method introduced here |
@@ -73,7 +80,7 @@ pip install -r requirements.txt
 
 CIFAR-10 downloads automatically via torchvision on first run.
 
-**Known good environment:** Python 3.10, PyTorch 2.0+, PEFT 0.18.0, CUDA GPU recommended.
+**Known good environment:** Python 3.10, PyTorch 2.1.x, torchvision 0.16.x, PEFT 0.13.x, Accelerate 0.34.x, Transformers 4.41-4.44, CUDA GPU recommended.
 
 ## Repo Structure
 
@@ -105,6 +112,9 @@ ForgetGate/
 ## Key Scripts
 
 ```bash
+# Run lightweight verification
+python -m pytest -q tests/test_basic.py tests/test_frs_leaderboard.py tests/test_cross_method_transfer.py
+
 # Train an unlearning checkpoint
 python scripts/2_train_unlearning_lora.py
 
@@ -129,7 +139,7 @@ python scripts/audits/26_mia_audit.py
 
 ## Paper
 
-**[The Recovery-Certification Gap: A Theory of Adversarial Unlearning (PDF)](results/analysis/figures/paper_draft.pdf)**, a working paper. Source (`paper_draft.tex`) and all result JSONs and figures are in `results/analysis/`. Code and full results are in this repo; an arXiv link will be added on submission.
+**[The Recovery-Certification Gap: Auditing Machine Unlearning Beyond Clean Forget Accuracy (PDF)](results/analysis/figures/paper_draft.pdf)**, a working paper. Source (`paper_draft.tex`) and all result JSONs and figures are in `results/analysis/`. Code and full results are in this repo; an arXiv link will be added on submission.
 
 ## Legacy Note
 
