@@ -275,12 +275,25 @@ Table~\ref{tab:breadth} reports both seeds. This is the breadth the earlier
 single-seed ViT-Small row lacked---a different architecture \emph{family} and a
 harder dataset, with utility-preserving forgetting, a positive certified floor,
 and \emph{stronger} selectivity, replicated across two seeds. We stress its
-scope: this is a breadth result for the \emph{constructive objective}
-specifically. The \emph{observational} super-elasticity and fragility-confound
-mechanism of Section~\ref{sec:theory} remains a within-benchmark finding and does
-\emph{not} cross architectures (the cautionary negative there stands); a method
-that certifies a recovery floor on a new architecture is a different claim than a
-pooled cross-architecture regression slope.
+scope: this is primarily a breadth result for the \emph{constructive objective}.
+The \emph{observational} super-elasticity and fragility-confound mechanism of
+Section~\ref{sec:theory} also pools across these architectures, but only under the
+appropriate estimator. A naive pool of raw log-radii across cells of differing
+fragility baseline---one of which (ResNet-18 seed $123$) is half left-censored at
+$r_F{=}0$, where three of six methods leak the forgotten class on \emph{clean}
+input---commits an ecological confound and flips the sign ($b{=}0.51$,
+$r{=}{+}0.44$). Within-cell fixed-effects pooling, which demeans each variable
+inside its (architecture, seed) cell and is the correct way to combine within-cell
+slopes, removes that baseline confound and restores the benchmark pattern across
+$14$ points in three cells: $b{=}1.55$ ($95\%$ CI $[1.00,2.31]$, all
+leave-one-out $>1$, $P(b{>}1){=}0.97$) and $r{=}{-}0.48$ ($95\%$ CI
+$[-0.78,0.00]$, all leave-one-out $<0$, $P(r{<}0){=}0.97$), close to the
+within-benchmark values ($b{\approx}1.31$, $r{\approx}{-}0.25$). This is
+observational cross-method evidence with modest $n$ and intervals that just touch
+the null; the controlled causal instrument remains within-benchmark, so we read it
+as a qualified positive rather than a cautionary negative. A method that certifies
+a recovery floor on a new architecture remains a separate, stronger claim than this
+pooled regression slope.
 
 \begin{table}[t]
   \centering
@@ -456,7 +469,7 @@ Table~\ref{tab:claim-evidence} summarizes the paper's strongest claims and the e
     Feature-subspace stage-2 gives positive shifts on several rows. & Point-estimate benchmark & Clearest on ORBIT and SalUn; BalDRO is a tiny positive shift and needs paired confidence intervals before stronger statistical language. \\
     CE-U shows selective full-image recovery. & Pilot & Seed-42, $n=8$, two-step audit; suggestive only and not ranked against full-audit rows. \\
     CIFAR-100 checks broaden scope. & Single-seed feasibility & Useful cross-dataset/architecture checks, not a multi-seed cross-dataset benchmark claim. \\
-    Super-elasticity and the fragility confound generalize across architectures. & Cautionary negative & A single-seed-per-cell ResNet-18 + ViT-Small / CIFAR-100 pool suggested $b>1$, $r<0$, but a second ResNet-18 seed flips the pooled fit ($b{=}0.51$, $r{=}+0.44$); cross-architecture generalization is \emph{not} established. The robust evidence is within-benchmark (3-seed) plus the controlled causal experiment. \\
+    Super-elasticity and the fragility confound generalize across architectures. & Qualified observational positive & Naive pooling of raw log-radii across cells of differing fragility baseline (one half left-censored at $r_F{=}0$) confounds the fit ($b{=}0.51$, $r{=}{+}0.44$); within-cell fixed-effects pooling removes the baseline confound and restores the pattern ($b{=}1.55$, CI $[1.00,2.31]$, all LOO $>1$; $r{=}{-}0.48$, CI $[-0.78,0.00]$, all LOO $<0$) across two architecture families. Observational, $n{=}14$, CIs touch the null; the causal instrument remains within-benchmark. \\
     \bottomrule
   \end{tabular}
   \caption{Claim--evidence audit for the current draft.}

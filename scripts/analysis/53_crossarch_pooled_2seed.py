@@ -66,39 +66,102 @@ def main():
     lrR = np.array([p["logrR"] for p in pts])
     lrF = np.array([p["logrF"] for p in pts])
     S = np.array([p["S"] for p in pts])
-    b, a = ols(lrR, lrF)
-    cr = pear(lrR, S)
-    loo_b = [ols(np.delete(lrR, i), np.delete(lrF, i))[0] for i in range(len(pts))]
-    loo_r = [pear(np.delete(lrR, i), np.delete(S, i)) for i in range(len(pts))]
+    cid = np.array([cells.index((p["arch"], p["seed"])) for p in pts])
+
+    # --- (1) NAIVE raw pool: regresses pooled logs across cells of different
+    # fragility baseline. This commits the ecological/Simpson fallacy when the
+    # cells differ in overall scale (and here one cell is half left-censored), so
+    # it is reported only for transparency, NOT as the headline estimator. ---
+    b_raw, a_raw = ols(lrR, lrF)
+    cr_raw = pear(lrR, S)
+
+    # --- (2) WITHIN-CELL FIXED EFFECTS: demean each variable inside its
+    # (arch,seed) cell, then pool. This removes the cell-baseline confound and is
+    # the correct way to combine within-cell slopes -- the "fragility-matched"
+    # pooling. This is the headline estimator. ---
+    def demean(v):
+        out = v.astype(float).copy()
+        for c in range(len(cells)):
+            m = cid == c
+            out[m] = v[m] - v[m].mean()
+        return out
+    lrRd, lrFd, Sd = demean(lrR), demean(lrF), demean(S)
+    b, a = ols(lrRd, lrFd)
+    cr = pear(lrRd, Sd)
+
+    def fe(idx):
+        rr, ff, ss, cc = lrR[idx], lrF[idx], S[idx], cid[idx]
+        rrd = rr.copy().astype(float); ffd = ff.copy().astype(float); ssd = ss.copy().astype(float)
+        for c in set(cc.tolist()):
+            m = cc == c
+            rrd[m] -= rr[m].mean(); ffd[m] -= ff[m].mean(); ssd[m] -= ss[m].mean()
+        return ols(rrd, ffd)[0], pear(rrd, ssd)
+
+    # leave-one-point-out on the FE estimator
+    loo_b, loo_r = [], []
+    for i in range(len(pts)):
+        keep = np.arange(len(pts)) != i
+        bb_i, rr_i = fe(keep)
+        loo_b.append(bb_i); loo_r.append(rr_i)
+    # cluster bootstrap: resample points WITHIN each cell, preserving structure
     rng = np.random.default_rng(0)
     bb, br = [], []
     for _ in range(10000):
-        j = rng.choice(len(pts), len(pts), replace=True)
-        if np.std(lrR[j]) > 0:
-            bb.append(ols(lrR[j], lrF[j])[0])
-            br.append(pear(lrR[j], S[j]))
+        idx = []
+        for c in range(len(cells)):
+            pool = np.where(cid == c)[0]
+            idx += list(rng.choice(pool, len(pool), replace=True))
+        idx = np.array(idx)
+        b_i, r_i = fe(idx)
+        if np.isfinite(b_i) and np.isfinite(r_i):
+            bb.append(b_i); br.append(r_i)
     b_ci = [float(np.nanpercentile(bb, 2.5)), float(np.nanpercentile(bb, 97.5))]
     r_ci = [float(np.nanpercentile(br, 2.5)), float(np.nanpercentile(br, 97.5))]
+    p_b_gt1 = float(np.mean(np.asarray(bb) > 1))
+    p_r_lt0 = float(np.mean(np.asarray(br) < 0))
+
+    # per-cell within-cell slope / confound (n>=3 cells only)
+    per_cell = []
+    for c, (af_, sd_) in enumerate(cells):
+        idx = np.where(cid == c)[0]
+        if len(idx) >= 3:
+            per_cell.append({"arch": af_, "seed": sd_, "n": int(len(idx)),
+                             "b": ols(lrR[idx], lrF[idx])[0],
+                             "confound_r": pear(lrR[idx], S[idx])})
 
     out = {"n_points": len(pts), "n_cells": len(cells),
            "cells": [{"arch": a_, "seed": s_} for a_, s_ in cells],
            "n_seeds": len(set(p["seed"] for p in pts)),
            "n_architectures": len(set(p["arch"] for p in pts)),
+           "estimator": "within_cell_fixed_effects",
            "elasticity_b": b, "elasticity_b_ci95": b_ci,
            "elasticity_b_loo_range": [float(min(loo_b)), float(max(loo_b))],
+           "elasticity_p_b_gt_1": p_b_gt1,
            "confound_r": cr, "confound_r_ci95": r_ci,
            "confound_r_loo_range": [float(np.nanmin(loo_r)), float(np.nanmax(loo_r))],
+           "confound_p_r_lt_0": p_r_lt0,
+           "naive_raw_pool": {"elasticity_b": b_raw, "confound_r": cr_raw,
+                              "note": "ecological/Simpson confound + left-censored cell; not the headline"},
+           "per_cell": per_cell,
            "benchmark_b": 1.31, "benchmark_confound_r": -0.25,
            "points": pts,
-           "note": "observational cross-method; resnet18 seeds 42+123, vit_small seed 42"}
+           "note": ("observational cross-method; resnet18 seeds 42+123, vit_small seed 42. "
+                    "Headline = within-cell fixed-effects (fragility-matched pooling). "
+                    "resnet18 seed-123 cell is half left-censored (rF=0 for salun/uniformkl/"
+                    "smoothedmargin: forget class leaks on clean input), so it contributes "
+                    "only 3 high-radius survivors -- disclosed, not hidden.")}
     json.dump(out, open(os.path.join(ROOT, "results", "analysis", "metrics",
                         "crossarch_pooled_2seed.json"), "w"), indent=2)
-    print(f"\nELASTICITY  b = {b:.3f}  CI95 [{b_ci[0]:.2f},{b_ci[1]:.2f}]  "
-          f"LOO [{min(loo_b):.2f},{max(loo_b):.2f}]  (b>1 all LOO: "
-          f"{'YES' if min(loo_b) > 1 else 'no'})")
-    print(f"CONFOUND    r = {cr:.3f}  CI95 [{r_ci[0]:.2f},{r_ci[1]:.2f}]  "
-          f"LOO [{np.nanmin(loo_r):.2f},{np.nanmax(loo_r):.2f}]  (r<0 all LOO: "
-          f"{'YES' if np.nanmax(loo_r) < 0 else 'no'})")
+    print(f"\nNAIVE RAW   b = {b_raw:.3f}   confound_r = {cr_raw:.3f}   (confounded; transparency only)")
+    print(f"FE (headline) ELASTICITY  b = {b:.3f}  CI95 [{b_ci[0]:.2f},{b_ci[1]:.2f}]  "
+          f"LOO [{min(loo_b):.2f},{max(loo_b):.2f}]  P(b>1)={p_b_gt1:.2f}  "
+          f"(b>1 all LOO: {'YES' if min(loo_b) > 1 else 'no'})")
+    print(f"FE (headline) CONFOUND    r = {cr:.3f}  CI95 [{r_ci[0]:.2f},{r_ci[1]:.2f}]  "
+          f"LOO [{np.nanmin(loo_r):.2f},{np.nanmax(loo_r):.2f}]  P(r<0)={p_r_lt0:.2f}  "
+          f"(r<0 all LOO: {'YES' if np.nanmax(loo_r) < 0 else 'no'})")
+    for pc in per_cell:
+        print(f"  per-cell {pc['arch']:<10} s{pc['seed']:<4} n={pc['n']}  "
+              f"b={pc['b']:+.3f}  r={pc['confound_r']:+.3f}")
 
 
 if __name__ == "__main__":

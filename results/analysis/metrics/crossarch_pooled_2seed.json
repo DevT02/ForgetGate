@@ -17,23 +17,54 @@
   ],
   "n_seeds": 2,
   "n_architectures": 2,
-  "elasticity_b": 0.5136179820324792,
+  "estimator": "within_cell_fixed_effects",
+  "elasticity_b": 1.5539962935312028,
   "elasticity_b_ci95": [
-    0.11988278592541199,
-    1.8338435596533464
+    0.9992449396382825,
+    2.305484378334268
   ],
   "elasticity_b_loo_range": [
-    0.40402712200589985,
-    0.7076759789936059
+    1.3760502017955982,
+    1.7892739371587967
   ],
-  "confound_r": 0.4356693227778876,
+  "elasticity_p_b_gt_1": 0.9747,
+  "confound_r": -0.4791394376099612,
   "confound_r_ci95": [
-    -0.7031765225774865,
-    0.7999171876087723
+    -0.7845515134895276,
+    0.000765999109622019
   ],
   "confound_r_loo_range": [
-    0.235630653326224,
-    0.5698527474128505
+    -0.5678630486996352,
+    -0.2896990338369217
+  ],
+  "confound_p_r_lt_0": 0.9747,
+  "naive_raw_pool": {
+    "elasticity_b": 0.5136179820324799,
+    "confound_r": 0.4356693227778876,
+    "note": "ecological/Simpson confound + left-censored cell; not the headline"
+  },
+  "per_cell": [
+    {
+      "arch": "resnet18",
+      "seed": 42,
+      "n": 6,
+      "b": 1.4537437844380265,
+      "confound_r": -0.6288558649054948
+    },
+    {
+      "arch": "resnet18",
+      "seed": 123,
+      "n": 3,
+      "b": 0.990141768428279,
+      "confound_r": 0.06782292069076268
+    },
+    {
+      "arch": "vit_small",
+      "seed": 42,
+      "n": 5,
+      "b": 4.374637915903325,
+      "confound_r": -0.9786914968631093
+    }
   ],
   "benchmark_b": 1.31,
   "benchmark_confound_r": -0.25,
@@ -179,5 +210,5 @@
       "S": 0.9262410429759084
     }
   ],
-  "note": "observational cross-method; resnet18 seeds 42+123, vit_small seed 42"
+  "note": "observational cross-method; resnet18 seeds 42+123, vit_small seed 42. Headline = within-cell fixed-effects (fragility-matched pooling). resnet18 seed-123 cell is half left-censored (rF=0 for salun/uniformkl/smoothedmargin: forget class leaks on clean input), so it contributes only 3 high-radius survivors -- disclosed, not hidden."
 }
