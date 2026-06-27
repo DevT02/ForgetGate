@@ -19,6 +19,7 @@ data_clean/
 # Results and logs
 # Keep key experimental logs for reproducibility
 # Exclude exploratory/debug runs (prompt ablations, k=1,5)
+logs/
 results/logs/*prompt*.jsonl
 results/logs/*_1shot_*.jsonl
 results/logs/*_5shot_*.jsonl
@@ -26,9 +27,27 @@ results/analysis/*.txt
 results/analysis/*.md
 !results/logs/.gitkeep
 !results/analysis/.gitkeep
+
+# LaTeX build auxiliaries; keep source/PDF/figures tracked explicitly.
+results/analysis/figures/*.aux
+results/analysis/figures/*.bbl
+results/analysis/figures/*.blg
+results/analysis/figures/*.fdb_latexmk
+results/analysis/figures/*.fls
+results/analysis/figures/*.log
+results/analysis/figures/*.out
+results/analysis/figures/*.synctex.gz
+
 .DS_Store
-!checkpoints/
-!checkpoints/**
-!*.pth
-!*.pt
-!*.safetensors
+
+# Model weights live on the dedicated LFS `checkpoints` branch, never on main.
+checkpoints/
+*.pth
+*.pt
+*.safetensors
+
+# Local PowerShell run scripts (resume runners, ad-hoc sweeps)
+*.ps1
+
+# One-off migration/patch scripts
+patch_*.py
