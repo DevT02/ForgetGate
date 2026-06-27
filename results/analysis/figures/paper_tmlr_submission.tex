@@ -1,0 +1,621 @@
+\documentclass{article}
+
+% TMLR submission (anonymous double-blind). For the de-anonymized preprint use
+% \usepackage[preprint]{tmlr}; for the camera-ready use \usepackage[accepted]{tmlr}.
+\usepackage{tmlr}
+% The bibliography uses a numeric thebibliography; override TMLR's default
+% author-year natbib style to numeric so plain \bibitem entries are compatible.
+\setcitestyle{numbers,square,comma}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{caption}
+\usepackage{placeins}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+
+\title{The Recovery--Certification Gap:\\ Auditing Machine Unlearning Beyond Clean Forget Accuracy}
+
+% In anonymous submission mode tmlr.sty prints "Anonymous authors"; this block is
+% only rendered in [preprint]/[accepted] builds.
+\author{\name Devansh Tayal \\ \email tayalde1@msu.edu \\ \addr Michigan State University}
+
+\hypersetup{
+  pdftitle={The Recovery--Certification Gap: Auditing Machine Unlearning Beyond Clean Forget Accuracy},
+  pdfsubject={Machine unlearning, recovery-radius auditing, and certified robustness},
+  pdfkeywords={machine unlearning, adversarial robustness, recovery radius, randomized smoothing}
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Clean forget accuracy is an incomplete audit of machine unlearning: a model can suppress a forgotten class on natural inputs yet recover it under a small targeted perturbation. We study unlearning through the per-example \emph{recovery radius}, the smallest input perturbation that re-elicits a forgotten class---oracle-free to measure, and, given a retain-only oracle, able to separate residual forgotten knowledge from generic target-label fragility. Our central measurement finding is that the selective-leakage metrics used across the unlearning-audit literature are \emph{confounded by global fragility}: across $132$ audits over $57$ checkpoints, apparent forget-vs-retain selectivity correlates negatively with how brittle a checkpoint is overall, because the forget radius is \emph{super-linearly} elastic to fragility ($b{=}1.31$; a controlled base-smoothness experiment yields a causal $\hat b{=}1.36$, CI $[1.31,1.84]$). We give the mechanism and a fragility-matched taxonomy that separates genuine leakers (SalUn, RURK) from brittleness artifacts (SCRUB, which a retain-only oracle null independently confirms). We formalize the audit with four supporting results (primarily CIFAR-10 ViT checkpoints, with a ResNet-18/CIFAR-100 replication of the constructive one). (i)~A \emph{recovery--certification gap}: mainstream certified unlearning bounds the indistinguishability of the \emph{weight distribution} from retraining and provably leaves the input-space recovery axis open. (ii)~A Pinsker-style selective-leakage bound underlying the taxonomy above. (iii)~A covering-family impossibility: exact worst-case delivery-surface invariance forces a constant classifier. (iv)~A Gaussian-smoothed objective that, to our knowledge among the first, carries a per-input input-space certified recovery floor ($R{=}0.193$ at a preserved retain accuracy of $93.8\%$, respected in-norm, replicated on ResNet-18/CIFAR-100), an axis on which the deterministic baselines certify nothing. The paper thus measures the recovery--certification gap, shows the standard selectivity metric is fragility-confounded, and exhibits an objective that narrows the gap. Code and result artifacts will be released publicly; an anonymized copy is available to reviewers.
+\end{abstract}
+
+\section{Introduction}
+Machine unlearning aims to remove the influence of specified training data from a trained model, but clean forget accuracy is an incomplete audit. A model can fail to predict the forgotten class on unperturbed inputs while still recovering that class under a small targeted perturbation. The central object in this paper is therefore the \emph{recovery radius}: the minimum perturbation required to re-elicit the forgotten class. This radius distribution, together with recovery rates at fixed budgets, is the quantity that an operational audit and any input-space certificate should address.
+
+\paragraph{The paper's central finding is about the audit instrument itself.} The standard way to decide whether a recovered forgotten class reflects \emph{residual knowledge} rather than \emph{generic adversarial fragility} is a forget-vs-retain selectivity gap: forget inputs that are easier to recover than matched retain controls. We show this selectivity metric is \emph{confounded by a checkpoint's global fragility}. Across $132$ matched audits over $57$ unlearned checkpoints, apparent selectivity correlates negatively with how brittle a checkpoint is overall, because the forget radius is \emph{super-linearly elastic} to fragility: as a model becomes globally easier to attack, its forget radius collapses faster than its retain controls, mechanically inflating apparent selectivity (observational slope $b{=}1.31$; a controlled base-smoothness experiment that moves only global fragility gives a causal $\hat b{=}1.36$, CI $[1.31,1.84]$, both excluding the no-confound value $b{=}1$). The consequence is a correction, not just a caveat: a fragility-matched taxonomy that, once global brittleness is regressed out, separates genuine leakers (SalUn, RURK) from brittleness artifacts (SCRUB, which a retrained retain-only oracle null independently places at the bottom). This is the paper's central contribution; the multi-regime benchmark below is the evidence that supports it, not an end in itself.
+
+The benchmark that supplies this evidence evaluates eight unlearning rows under a primary recovery-radius battery---per-example conditional recovery, conditional patches, border-frame delivery, and multi-patch delivery---with universal perturbations, amortized short-budget attacks, prompt/probe controls, and AWP used as auxiliary probes. No attack or defense is universal. Some methods are vulnerable to targeted per-example recovery but not patches; others look robust until the delivery surface changes; and defenses that close one channel often leave another open.
+
+This framing separates attack success from selective leakage. When a perturbation recovers the forgotten class, it may expose residual class-specific information, or it may merely induce a generic adversarial target-label failure. The audit therefore compares forget-set examples with matched retain-class controls, and, when available, with a retain-only oracle null: a model retrained without the forgotten class. Recovery radius remains the oracle-free primitive; the retain-only oracle calibrates whether a forget-vs-retain gap is residual knowledge rather than baseline target-class asymmetry.
+
+The positive defense results are modest. A post-hoc feature-subspace defense gives positive point-estimate shifts on BalDRO, SalUn, and ORBIT without hurting clean accuracy in the measured rows, with the clearest practical signal on ORBIT and SalUn and only a tiny BalDRO shift; RURK and SCRUB are largely unaffected. Patch-aware training partially closes the patch channel on ORBIT and CE-U, but does not transfer reliably to frame or multi-patch delivery. The benchmark code, result JSONs, and selected checkpoints will be released publicly and are available to reviewers in anonymized form.
+
+The primary and auxiliary attack regimes measure the same object, and that object ties red-team auditing to certified unlearning. We formalize the audit with four supporting results (Section~\ref{sec:theory}); the fragility confound above is the empirical headline, and these results give it---and the rest of the audit---their formal footing. Theorem~\ref{thm:gap} bounds recovery radius below by the target margin and a Lipschitz constant, giving an audit-estimable necessary condition for certified-unlearning budgets rather than a strict falsification test. Theorem~\ref{thm:pinsker} gives a variational-information interpretation of large forget-vs-retain recovery-rate gaps; the retain-only oracle null is the empirical calibration used later to identify residual knowledge. Theorem~\ref{thm:transfer} shows that exact worst-case robustness over a coordinate-covering delivery family forces constancy, which motivates distributional local-delivery defenses instead of global worst-case invariance. Theorem~\ref{thm:smooth} attaches a per-input input-space randomized-smoothing lower bound to a binary forgotten-class detector---the \emph{constructive} counterpart to Theorem~\ref{thm:gap}: it yields an unlearning objective that provably narrows the recovery--certification gap on the very axis the audit measures, attaching a positive certified recovery floor to every audited forget point at preserved utility, whereas the deterministic methods it is benchmarked against carry no such certificate. Section~\ref{sec:validation} checks these claims through the Lipschitz--radius diagnostic, the Pinsker/oracle-null audit, the patch/frame/multi-patch transfer results, and the smoothed-margin recovery-radius audits.
+
+\section{Threat Models and Attack Regimes}
+The audit spans five regimes, all measuring the same recovery object. \textbf{Universal perturbations} (Fourier, tile, warp, codebook) serve mainly as a negative result: on stronger methods the residual vulnerability is not well-compressed into one shared low-complexity direction. \textbf{Per-example conditional recovery}, the main broad attack, optimizes the forgotten-class target margin $m_t(x) = z_t(x) - \max_{j \neq t} z_j(x)$ with strong first-order optimizers (\texttt{adam\_margin}, \texttt{apgd\_margin}), asking whether a forgotten behavior is locally recoverable inside a fixed norm budget. \textbf{Amortized short-budget attacks} use a learned image-conditional perturbation generator distilled from short Adam teacher trajectories; not universal, but it improves matched low-step attacks on some methods. \textbf{Conditional patches} place small-area patches whose content and location both depend on the input (a patch regime, not a universal-trigger claim). \textbf{Additional local-delivery surfaces}---conditional border-frame and multi-patch attacks---are stronger geometry-varying checks than a single patch while preserving the same selective objective.
+
+\input{theory_appendix}
+
+\section{Related Work}
+These experiments sit at the intersection of machine unlearning, adversarial robustness, and parameter-efficient adaptation. The benchmark builds on SalUn~\cite{fan2024salun}, SCRUB~\cite{kurmanji2023scrub}, LoRA~\cite{hu2022lora}, VPT~\cite{jia2022vpt}, and AutoAttack~\cite{croce2020autoattack}, and treats recent 2025--2026 methods such as RURK~\cite{hsu2025rurk} as newer literature baselines; it also includes a gradient-ascent row labeled CE-U, which implements cross-entropy \emph{ascent} rather than the corrected-target objective of~\cite{yang2025ceu} and should be read as a GA baseline (see Appendix~\ref{sec:adaptation}). It additionally includes adapted recent objectives such as SGA~\cite{pang2025sga} and BalDRO~\cite{shao2026baldro} as cross-domain benchmark rows. ORBIT is introduced here as a diagnostic stress-test objective rather than as an external literature anchor. Additional appendix-only proxy and supporting rows, including FaLW~\cite{yu2026falw} and Langevin-style~\cite{chien2024langevin} variants, are used only when they help define regime boundaries. Langevin Unlearning~\cite{chien2024langevin} is used as a theoretical anchor for principled privacy-certified evaluation, and MUSE~\cite{shi2024muse} motivates multi-regime testing rather than single-metric forgetting claims.
+
+A wave of concurrent 2025--2026 work studies the same residual-knowledge phenomenon from complementary angles. Xuan and Li~\cite{xuan2025uma} verify robust unlearning with the Unlearning Mapping Attack, an adversarial-query probe for forgotten traces; recovery-radius auditing quantifies the same probe as a per-example minimum perturbation and ties it to a certificate (Theorems~\ref{thm:gap} and~\ref{thm:smooth}) and a forget-vs-retain selective test (Theorem~\ref{thm:pinsker}). Goel et al.~\cite{goel2026pid} audit unlearning with an information-theoretic Partial Information Decomposition, and Yu et al.~\cite{yu2026mirage} certify visual unlearning at the \emph{representation} level (linear-probe recovery, CKA, feature separability), both finding that output-level forgetting hides residual structure; Theorem~\ref{thm:pinsker} is a coarser but distribution-free counterpart that bounds the KL of the binary recoverability outcome rather than decomposing mutual information, and the recovery radius is a complementary \emph{input-space} quantity to Mirage's feature-space audit. The closest hypothesis-testing framing, Pandey and Kulkarni~\cite{pandey2026statistical}, tests which samples to edit out of a distribution rather than whether a forgotten example is selectively recoverable, so it is orthogonal to the forget-vs-retain test here. The qualitative \emph{distinction} between residual-knowledge leakage and generic adversarial fragility is not new---RURK~\cite{hsu2025rurk} and the UMA probe of Xuan and Li~\cite{xuan2025uma} both raise it---but these treat it as a binary caveat and, as Xuan and Li note for their own attack, do not measure baseline robustness, correlate it with apparent leakage, or calibrate against a retrained oracle. The contribution here is to make that confound \emph{quantitative}: a benchmark-wide negative correlation between selectivity and global fragility (Section~\ref{sec:validation}), a super-linear forget-radius elasticity that explains it through Theorem~\ref{thm:gap}, and a fragility-matched taxonomy whose validity is checked by the oracle null landing where it must. Ha et al.~\cite{ha2025prototypical} introduce a prototypical relearning attack that restores forget-set performance from per-class prototypes with only a few samples; that is a weight- and prototype-space relearning attack rather than the input-space recovery studied here, and it is precisely the channel ORBIT's dispersion penalty is designed to weaken.
+
+This paper's certification angle is positioned against the certified-unlearning line specifically. Langevin unlearning~\cite{chien2024langevin}, Rewind-to-Delete~\cite{mu2025rewind}, the neural-network certificates of~\cite{koloskova2025certified}, and retain-sensitivity calibration~\cite{heinzler2026retain} certify a \emph{parameter-distribution} $(\epsilon,\delta)$: indistinguishability between the distribution over unlearned weights and retraining from scratch. As a recent verification survey~\cite{xue2026survey} notes, these guarantees say nothing about whether a single deployed model resurfaces the forgotten class under a crafted input. The recovery radius is the natural measure of that uncertified input-space axis, and Theorem~\ref{thm:gap} makes the separation precise (Section~\ref{sec:theory}): the paper's title names a gap that is structural, not rhetorical.
+
+\section{Experimental Setup}
+\subsection{Models and data}
+The main benchmark uses CIFAR-10 with 224$\times$224 inputs and ViT-tiny-based checkpoints; Section~\ref{sec:validation} adds single-seed CIFAR-100 cross-checks. The main rows are SalUn and SCRUB as literature anchors, RURK and CE-U as newer literature methods, SGA and BalDRO as adapted recent methods, ORBIT as a diagnostic stress-test objective introduced here, and robust-base SalUn as a defense frontier. Several appendix-only proxy, bridge, and negative-control rows are retained only as supporting comparisons.
+
+\input{method_classification_table}
+
+\subsection{ORBIT: a diagnostic stress-test row}
+ORBIT (oracle-aligned, representation-dispersive unlearning) is a diagnostic objective introduced here---not an external baseline---combining forget-logit hinge suppression, masked dark-knowledge distillation from a frozen oracle, oracle feature alignment, and a forget-feature dispersion penalty, so that suppression targets the representational substrate rather than only the output logit. Its original objective code was lost; it is evaluated here as a committed \emph{reconstruction} from this four-term specification (reproducibility appendix), so we treat it as one diagnostic row among the eight rather than a headline method. It is the strongest patch-positive case and therefore appears in the local-delivery analysis, but no central claim of the paper rests on it.
+
+\subsection{LoRA as benchmark substrate}
+The repository originated as a LoRA-centered audit, and many of the stored checkpoints remain LoRA adapters for comparability and fast stage-2 iteration. That implementation choice is useful experimentally, but it is not the main scientific claim of the paper. The paper is about unlearning robustness under multiple attack regimes. LoRA is therefore treated primarily as part of the benchmark substrate, while selected full-finetune and cross-architecture rows check that the resulting story is not purely an artifact of one parameter-efficient adaptation scheme.
+
+\subsection{Baseline checkpoint quality}
+The clean baseline summary shows that unlearning methods can appear successful on clean metrics while still exposing recovery channels. Across seeds 42, 123, and 456, clean retain accuracy stays in the low 90s for the main baselines, while forget accuracy varies dramatically by method. The base model sits at 91.83 $\pm$ 4.36 forget and 91.80 $\pm$ 3.77 retain. Uniform KL, CE Ascent, SalUn, and SCRUB all preserve similar retain performance, but their forget-side variance is extremely large, which already suggests that clean-point forgetting is an unstable proxy for actual robustness. These clean baselines therefore motivate attack-based evaluation rather than one-number forgetting claims.
+
+\subsection{Recovery metric}
+For each forget or retain-control sample, the audit searches for the minimum perturbation that causes the unlearned model to predict the forgotten class. Clean forgotten-class predictions are assigned radius $0$. If the optimizer succeeds within the audit budget $\epsilon_{\max}$, binary search returns a finite estimate $\hat r_t(x)\leq\epsilon_{\max}$; if it fails, the sample is right-censored as $\hat r_t(x)>\epsilon_{\max}$. To keep the empirical object aligned with the theoretical distribution of $r_t$, rows should be read through three statistics: recovery rate at $\epsilon_{\max}$, the censored all-sample median (failures counted as right-censored above $\epsilon_{\max}$, so the median may be reported as $>\epsilon_{\max}$), and the success-conditioned median among finite successful recoveries. Several compact tables report the success-conditioned median for space; ``undefined'' means no finite recoveries, not a radius of zero. The interpretive question is whether forget examples are selectively easier to recover than matched retain controls under the same censoring rule. A consistent forget-vs-retain gap supports the view that the attack is exposing residual information left behind by incomplete unlearning, whereas non-selective success on both groups is more consistent with generic adversarial fragility.
+
+\input{protocol_table}
+
+\input{multiregime_results_section}
+
+\section{Short-Budget and Auxiliary Regimes}
+\subsection{Amortized short-budget attack}
+The learned distilled short-budget attacker is target-dependent. It improves matched low-step Adam on ORBIT across both seeds and also helps on SalUn, but it does not preserve a clean forget/retain Pareto on RURK. It is therefore positioned as an amortized attack regime rather than a universal attack method.
+
+\input{short_budget_table}
+
+\subsection{Uniform KL as a bridge target}
+An earlier oracle-contrastive prompt probe moved Uniform KL strongly (seed 42: $12.7\%\!\to\!21.1\%$ forget at a $0.36$pp retain cost) but left the stronger methods (SalUn, SCRUB, ORBIT) resistant. Uniform KL is also locally recoverable under the newer conditional regime---a 2-step \texttt{adam\_margin} pilot recovers every sampled forget example (median radius $0.00147$) while hitting one of eight retain controls on seed 42, and is flat on seed 123---and weakly patch-accessible ($15.6\%$ forget recovery, $0\%$ retain-to-forget at $32\times32$). It is thus a bridge between the older probe story and the conditional-optimization story, not a flagship case.
+
+\subsection{Additional auxiliary targets}
+SGA does not support a selective-leakage reading: across seeds 42/123/456 forget and retain-control success are both near ceiling (generic fragility, not a forget-vs-retain gap), a matched $32\times32$ patch is negative on seed 42, and a feature-subspace stage-2 pilot barely moves it. Uniform KL and SGA are therefore regime-defining auxiliary targets, not methods to build the defense story around.
+
+\input{auxiliary_targets_table}
+
+\section{Empirical Validation and the Fragility Confound}
+\label{sec:validation}
+Each of the four results in Section~\ref{sec:theory} comes with a benchmark check, and this section reports those checks rather than treating the attack regimes as standalone curves. Its central result is empirical and stands on its own: under Theorem~\ref{thm:pinsker} we show that the forget-vs-retain selectivity metric---the field's standard test for residual knowledge---is confounded by global fragility, give its mechanism (a super-linear forget-radius elasticity), and supply the fragility-matched correction. That finding (Section~\ref{sec:confound}) is the paper's headline; the remaining checks position it and validate the constructive certificate.
+
+\subsection{Theorem~\ref{thm:gap}: the recovery--certification scatter}
+For each method, the margin-Jacobian audit estimates a local Lipschitz proxy $\hat L$, and the recovery-radius audit estimates the median radius $\mathrm{median}(\hat r)$. The underlying join contains $40$ (method, seed, config) rows; Figure~\ref{fig:lip-scatter} shows method-level aggregates to make the ranking readable. It is a diagnostic for the ordering suggested by Eq.~\eqref{eq:thm1-pointwise}, not a tightness plot: drawing the actual bound $\hat r \geq -\bar m/\hat L$ would require the per-method oracle margin $\bar m$, and the plotted $\hat L$ is a local logit-margin proxy rather than the probability-margin constant in Corollary~\ref{cor:cert}. The aggregates separate the methods cleanly ($\hat L \approx 47$ for SCRUB, $26$ for ORBIT, $16$ for Uniform-KL, and $15$ for SalUn), so this section uses the scatter as a heuristic ranking and sanity check, not as a measured certificate. The empirical recovery rates that feed this scatter are themselves attack-valid in one direction without assuming optimizer completeness: by Corollary~\ref{cor:attack-observable} each successful attack at radius $\le\rho$ certifies $r_t\le\rho$ for that input, so the measured rate lower-bounds $\Pr_{\mu_t}[r_t\le\rho]$ while Theorem~\ref{thm:gap} upper-bounds it---a two-sided sandwich that does not rest on the inner attacker being complete.
+
+\paragraph{A per-sample validation, not just four aggregates.} The aggregate scatter is intentionally coarse, so we also test Eq.~\eqref{eq:thm1-pointwise} at the \emph{sample} level, where it makes a sharp prediction: since $r_t \gtrsim -m_t/L$, individual samples with a less-suppressed forget logit should recover at smaller radius. Using $\log p_t(x)$---the log clean forgotten-class probability, monotone in the logit margin (the probability margin saturates near $-1$ once $p_t$ is tiny, so the \emph{log} carries the usable signal)---Theorem~\ref{thm:gap} predicts $\mathrm{corr}(\hat r,\log p_t) < 0$. Across the $58$ audited checkpoints that retain genuine forget-margin variation (excluding blocks where every forget logit is uniformly crushed to underflow), the median per-checkpoint correlation is $-0.64$, with $97\%$ of checkpoints negative and $83\%$ strongly so ($<-0.3$); matched retain controls obey the same law (median $-0.45$, $86\%$ negative), confirming this is the general margin--radius relation of Theorem~\ref{thm:gap} rather than a forget-specific artifact (\texttt{scripts/analysis/45\_per\_sample\_thm1.py}). This is a hundreds-of-points-per-checkpoint test of the pointwise inequality, not a four-aggregate ranking, and it lets the next subsection's mechanism rest on the validated pointwise law.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.92\linewidth]{lipschitz_radius_scatter.png}
+  \caption{Theorem~\ref{thm:gap} ranking diagnostic. Per-method aggregate Lipschitz proxy $\hat L$ versus aggregate median recovery radius $\hat r$, summarized from the $40$ joined audit rows. The plot orders methods by $\hat L$ rather than drawing the pointwise bound $\hat r \geq -\bar m/\hat L$, which would need a per-method oracle margin $\bar m$ unavailable to an oracle-free auditor; it visualizes the Corollary~\ref{cor:cert} ranking, not a tightness test.}
+  \label{fig:lip-scatter}
+\end{figure}
+
+\subsection{Theorem~\ref{thm:pinsker}: selective leakage, Pinsker, and the oracle null}
+The recovery-rate audit computes forget and retain-control rates $(\hat p_F, \hat p_R)$ for $226$ (method, seed, audit-config) rows and reports the Pinsker lower bound $\mathrm{KL} \geq 2|\hat p_F - \hat p_R|^2$ (and the tighter Bretagnolle--Huber bound) in the repository artifacts. The main full-audit rows show the expected qualitative ordering: SalUn has a large measured gap, ORBIT has a positive but smaller gap, and SCRUB has nearly matched rates ($\hat p_F \approx \hat p_R \approx 0.97$, $|\Delta| \approx 0.031$). Corollary~\ref{cor:bayes-acc} gives these gaps an operational reading: an observer who sees only the single recovery bit can label an input forget-vs-retain with accuracy $\tfrac{1}{2}(1+|\hat p_F-\hat p_R|)$, so SalUn's gap is a sizeable above-chance advantage while SCRUB's $|\Delta|\approx0.031$ is barely above a coin flip. The SCRUB interpretation rests on this direct measured equality, not on Pinsker: Pinsker only lower-bounds KL when a genuine gap exists and cannot certify an upper bound on leakage. CE-U is kept as pilot evidence rather than a ranked headline row: its seed-42, $n=8$ audit has $\hat p_F = 0.875$ and $\hat p_R = 0.000$, which is suggestive of selectivity but too small to compare statistically against the full-audit rows.
+
+\paragraph{A stronger control: the oracle null and larger $n$.} The rate table above is limited in two ways the literature rightly flags: small per-row $n$, and the worry that a forget-vs-retain radius gap is merely the intrinsic difficulty asymmetry of driving \emph{any} input to the forgotten class. A larger-$n$ ($n_F = n_R = 128$) \texttt{adam\_margin} audit and a \emph{retain-only oracle null}---a model retrained on the retain set only, with the same $K$-class output space and the forgotten-class logit left without positive training examples---address both issues. This null is not an information-theoretic proof of zero class knowledge, especially if pretrained features are used; it is a matched operational baseline for target-label fragility. Across seeds 42, 123, and 456 the oracle null shows essentially no intrinsic asymmetry (forget/retain median-radius ratio $0.94$, $1.05$, $1.01$), so a gap beyond the null on an \emph{unlearned} model is evidence of residual-knowledge signal rather than baseline artifact. Against this null, SalUn separates cleanly (forget median radius $0.000$ vs retain $0.0039$ at $n{=}128$, non-overlapping bootstrap CIs) and the smoothed-margin model recovers well below the null---both genuine residual leakage under this audit. SCRUB, by contrast, does not merely vary in magnitude across seeds---its selectivity \emph{changes sign}. Reporting the forget-vs-retain median-radius ratio as ``$\times$ easier'' (retain over forget, so $>1$ is selective) with $5000$-resample bootstrap $95\%$ CIs: seed 42 is selective ($2.04\times$, CI $[1.85,2.38]$), seed 123 is significantly \emph{anti}-selective---forget is \emph{harder} to recover than the retain control ($0.83\times$, CI $[0.74,0.93]$, excluding parity)---and seed 456 is at parity ($1.01\times$, CI $[0.82,1.21]$). Both the seed-42 and seed-123 CIs exclude $1$, in \emph{opposite} directions, against a flat oracle null on every seed. So the earlier ``selective on 42, parity on 123/456'' reading was too generous to the parity story: SCRUB is not consistently generic-fragile, it is \emph{unstable in the sign of its leakage}, which is a stronger reason to distrust any single-seed selective claim about it. One observation suggests where to look next, though $n=3$ seeds cannot establish it: the lone selective seed (42) is also the one whose SCRUB checkpoint is globally most fragile (smallest retain-control median radius, $0.0052$ versus $0.0092$ and $0.0123$), hinting that SCRUB's apparent selectivity is a property of an unstable, globally fragile checkpoint rather than of the method. The next paragraph runs exactly that test---correlating signed selectivity against the oracle-free fragility scale---not just over more SCRUB seeds but across every audited checkpoint, and finds the confound is benchmark-wide. This instability is consistent with the large clean-baseline forget variance of Appendix~\ref{sec:seedvar} and is quantified per seed in \texttt{results/analysis/metrics/scrub\_seed\_dependence.json}.
+
+\subsection{The fragility confound in the selectivity metric}
+\label{sec:confound}
+The SCRUB observation generalizes. Pooling \emph{every} $(\text{method},\text{seed},\text{attack config})$ audit row that carries a matched forget and retain control---$132$ rows over $57$ distinct unlearned checkpoints---let $S = \log(\tilde r_R / \tilde r_F)$ be the signed selectivity (median retain radius over median forget radius, so $S>0$ is selective) and let the \emph{fragility scale} $F = \tilde r_R$ be the retain-control median radius, an oracle-free measure of how globally easy the checkpoint is to attack. Across the benchmark $S$ is negatively correlated with $\log F$: Pearson $r = -0.25$ (Spearman $-0.37$), with a suite-clustered bootstrap $95\%$ CI of $[-0.44,-0.09]$ that excludes zero. The effect is modest---fragility explains only $\sim\!6\%$ of selectivity variance, and $83\%$ of even the most robust checkpoints still read as nominally selective---but it is \emph{not} an artifact of pooling: it survives restriction to CIFAR-10 alone ($r=-0.29$; clustered CI $[-0.49,-0.04]$), to a single attack family (\texttt{adam} $-0.25$, \texttt{apgd} $-0.49$), and crucially to a \emph{single seed} (seed 42, $r=-0.24$, $n=89$), so it is a cross-method structural confound rather than a restatement of SCRUB's cross-seed instability. The correlation is not a chance artifact: a $20{,}000$-draw permutation null gives $p = 0.013$, it is sign-stable under leave-one-method-out (every single-family deletion leaves $r \in [-0.28,-0.20]$), it strengthens under outlier trimming ($r=-0.47$ on the central $90\%$ of fragility), and---most importantly---it \emph{replicates independently in all three seeds} (seed 42 $r=-0.24$, seed 123 $r=-0.35$, seed 456 $r=-0.63$), so it is not a one-off of the seed-42-heavy pool (\texttt{scripts/analysis/42\_robustness\_checks.py}). The consequence for the instrument is concrete: a globally brittle checkpoint inflates the apparent forget-vs-retain gap, so cross-checkpoint selectivity rankings are partly fragility rankings unless the absolute scale $F$ is matched or reported alongside. The retain-only oracle null subtracts the oracle's \emph{own} forget/retain asymmetry but does not equalize $F$ between the unlearned model and the oracle, so it controls this confound only partially. We therefore read recovery-radius selectivity as a fragility-conditioned quantity: report $F$ with every gap, and prefer fragility-matched comparisons (numbers in \texttt{results/analysis/metrics/fragility\_confound.json}, script \texttt{scripts/analysis/40\_fragility\_confound.py}).
+
+\subsection{Why the confound exists: forget-radius super-elasticity}
+The confound has a precise mechanism that the paper's own Theorem~\ref{thm:gap} makes falsifiable. If recovery radius were exactly $r \approx -m/L$ with a single global Lipschitz constant $L$, then $L$ would cancel in the ratio $r_R/r_F$ and selectivity would be fragility-\emph{independent}: the naive theory predicts no confound. Fitting $\log r_F = a + b\,\log r_R$ across the $132$ rows gives slope $b = 1.31$ with a suite-clustered bootstrap $95\%$ CI of $[1.11, 2.04]$, excluding the no-confound value $b = 1$. The forget-class radius is thus \emph{super-linearly} elastic to the global scale: as a checkpoint becomes globally more fragile (retain radius halves), the forget radius falls by $\approx 2^{1.31}\!\approx\!2.5\times$, collapsing faster than retain controls and mechanically inflating apparent selectivity. The estimate is conservative---classic errors-in-variables attenuation biases the slope \emph{toward} the no-confound value $b=1$, so noise cannot manufacture $b>1$ from a true $b=1$---and it is stable under stress: a Theil--Sen robust slope gives $b=1.74$, the central-$90\%$ fit gives $b=2.42$, every leave-one-method-out fit stays in $[1.20,1.58]$, and all three seeds reproduce $b>1$ (seed 42 $1.28$, seed 123 $1.64$, seed 456 $1.55$). This locates exactly where the single-$L$ reading of Theorem~\ref{thm:gap} breaks: forget and retain inputs sit in regions of systematically different local Lipschitz behavior, and that difference scales with global brittleness. The per-sample law above supplies the micro-mechanism: a checkpoint's selectivity tracks the \emph{heterogeneity} of its forget margins. Where unlearning leaves a heterogeneous forget-margin distribution---some samples barely suppressed, sitting near the boundary---those samples recover at small radius and the row reads as selective; where it crushes every forget logit uniformly (e.g.\ SCRUB seed 123, all $\log p_t < -37$), there is no near-boundary tail and no selective gap. Across checkpoints, the within-checkpoint spread of $\log p_t$ correlates positively with selectivity ($r=+0.27$, $n=55$), a modest but direction-consistent signal that ties the seed-level SCRUB instability to a measurable property of the forget-margin distribution rather than to residual class knowledge. The observational slope $b=1.31$ pools methods of differing fragility, so we confirm it with a controlled within-method experiment (Appendix~\ref{sec:controlled}): holding SalUn fixed and varying only the base input-space smoothness through adversarial pre-training strength---a clean instrument that moves the global scale $r_R$ over a $22\times$ range without a direct forget-suppression channel---yields a causal slope $\hat b_{\text{causal}} = 1.36$ (cluster-bootstrap $95\%$ CI $[1.31,1.84]$, ten checkpoints over two seeds), excluding the single-scale null $b=1$ and matching the observational estimate (Figure~\ref{fig:elasticity-confound}D). Adapter-side weight decay is by contrast a first-stage null---the radius is governed by the base geometry, not the low-rank adapter ($\eta^2$ of $\log r_R$ is $0.25$ by method but $0.002$ by base seed and $\approx 0$ by regularization)---which is exactly what identifies base smoothness as the correct knob. The super-elasticity is therefore a causal, not merely pooled, property of how the forget radius responds to fragility.
+
+\paragraph{Does the mechanism cross architectures? A qualified positive under the right estimator.} We tested whether the super-elastic slope ($b>1$) and the fragility confound ($r<0$) extend beyond CIFAR-10/ViT-Tiny by retraining six LoRA unlearning methods on two new architecture/dataset pairs---ResNet-18 (convolutional) and ViT-Small, both on CIFAR-100---and auditing each with the identical recovery-radius protocol. The answer depends on the pooling estimator. Naively regressing raw log-radii pools cells with very different fragility baselines, and one cell (ResNet-18 seed 123) is additionally half left-censored: three of six methods leave the forget class recoverable at radius $0$ (it leaks on clean input), so only the high-radius survivors enter the fit. That raw pool commits an ecological (Simpson) confound and even flips the sign ($\hat b=0.51$, $r=+0.44$). Within-cell fixed-effects pooling, which demeans each variable inside its (architecture, seed) cell before pooling, removes the cell-baseline confound and restores the within-benchmark pattern across the $14$ usable points: $\hat b=1.55$ (95\% CI $[1.00,2.31]$, all leave-one-out $>1$) and $r=-0.48$ (95\% CI $[-0.78,0.00]$, all leave-one-out $<0$), close to the within-benchmark $b\approx1.31$, $r\approx-0.25$. This is observational cross-method evidence with modest $n$ and intervals that touch the null, so we read it as a qualified positive, not a breadth claim; the robust evidence remains the within-benchmark analysis (132 rows, three seeds) and the controlled causal experiment (Appendix~\ref{sec:controlled}, which gives the full naive-vs-fixed-effects comparison and per-cell fits). Numbers in \texttt{results/analysis/metrics/crossarch\_pooled\_2seed.json} (script \texttt{53\_crossarch\_pooled\_2seed.py}).
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.92\linewidth]{crossarch_replication_fig.pdf}
+  \caption{Cross-architecture check on CIFAR-100 (six LoRA unlearning methods per cell), illustrating why the pooling estimator matters. \textbf{(A)} forget-radius log--log fit and \textbf{(B)} the selectivity--fragility confound. Naively pooling raw radii across cells is confounded by their differing fragility baselines: the single-seed pool (circles/triangles) gives $\hat b=1.98$, $r=-0.74$, but adding the second ResNet-18 seed (red $\times$), whose cell is half left-censored at $r_F{=}0$, flips the raw pooled fit to $\hat b=0.51$, $r=+0.44$. Within-cell fixed-effects pooling removes this baseline confound and recovers the within-benchmark pattern ($\hat b=1.55$, $r=-0.48$; Section~\ref{sec:controlled}). The raw cross-cell pool shown here is the wrong estimator; it is retained to make the confound visible.}
+  \label{fig:crossarch}
+\end{figure}
+
+\subsection{Which methods leak after fragility-matching}
+Removing the fragility trend ($S = a + c\log F + e$) leaves a fragility-adjusted selectivity $e$ that ranks methods by leakage \emph{beyond} what their brittleness explains (Table~\ref{tab:adj-selectivity}). Two features validate the adjustment. First, the retain-only \emph{oracle null}---which has no forget-class knowledge by construction---falls to the bottom ($e=-0.66$, CI excluding $0$), exactly where a correct adjustment must place it. Second, \emph{SCRUB} sits at or below the oracle ($e=-0.76$): once fragility is controlled, its apparent selectivity vanishes entirely, mechanistically confirming the seed-level finding that SCRUB's leak is a brittleness artifact, not residual knowledge. The genuine leakers that survive the adjustment with CIs excluding zero are SalUn ($+0.50$), RURK ($+0.44$), and the smoothed-margin model ($+0.46$, small $n{=}4$)---the same rows the oracle-null audit flags as separating from the null---while BalDRO, CE-ascent, and Uniform-KL are indistinguishable from fragility-driven selectivity. Numbers and per-family CIs are in \texttt{results/analysis/metrics/elasticity\_taxonomy.json} (script \texttt{scripts/analysis/41\_elasticity\_and\_taxonomy.py}); families with $n<4$ (e.g.\ OrthoReg) are excluded as underpowered.
+
+\begin{table}[t]
+  \centering
+  \small
+  \setlength{\tabcolsep}{6pt}
+  \begin{tabular}{l c c c}
+    \toprule
+    Method family & $n$ & raw selectivity & fragility-adjusted $e$ (CI95) \\
+    \midrule
+    SalUn            & 20 & $1.39$ & $+0.50\ [+0.08,+0.91]$ \\
+    Smoothed-margin  &  4 & $0.91$ & $+0.46\ [+0.18,+0.73]$ \\
+    RURK             & 12 & $1.26$ & $+0.44\ [+0.21,+0.62]$ \\
+    BalDRO           & 16 & $0.83$ & $+0.05\ [-0.12,+0.25]$ \\
+    CE-ascent        & 17 & $0.79$ & $-0.02\ [-0.06,+0.01]$ \\
+    ORBIT            & 30 & $0.61$ & $-0.14\ [-0.21,-0.05]$ \\
+    Uniform-KL       &  6 & $0.77$ & $-0.19\ [-0.57,+0.20]$ \\
+    Oracle null      &  3 & $-0.01$ & $-0.66\ [-0.81,-0.51]$ \\
+    SCRUB            & 17 & $-0.03$ & $-0.76\ [-0.98,-0.59]$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Fragility-matched selectivity taxonomy. Raw selectivity $S=\log(\tilde r_R/\tilde r_F)$ is confounded by global fragility; the adjusted $e$ is the residual after regressing $S$ on $\log F$. The oracle null and SCRUB fall to the bottom---validating the adjustment and confirming SCRUB's leak as a brittleness artifact---while SalUn, RURK, and smoothed-margin survive as genuine leakers (CIs excluding $0$). Bootstrap $95\%$ CIs over rows; small-$n$ families ($<4$) omitted.}
+  \label{tab:adj-selectivity}
+\end{table}
+
+\subsection{Theorem~\ref{thm:transfer}: covering implies the mixed-surface failure}
+The patch, border-frame, and multi-patch results reported above are empirical context for Theorem~\ref{thm:transfer}. Patch-aware stage-2 closes the single-patch channel on ORBIT and CE-U, but the same defense becomes easier to recover under frame and multi-patch delivery, and mixed-surface stage-2---explicitly trained on multiple surfaces---does not reliably fix the transfer gap. Every coordinate is covered by some $32\times 32$ patch (Lemma~\ref{lem:cover}), so by Theorem~\ref{thm:transfer} exact worst-case robustness across the family forces constancy at \emph{any} budget---including the $\epsilon \approx 8/255$ the audits use, not only in a large-budget limit (Corollary~\ref{cor:no-free-lunch}). The empirical mixed-surface failure is consistent with this obstruction, but the theorem does not rule out average-case or data-manifold robustness under realistic sampled mask distributions; that remains the appropriate local-delivery defense target.
+
+\subsection{Theorem~\ref{thm:smooth}: a certified recovery floor at preserved utility}
+This is the paper's constructive result. The empirical objectives audited above carry no input-space certificate; the smoothed objective of Eq.~\eqref{eq:smoothed} does, attaching a positive certified recovery floor to \emph{every} audited forget point at a preserved retain accuracy of $93.8\%$, validated in its native $L_2$ norm and robust across three seeds (Figure~\ref{fig:thm4-constructive}). The smoothed objective of Eq.~\eqref{eq:smoothed} is implemented as a hinge on the Monte-Carlo smoothed target margin and trained end-to-end. On seed 42, starting from a base ViT-Tiny at $94.2\%$ validation accuracy, a 10-epoch smoothed-margin LoRA fine-tune ($\sigma = 0.10$, $n_{\text{noise}} = 4$, $\gamma = 1.0$) drives forget accuracy $95.7\% \to 12.0\%$ while retain accuracy is preserved ($93.9\% \to 93.8\%$). Seeds 123 and 456 reach forget accuracy $12.1\%$ and $9.3\%$ with retain preserved. The objective is designed to reduce the noisy forgotten-class event, but the certificate is established only post hoc by the Monte-Carlo upper confidence bound in Theorem~\ref{thm:smooth}. The exact theorem applies to the binary forgotten-class detector under \emph{unclipped} Gaussian noise; noisy-input clipping during training or auditing is an implementation choice and must be interpreted as a clipped-distribution diagnostic rather than the exact Cohen--Rosenfeld--Kolter certificate. Under the native $L_2$ audit, the reported detector-radius scale is $R=0.193$, while measured deterministic-model $L_2$ recovery radii remain above it across seeds. This is evidence that the deterministic recovery radius is compatible with the detector certificate, not a direct proof of the smoothed detector's recovery radius. The $L_\infty$ comparison is moved to Appendix~\ref{sec:crossnorm}: it is a cross-norm stress diagnostic comparing an $L_2$ detector bound, after $\sqrt{d}$ conversion, to a base-model $L_\infty$ recovery audit. Because $d=150{,}528$, the converted scale is only $\approx0.0005$, so that plot is a caveat about norm mismatch rather than validation of Theorem~\ref{thm:smooth}.
+
+\paragraph{Native $L_2$ recovery audit.} The $\sqrt{d}$ deflation above is an artifact of comparing an $L_2$ detector-radius scale against an $L_\infty$ audit. Re-running the deterministic recovery audit under an $L_2$ budget gives a forget median recovery radius of $0.46$--$0.57$ across seeds 42/123/456, above the reported $L_2$ detector-radius scale $R = 0.193$. The $L_2$ audit also sharpens the selectivity picture: at the $L_2$ budget the forget and retain \emph{success rates} no longer saturate, separating to $0.84$ (forget) versus $0.03$ (retain)---a $0.82$ rate gap. This native-norm diagnostic is the cleanest empirical companion to the detector certificate; the converted $L_\infty$ plot is only a caveat about metric mismatch.
+
+\paragraph{Direct smoothed-detector certificate.} Table~\ref{tab:cert} reports the Theorem~\ref{thm:smooth} certificate \emph{directly} on the binary smoothed forget-detector $g_t$, rather than inferring it from the deterministic audit. Every noise draw predicts a non-forget class ($\hat p_{\neg t} = 1$ at $m = 256$), so the Clopper--Pearson lower bound on the non-forget probability is $\underline p_{\neg t} = 0.973$ and the certified radius $R = \sigma\,\Phi^{-1}(\underline p_{\neg t}) = 0.193$ saturates identically across all $64$ forget samples and all three seeds; equivalently the upper bound on the forgotten-class-top-logit event is $\tau = 1 - \underline p_{\neg t} \approx 0.027$. The deterministic native-$L_2$ forget recovery medians sit a factor $\sim\!2.4$--$3.0$ above $R$ (no $L_2$ violation) and are the empirical companion to the certificate, not a substitute for it. Holding this model fixed and raising the \emph{certification} noise---a distinct role from the \emph{training} scale swept in Table~\ref{tab:sigma-frontier}---to $\sigma = 5.0$ leaves the forgotten class off the top logit in \emph{every} one of $65{,}536$ noisy forwards ($\hat p_{\neg t} = 1.0$ over $256$ samples $\times\,256$ draws, unclipped, seed 42), so the radius scales linearly to $R = 9.66$ with the certified fraction pinned at $1.0$. The saturated certificate columns therefore reflect global suppression of the forget-class prior across input space, not a reporting artifact; the seed-to-seed signal is carried by the deterministic median. Strengthening the protocol---raising the Monte-Carlo count to $m=2048$ and applying a union bound for \emph{simultaneous} validity over all $64$ audited forget points ($\alpha_i = 10^{-3}/64$, the construction of Corollary~\ref{cor:gen})---\emph{tightens} rather than weakens the certificate: the larger sample shrinks the Clopper--Pearson interval faster than the union bound widens it, giving $\tau = 0.0054$ and a simultaneously-valid certified radius $R = 0.255$ on $100\%$ of forget points across all three seeds (Table~\ref{tab:cert}, lower block), versus the per-point $R = 0.193$ at $m=256$. The headline certificate is therefore conservative; the simultaneous bound is both more rigorous and numerically larger.
+
+\begin{table}[t]
+  \centering
+  \small
+  \setlength{\tabcolsep}{5pt}
+  \begin{tabular}{c c c c c c c c}
+    \toprule
+    seed & $\sigma$ & $m$ & $n$ & $\tau$ (CP) & cert.\ frac. & detector $R$ & det.\ $L_2$ med. \\
+    \midrule
+    \multicolumn{8}{l}{\emph{per-point} ($\alpha = 10^{-3}$), $m=256$:} \\
+    42  & 0.10 & 256 & 64 & 0.027 & 1.00 & 0.193 & 0.488 \\
+    123 & 0.10 & 256 & 64 & 0.027 & 1.00 & 0.193 & 0.461 \\
+    456 & 0.10 & 256 & 64 & 0.027 & 1.00 & 0.193 & 0.570 \\
+    \midrule
+    \multicolumn{8}{l}{\emph{simultaneous} ($\alpha_i = 10^{-3}/64$), $m=2048$:} \\
+    42  & 0.10 & 2048 & 64 & 0.0054 & 1.00 & 0.255 & 0.488 \\
+    123 & 0.10 & 2048 & 64 & 0.0054 & 1.00 & 0.255 & 0.461 \\
+    456 & 0.10 & 2048 & 64 & 0.0054 & 1.00 & 0.255 & 0.570 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Smoothed forget-detector certificate (Theorem~\ref{thm:smooth}), $\sigma = 0.10$, \emph{unclipped} Gaussian noise (the exact Cohen--Rosenfeld--Kolter setting). Columns: noise draws $m$; audited forget samples $n$; threshold $\tau$, the Clopper--Pearson upper bound on the forgotten-class-top-logit event $q_t$; fraction of forget inputs with a positive certificate; the $L_2$ detector radius $R = \sigma\,\Phi^{-1}(1-\tau)$; and the deterministic native-$L_2$ forget recovery median. Upper block: the per-point certificate ($\alpha=10^{-3}$, $m=256$). Lower block: the \emph{stronger} protocol---$m=2048$ draws and a union bound for joint validity over all $64$ forget points ($\alpha_i=10^{-3}/64$, Corollary~\ref{cor:gen})---which tightens $\tau$ and \emph{raises} the simultaneously-valid radius to $R=0.255$. The certificate is identical across seeds because every noise draw is non-forget, while the deterministic median varies; retain controls give an identical certificate. Numbers from \texttt{smoothed\_radius\_seed\_*\_sigma\_0p1\_n\{256,2048\}\_*.json}.}
+  \label{tab:cert}
+\end{table}
+
+\paragraph{Certification--utility frontier.} Theorem~\ref{thm:smooth} exposes a tunable tradeoff through the smoothing scale $\sigma$: a larger $\sigma$ inflates the detector-radius scale ($R = \sigma\,\Phi^{-1}(1-\tau)$, with $\tau$ the upper confidence bound on the noisy forgotten-class event), but the same noise that buys the certificate also washes out the clean forgetting signal. Table~\ref{tab:sigma-frontier} sweeps $\sigma$ on seed 42. The $L_2$ detector radius grows linearly with $\sigma$ (from $0.10$ at $\sigma{=}0.05$ to $0.97$ at $\sigma{=}0.50$), but clean forget accuracy degrades sharply (from $0.2\%$ to $83.5\%$) while retain accuracy stays preserved throughout. A wide radius therefore does \emph{not} imply good unlearning: at $\sigma{=}0.50$ the smoothed classifier carries a large radius while the underlying model has effectively stopped forgetting. The useful operating regime is small $\sigma$ ($0.05$--$0.10$), where forgetting is strong and the radius is modest---which is why the headline run uses $\sigma{=}0.10$.
+
+\begin{table}[t]
+  \centering
+  \small
+  \begin{tabular}{c c c c}
+    \toprule
+    $\sigma$ & forget acc & retain acc & $L_2$ detector radius $R$ \\
+    \midrule
+    0.05 & 0.2\%  & 93.7\% & 0.097 \\
+    0.10 & 12.0\% & 93.8\% & 0.193 \\
+    0.25 & 66.4\% & 93.9\% & 0.483 \\
+    0.50 & 83.5\% & 94.1\% & 0.967 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Certification--utility frontier for the smoothed-margin objective (seed 42, $n_{\text{noise}}=256$, $\alpha=10^{-3}$). Larger $\sigma$ buys a larger $L_2$ detector-radius scale but degrades clean forgetting; retain accuracy is preserved across the sweep.}
+  \label{tab:sigma-frontier}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{theorem4_constructive_fig.pdf}
+  \caption{\textbf{The smoothed-margin objective as a constructive result
+  (Theorem~\ref{thm:smooth}).} \textbf{(A)} Certification--utility frontier
+  (seed 42): raising the training smoothing scale $\sigma$ grows the median
+  certified $L_2$ recovery floor $R=\sigma\,\Phi^{-1}(1-\tau)$ (right axis,
+  positive certificate on $100\%$ of forget points) while retain accuracy stays
+  flat at $\approx 94\%$; strong forgetting lives at small $\sigma$, so the
+  useful regime is the shaded band and the headline run uses $\sigma=0.10$.
+  \textbf{(B)} Same-norm validation: across seeds 42/123/456 the realized native
+  $L_2$ forget recovery radius ($0.46$--$0.57$) sits \emph{above} the certified
+  floor $R=0.193$ (the floor is respected, not merely consistent), while the
+  retain controls are essentially unrecoverable (attack success $2$--$3\%$ vs.\
+  $80$--$89\%$ on forget). Deterministic methods carry a certified floor of $0$
+  on this axis. Data: \texttt{smoothed\_margin\_sigma\_frontier.json},
+  \texttt{smoothed\_margin\_l2\_recovery\_summary.json}.}
+  \label{fig:thm4-constructive}
+\end{figure}
+
+\paragraph{Cross-architecture-family breadth: ResNet-18 / CIFAR-100, two seeds.}
+The headline construction lives on ViT-Tiny/CIFAR-10. To test whether the
+certified-floor result is specific to that architecture or dataset, we repeat the
+\emph{entire} smoothed-margin pipeline---train, certify, and audit recovery---on a
+\emph{convolutional} ResNet-18 backbone and the harder $100$-class CIFAR-100,
+across two independently trained base seeds ($123,456$; bases at
+$\approx\!77$--$78\%$ CIFAR-100 top-1 at the native $32$-px training resolution,
+$\approx\!89\%$ retain accuracy under the $224$-px audit pipeline used for all
+recovery measurements). A $25$-epoch smoothed-margin LoRA fine-tune
+($\sigma=0.10$) drives forget accuracy from $\approx\!0.92$ to $0.05$ (mean over
+seeds, range $[0.03,0.07]$) while retain accuracy is preserved
+($\approx\!0.89\!\to\!0.88$). The smoothed detector certifies a positive $L_2$
+recovery floor $R=0.193$ on $93\%$ of forget points (per seed $92$--$94\%$),
+identical to the CIFAR-10 scale because $\sigma$ is matched. Crucially the
+recovery audit shows the result is \emph{selective}, not generic fragility: the
+median $L_\infty$ forget recovery radius ($0.0010$) is $5.2\times$ smaller than
+the matched retain-control radius ($0.0053$; per-seed $5.18$--$5.25\times$),
+\emph{exceeding} the CIFAR-10/ViT-Tiny selectivity ($\approx\!3.5\times$).
+Table~\ref{tab:breadth} reports both seeds. This is the breadth the earlier
+single-seed ViT-Small row lacked---a different architecture \emph{family} and a
+harder dataset, with utility-preserving forgetting, a positive certified floor,
+and \emph{stronger} selectivity, replicated across two seeds. We stress its
+scope: this is a breadth result for the \emph{constructive objective}. The
+\emph{observational} super-elasticity and fragility-confound mechanism of
+Section~\ref{sec:theory} is a separate claim; it replicates across these
+architectures only under within-cell fixed-effects pooling
+(Section~\ref{sec:validation}, Appendix~\ref{sec:controlled}), as a qualified
+observational positive rather than a breadth result. Certifying a recovery floor
+on a new architecture is the stronger, separate claim established here.
+
+\begin{table}[t]
+  \centering
+  \small
+  \setlength{\tabcolsep}{5pt}
+  \begin{tabular}{c c c c c c c}
+    \toprule
+    seed & forget acc & retain acc & forget $r$ & retain $r$ & selectivity & cert.\ $R$ \\
+     & (before$\to$after) & (before$\to$after) & ($L_\infty$ med.) & ($L_\infty$ med.) & ($r_R/r_F$) & ($L_2$, \%${+}$) \\
+    \midrule
+    123 & $0.95\to0.03$ & $0.895\to0.885$ & $0.00098$ & $0.00515$ & $5.25\times$ & $0.193$ ($94\%$) \\
+    456 & $0.90\to0.07$ & $0.889\to0.881$ & $0.00104$ & $0.00539$ & $5.18\times$ & $0.193$ ($92\%$) \\
+    \bottomrule
+  \end{tabular}
+  \caption{\textbf{Cross-architecture-family breadth for the constructive
+  objective (Theorem~\ref{thm:smooth}).} Smoothed-margin on a convolutional
+  ResNet-18 / CIFAR-100 base (two independently trained seeds), forgotten class
+  $0$, $\sigma=0.10$. Forgetting is utility-preserving (retain accuracy drops
+  $\approx\!1$ pp), the $L_2$ certificate attaches on $92$--$94\%$ of forget
+  points at the same scale $R=0.193$ as CIFAR-10, and the forget class is
+  $\approx\!5.2\times$ easier to recover than matched retain controls---a
+  \emph{stronger} selective gap than the CIFAR-10/ViT-Tiny headline. Numbers in
+  \texttt{breadth\_resnet18\_cifar100\_summary.json} (scripts
+  \texttt{2\_train\_unlearning\_lora}, \texttt{17}, \texttt{27}, \texttt{55}).}
+  \label{tab:breadth}
+\end{table}
+
+\paragraph{Second forgotten class: the floor is not a class-0 artifact.}
+A natural objection to the headline construction is that it is reported almost
+entirely for forgotten class $0$, so the certified floor and the selective
+recovery gap could be a property of that one target label rather than of the
+method. To test this we repeat the \emph{entire} smoothed-margin pipeline---train,
+certify, audit recovery---on ViT-Tiny/CIFAR-10 with forgotten class $5$ held out
+instead (two seeds, $42$ and $123$, $\sigma=0.10$, otherwise the identical recipe).
+Forgetting is clean and utility-preserving on both seeds (forget accuracy
+$90.1$--$90.6\%\!\to\!0.2$--$0.9\%$, retain accuracy $94.3$--$94.5\%\!\to\!95.1$--$95.4\%$).
+The smoothed detector certifies a positive $L_2$
+recovery floor on \emph{every} one of the $64$ audited forget points, for both
+seeds, at exactly the class-0 scale $R=0.193$ ($\tau=0.027$, $\hat p_{\neg t}=1$ at
+$m=256$, identical to the third decimal across seeds): the
+floor is fixed by $\sigma$ and the saturated non-forget event, so it transfers
+across both the target label and the seed unchanged. The deterministic recovery
+audit reproduces the selective gap in the same direction on both seeds, though more
+weakly than for class $0$---the median $L_\infty$ forget recovery radius
+($0.0042$--$0.0049$) is $1.6$--$1.8\times$ smaller than the matched
+retain-to-forget control radius ($0.0075$--$0.0078$), versus $\approx\!3.5\times$ for
+class $0$. The certified floor is therefore a class-independent property of the
+construction, while the \emph{magnitude} of the selective gap is target-dependent,
+a distinction we do not oversell. Numbers in
+\texttt{smoothed\_radius\_seed\_\{42,123\}\_sigma\_0p1\_n256\_smoothed\_margin\_fc5\_*.json}
+and \texttt{recovery\_radius\_cifar10\_vit\_tiny\_forget5\_seed\_\{42,123\}\_*.json}.
+
+\paragraph{Earlier single-seed cross-checks.} A first cross-dataset attempt ran
+the same objective on a lightly-trained ViT-Small CIFAR-100 base (seed 42): it
+drove forget accuracy to $0.0\%$ but with a nontrivial retain drop
+($54.7\%\!\to\!47.7\%$) and \emph{no} selective gap (forget and retain recovery
+radii nearly identical), so it supported objective/certificate feasibility but
+not selective leakage---superseded by the utility-preserving, selective
+two-seed ResNet-18 result above. Two literature methods were also run once each
+on CIFAR-100 (RURK on ViT-Small, SalUn on ResNet-18), driving forget accuracy to
+$0.0\%$ while largely preserving retain accuracy and resisting an adversarial
+weight-perturbation (AWP) audit at $\epsilon=10^{-3}$. Table~\ref{tab:crossarch}
+collects these single-seed rows as supplementary feasibility checks.
+
+\begin{table}[t]
+  \centering
+  \small
+  \begin{tabular}{l l c c l}
+    \toprule
+    Method & Architecture & Forget acc & Retain acc & Robustness audit \\
+     & & (before$\to$after) & (before$\to$after) & \\
+    \midrule
+    Smoothed-margin & ViT-Small & $78.0\to0.0$ & $54.7\to47.7$ & certified $L_2$ $R=0.193$ \\
+    RURK            & ViT-Small & $88.1\to0.0$ & $94.3\to93.7$ & AWP recovery gap $0.9\%$ \\
+    SalUn           & ResNet-18 & $92.2\to0.0$ & $94.6\to91.5$ & AWP recovery gap $0.0\%$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Single-seed CIFAR-100 cross-check (forgotten class 0). All three methods drive forget accuracy to $0\%$. RURK and SalUn largely preserve retain accuracy and resist a weight-perturbation (AWP) recovery audit at $\epsilon=10^{-3}$; the smoothed-margin row uses a lightly-trained base and has a larger retain drop, but is the only row carrying the smoothed detector-radius audit. Numbers in \texttt{cross\_arch\_cifar100\_summary.json}.}
+  \label{tab:crossarch}
+\end{table}
+
+\section{Defense Discussion}
+\subsection{Feature-subspace stage-2}
+The strongest post-hoc defense candidate in the current benchmark is a feature-subspace stage-2 finetune. Rather than modifying the full unlearning objective from epoch 0, it starts from an already-unlearned adapter and suppresses attacked forget-sample features inside a learned recovery subspace. This avoids the instability of earlier logit-margin and teacher-distillation defenses on BalDRO, but the evidence remains point-estimate evidence rather than a fully paired confidence-interval result.
+
+\subsection{Why the gains are small}
+The absolute changes in reported radii are numerically small because the benchmark itself is small: CIFAR-10 under an $L_\infty$ budget on 224$\times$224 inputs yields radii on the order of a few thousandths. The right question is therefore relative: does the defense move the forget-vs-retain frontier without collapsing clean utility? The point estimates move in the right direction on BalDRO, SalUn, and ORBIT, but the BalDRO shift is too small to emphasize without uncertainty intervals; the defensible reading is a modest ORBIT/SalUn signal plus a tiny BalDRO sanity check.
+
+\subsection{What does not generalize}
+The defense is not universal. RURK remains a hard case under both attack and defense. SCRUB behaves like generic adversarial fragility rather than a clean forgetting-leak regime, so stronger attacks on SCRUB do not necessarily imply a meaningful unlearning failure mode. The newer delivery-surface results make this sharper: patch-aware defenses often fail to transfer to border-frame or multi-patch delivery, and the mixed-surface stage-2 defense does not reliably fix that.
+
+\section{Proposed Defense Objective}
+The experiments suggest that clean-point forgetting is too weak a training target. A more principled direction is targeted-margin adversarial unlearning:
+\begin{equation}
+\min_{\theta}
+\mathbb{E}_{x \in R} L_{\text{retain}}(x;\theta)
+ + \lambda_f \mathbb{E}_{x \in F} L_{\text{forget}}(x;\theta)
+ + \lambda_m \mathbb{E}_{x \in F} \max\!\left(0,\; m_t(x + \delta^*(x)) + \gamma \right),
+\label{eq:proposed}
+\end{equation}
+where $F$ is the forget set, $R$ is the retain set, $m_t$ is the forgotten-class target margin, $\delta^*(x)$ is an inner-loop or amortized attack, and $\gamma$ is a safety margin. This objective is purely empirical: it minimizes a worst-case inner attack and carries no certificate. Theorem~\ref{thm:smooth} replaces the inner attacker $\delta^*(x)$ with Gaussian smoothing of the target margin, Eq.~\eqref{eq:smoothed}, yielding what appears to be an early unlearning objective with a per-input input-space randomized-smoothing lower bound on forgotten-class recovery radius. The end-to-end result in Section~\ref{sec:validation} (seed 42: forget $95.7\%\to12.0\%$, retain preserved, $L_2$ detector-radius scale $0.193$; replicated across seeds 42, 123, and 456) is the realized version of this objective. The implemented feature-subspace stage-2 defense can be viewed as a computationally cheaper, uncertified approximation to the same idea: defend against locally recoverable targeted behavior, not just against clean forget accuracy.
+
+\section{Discussion}
+The evidence supports a non-universal picture. Strong per-example conditional recovery is the main general threat; universal perturbations are mostly weak on stronger checkpoints; conditional patches expose an additional local surface on some methods; and border-frame and multi-patch delivery show that exact worst-case local-delivery transfer is the wrong target. Defenses are similarly method-specific: feature-subspace stage-2 gives modest point-estimate gains on several rows, teacher-guided stochastic CVaR helps ORBIT slightly but not CE-U, and patch-aware stage-2 gives the first clearly positive CE-U patch result ($68.8\%\!\to\!43.8\%$ at $32\times32$, seed 42) without retain-side failure but does not transfer to the full-image attack. The unifying lesson is that selectivity must be read as fragility-conditioned (Section~\ref{sec:confound}): the cleanest cross-checkpoint comparisons are fragility-matched, and the constructive smoothed objective is the one row that replaces an uncertified audit signal with a per-input certificate.
+
+
+\section{Limitations}
+The paper does not claim a universally stronger new optimizer than strong first-order attacks such as \texttt{adam\_margin} or \texttt{apgd\_margin}. The amortized short-budget attack is partial and target-dependent. The defense gains are modest and currently demonstrated on a benchmark that is intentionally controlled rather than broad: mostly CIFAR-10 ViT checkpoints, often with LoRA-based unlearning implementations, plus a smaller number of full-finetune and cross-architecture checks. This makes the benchmark useful for discovering failure modes and transfer gaps, but not yet a direct proxy for most industry deletion settings. Finally, some regimes are better understood as negatives or controls than as headline wins.
+
+A reproducibility caveat is stated up front rather than left to the appendix. The distributed SalUn baseline checkpoint does \emph{not} reproduce its reported clean-forget rate (it predicts the forgotten class on $28$--$53\%$ of clean forget inputs from the published \texttt{checkpoints} branch); the SalUn training recipe does reproduce, and the regenerated 3-seed baseline supersedes the shipped checkpoint. The plain BalDRO, ORBIT, and RURK baseline recipes were not originally committed (only \texttt{\_smoke} variants existed), so they are re-reported as committed \emph{reconstructions} with a fidelity caveat rather than as the originals: BalDRO as a recipe-scaled reconstruction, and ORBIT---a diagnostic row whose original objective code was lost---re-implemented from its four-term specification (\texttt{configs/suites/recon\_orbit.yaml}) and reproduced across three seeds (forget accuracy $0.86$--$0.93\!\to\!\le\!0.001$, retain preserved, selective forget recovery median $\approx\!0.003$ vs.\ retain $\approx\!0.006$). These reconstructions are runnable from committed code but are \emph{not} expected to match the orphaned original numbers; the RURK reconstruction remains incomplete (its nested noisy forward makes training prohibitively slow). Appendix~\ref{sec:adaptation} and the reproducibility appendix give the full audit; the takeaway is that the tracked result JSONs and recipes, not the distributed checkpoints, are the primary reproducibility surface.
+
+The theory carries its own caveats. (i) Corollary~\ref{cor:cert} is rigorous for the bounded probability margin (constant $2$, no logit bound), but the Lipschitz constant $L$ it needs is estimated empirically by a logit-margin Jacobian proxy $\hat L$ at audit points; because this proxy is not a certified global upper bound, the scatter gives a heuristic lower-bound estimate and ranking rather than a valid certificate floor. The pointwise inequality itself, however, is validated directly at the sample level (median $\mathrm{corr}(\hat r,\log p_t)=-0.64$ over $58$ checkpoints; Section~\ref{sec:validation}), so the caveat is about the unmeasured global $L$, not about Eq.~\eqref{eq:thm1-pointwise}. (ii) Pinsker's inequality in Theorem~\ref{thm:pinsker} is loose; the tighter Bretagnolle--Huber bound is reported alongside it, but neither is a finite-sample hypothesis test at the small per-row audit sizes ($n_F = n_R$ from 4 to 32). A larger-$n$ follow-up ($n = 128$) with bootstrap confidence intervals and a retain-only oracle null (Section~\ref{sec:validation}) backs the main selective rows and shows that the forget-vs-retain gap is not a baseline artifact; it also reveals that the \emph{sign} of SCRUB's selectivity is seed-unstable (selective on 42, anti-selective on 123, parity on 456, with two of three CIs excluding parity in opposite directions), so neither a selective-leak nor a generic-fragility label is robust for SCRUB. More broadly, a benchmark-wide audit ($132$ rows, $57$ checkpoints; Section~\ref{sec:validation}) shows the selectivity metric carries a modest but robust \emph{fragility confound}---signed selectivity correlates with the oracle-free retain-control radius scale at $r=-0.25$ (suite-clustered CI $[-0.44,-0.09]$, holding within a single seed)---so selectivity should be read as fragility-conditioned and cross-checkpoint comparisons should be fragility-matched; the oracle null controls this only partially. (iii) Theorem~\ref{thm:transfer} holds at \emph{any} budget, including the audit budget, but it constrains only \emph{worst-case} invariance; average-case robustness over sampled masks remains open and is the relevant distributional defense target. (iv) Theorem~\ref{thm:smooth} is an $L_2$ result for a binary smoothed detector. Converting that scale to $L_\infty$ at $d = 150{,}528$ incurs the $\sqrt{d}\approx388$ penalty and yields a numerically tiny converted bound ($\approx 0.0005$), so the native $L_2$ audit is the main diagnostic companion and the $L_\infty$ plot is only a caveat. The main smoothed-margin result replicates across seeds 42/123/456 (a $2.7$--$4.3\times$ selective gap on CIFAR-10/ViT-Tiny), and the certified-floor result further replicates on a convolutional ResNet-18 / CIFAR-100 base (Table~\ref{tab:breadth}: two seeds, preserved utility, a positive $L_2$ certificate on $92$--$94\%$ of forget points, a \emph{stronger} $5.2\times$ gap); single-seed ViT-Small and literature-method rows (Table~\ref{tab:crossarch}) are supplementary feasibility checks. This breadth is for the \emph{constructive objective}. The \emph{observational} super-elasticity/confound mechanism is supported most strongly within-benchmark (three seeds) and by the controlled causal base-smoothness experiment; its cross-architecture replication is a \emph{qualified} positive that holds under within-cell fixed-effects pooling but not naive cross-cell pooling, which is confounded by differing cell baselines (Section~\ref{sec:validation}). Each caveat is a concrete next step, not a hidden assumption.
+
+\FloatBarrier
+\section{Conclusion}
+Machine unlearning cannot be evaluated reliably with clean forget accuracy alone. This paper makes the per-example recovery radius the central object and shows it supports an operational theory: a Lipschitz recovery--certification gap that gives a necessary condition for certificate claims (Theorem~\ref{thm:gap}), a Pinsker bound plus oracle-null calibration for selective leakage (Theorem~\ref{thm:pinsker}), refined by a benchmark-wide fragility confound---globally brittle checkpoints inflate apparent selectivity, so a fragility-matched taxonomy is needed to tell genuine leakers (SalUn, RURK) from brittleness artifacts (SCRUB), a covering-family impossibility for exact worst-case local-delivery invariance (Theorem~\ref{thm:transfer}), and---constructively---a smoothed objective that is, to our knowledge, among the first unlearning methods to carry a per-input \emph{input-space} certified recovery floor for a binary forget detector (Theorem~\ref{thm:smooth}), attaching a positive certificate to every audited forget point at preserved utility and validated in its native $L_2$ norm, where the deterministic baselines certify nothing on this axis. The paper thus both names the recovery--certification gap and exhibits an objective that provably narrows it, with the constructive result replicating across two seeds on a convolutional ResNet-18 / CIFAR-100 base---a different architecture family and harder dataset---at preserved utility and stronger selectivity. Across the benchmark, the dominant leakage channel is strong per-example conditional recovery, but local patch, frame, and multi-patch attacks expose additional method-specific surfaces that do not reduce to a single universal vulnerability. The defense picture is similarly non-universal: feature-subspace stage-2 gives modest point-estimate gains on several rows, patch-aware training helps ORBIT and CE-U locally, and average-case delivery-surface transfer remains open. The benchmark is the experimental support for this theory, not a substitute for broader multi-dataset evaluation.
+
+\section*{Broader Impact Statement}
+This work is an auditing and defense study, and its primary intended effect is defensive: the recovery radius is a measurement primitive that lets practitioners detect when a model that passes clean forget-accuracy tests still leaks a forgotten class under a small input perturbation, \emph{before} such a model is deployed as ``unlearned.'' We see the fragility-confound finding as risk-reducing as well, since it corrects a selectivity metric that can otherwise overstate how thoroughly a method has removed information.
+
+The recovery attacks we study are nonetheless dual-use: the same per-example, patch, and frame procedures that audit an unlearned model could in principle be used by an adversary to re-elicit content a deployer intended to suppress. We mitigate this in three ways. First, all experiments use standard public image benchmarks (CIFAR-10 and CIFAR-100) with class labels as the forgetting target; no personal, private, or human-subject data is used, so no individual can be harmed or re-identified by the released artifacts. Second, the attacks are standard first-order and patch optimizations rather than new offensive capabilities, and we pair every attack family with a corresponding defense analysis (feature-subspace and patch-aware stage-2 training) and a constructive certified objective, so the paper supplies mitigation alongside the vulnerability it exposes. Third, the certified-recovery objective (Theorem~\ref{thm:smooth}) is offered precisely as a constructive path toward unlearning methods that carry an input-space guarantee rather than only a clean-accuracy claim. We judge that the defensive value to practitioners deploying unlearning---an honest audit and a certificate on the axis that matters---outweighs the marginal offensive utility of techniques that are already standard in the adversarial-robustness literature.
+
+\clearpage
+\appendix
+
+\section{Appendix: Seed Variance and Baseline Stability}
+\label{sec:seedvar}
+The clean baseline regime itself is highly variable across seeds for several unlearning methods, especially on forget accuracy. Figure~\ref{fig:seed-variance} summarizes this instability. This is one reason the paper emphasizes attack-conditioned evaluation rather than clean forget accuracy alone.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.92\linewidth]{baseline_seed_variance.png}
+  \caption{Seed variance of clean baselines. Forget-side variance is large for several methods even when retain-side variance remains small.}
+  \label{fig:seed-variance}
+\end{figure}
+
+\section{Appendix: Robust-Base Frontier}
+Figure~\ref{fig:robust-frontier} (main text) summarizes the robust-base SalUn operating-point story. At low utility, recovery can be suppressed strongly or disappear on the sampled audit. As retain accuracy increases, conditional recovery re-emerges. This makes robust-base training a frontier choice rather than a single robust point.
+
+\section{Appendix: Conditional Patch Regime}
+The patch regime is method-dependent. ORBIT (a reconstructed diagnostic row, not a headline method) is the clearest positive case, with a 32$\times$32 conditional patch covering 2.04\% of the image, strong forget recovery, 0\% retain-to-forget success, and limited retain accuracy drop. SalUn is patch-vulnerable only at a larger 48$\times$48 patch budget. BalDRO is effectively negative at the tested budgets. Figure~\ref{fig:patch-regime} (main text) summarizes the patch success rates across methods and seeds.
+
+\section{Appendix: Delivery-Surface Transfer}
+The later delivery-surface checks separate one-patch wins from broader local-delivery robustness. Under the conditional frame attack, the ORBIT patch-stage2 row and CE-U combined stage-2 both become easier to recover, and CE-U also incurs retain-side failure. Under conditional multi-patch delivery, the ORBIT patch-stage2 row transfers only weakly, while CE-U combined stage-2 and faithful full-ft SalUn patch-stage2 become easier to recover. Mixed-surface stage-2 was designed to fix this transfer problem, but in practice it only gives narrow gains and often worsens frame or multi-patch robustness. Delivery-surface transfer therefore remains an open average-case defense problem rather than solved by the current stage-2 families.
+
+\section{Appendix: Negative and Hard Cases}
+RURK remains a hard case for both the amortized attack family and the feature-subspace defense. SCRUB is useful as a negative control of a sharper kind: its forget-vs-retain selectivity is not merely weak but \emph{sign-unstable} across seeds. Under the matched $n{=}128$ \texttt{adam\_margin} oracle-null audit it is selective on seed 42 ($2.04\times$ easier, bootstrap CI $[1.85,2.38]$), significantly \emph{anti}-selective on seed 123 (forget \emph{harder} than retain, $0.83\times$, CI $[0.74,0.93]$), and at parity on seed 456 ($1.01\times$, CI $[0.82,1.21]$), all against a flat oracle null. Two of three seeds have CIs that exclude parity, in opposite directions, so SCRUB cannot be assigned a stable selective-leak or generic-fragility label; the seed-42 selective reading in particular is not a reliable leak. Several later defense variants also belong in this bucket: mixed-surface stage-2, frame-transfer failures, and the faithful full-ft SalUn mixed-surface row are all informative mainly because they show what does not transfer.
+
+\section{Appendix: Cross-Norm Diagnostic}
+\label{sec:crossnorm}
+Figure~\ref{fig:pred-meas} is retained only as a norm-mismatch diagnostic. The x-axis is the $L_\infty$ scale obtained by converting an $L_2$ detector radius by the $\sqrt{d}$ factor, while the y-axis is a base-model $L_\infty$ recovery audit. Points below the line should not be interpreted as failures of the detector certificate; they show why the native $L_2$ audit and Table~\ref{tab:cert}, not this converted plot, are the appropriate companion evidence for Theorem~\ref{thm:smooth}.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.92\linewidth]{predicted_vs_measured_radius.png}
+  \caption{Cross-norm stress diagnostic for the smoothed-margin row (seed 42). This is not a certificate test: it compares a dimension-converted $L_2$ detector-radius scale to a deterministic base-model $L_\infty$ recovery audit.}
+  \label{fig:pred-meas}
+\end{figure}
+
+\section{Appendix: Claim--Evidence Map}
+\label{sec:claim-evidence}
+Table~\ref{tab:claim-evidence} summarizes the paper's strongest claims and the evidence class supporting each. The goal is to separate theorem statements, measured benchmark findings, diagnostics, and pilot observations.
+
+\begin{table}[t]
+  \centering
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{p{0.28\linewidth} p{0.18\linewidth} p{0.42\linewidth}}
+    \toprule
+    Claim & Evidence class & Evidence boundary \\
+    \midrule
+    Recovery radius is an oracle-free audit primitive. & Definition + audit protocol & The radius estimator does not require a retrained oracle; oracle-null calibration is optional and used only to interpret selectivity. \\
+    Theorem~\ref{thm:gap} gives a recovery--certification necessary condition. & Theorem + diagnostic & The theorem is exact for the stated Lipschitz constant; Figure~\ref{fig:lip-scatter} uses a local logit-margin proxy and is only a ranking diagnostic. \\
+    Large forget-vs-retain rate gaps imply a variational signal. & Theorem + measured rates & Pinsker lower-bounds KL only when a gap exists; it does not certify low leakage when the measured gap is near zero. \\
+    The oracle-null audit separates residual leakage from target-label asymmetry. & Measured control & Larger-$n$ retain-only oracle audit shows near-zero baseline asymmetry; it is an operational null, not an information-theoretic zero-knowledge proof. \\
+    Worst-case delivery-surface invariance over a covering family is impossible for nonconstant classifiers. & Theorem & The result applies to exact global worst-case invariance with submask-supported perturbations; average-case sampled-mask robustness remains open. \\
+    The smoothed objective yields an $L_2$ detector certificate. & Post-training certificate & The certificate is for a binary smoothed forgotten-class detector under unclipped Gaussian noise; deterministic $L_2$ recovery is companion evidence, not the proof. \\
+    Feature-subspace stage-2 gives positive shifts on several rows. & Point-estimate benchmark & Clearest on ORBIT and SalUn; BalDRO is a tiny positive shift and needs paired confidence intervals before stronger statistical language. \\
+    CE-U shows selective full-image recovery. & Pilot & Seed-42, $n=8$, two-step audit; suggestive only and not ranked against full-audit rows. \\
+    CIFAR-100 checks broaden scope. & Single-seed feasibility & Useful cross-dataset/architecture checks, not a multi-seed cross-dataset benchmark claim. \\
+    Super-elasticity and the fragility confound generalize across architectures. & Qualified observational positive & Naive pooling of raw log-radii across cells of differing fragility baseline (one half left-censored at $r_F{=}0$) confounds the fit ($b{=}0.51$, $r{=}{+}0.44$); within-cell fixed-effects pooling removes the baseline confound and restores the pattern ($b{=}1.55$, CI $[1.00,2.31]$, all LOO $>1$; $r{=}{-}0.48$, CI $[-0.78,0.00]$, all LOO $<0$) across two architecture families. Observational, $n{=}14$, CIs touch the null; the causal instrument remains within-benchmark. \\
+    \bottomrule
+  \end{tabular}
+  \caption{Claim--evidence audit for the current draft.}
+  \label{tab:claim-evidence}
+\end{table}
+
+\section{Appendix: Reproducibility Artifacts}
+The paper draws from the committed result JSONs and figure sources in this repository. Before external release, the exact artifact commit should be tagged so the paper PDF, source, and generated summaries resolve to one immutable revision. The main summaries and generated figures live in:
+\begin{itemize}[leftmargin=1.5em]
+  \item \texttt{results/analysis/feature\_subspace\_tradeoff.md}
+  \item \texttt{results/analysis/recovery\_tradeoff\_summary.md}
+  \item \texttt{results/analysis/conditional\_patch\_summary.md}
+  \item \texttt{results/analysis/paper\_results\_outline.md}
+  \item \texttt{manifest.json}, regenerated by the repository manifest audit script (which also writes an ignored human-readable report)
+  \item \texttt{results/analysis/figures/}
+\end{itemize}
+
+All figures and tables in this paper are generated from JSON result files committed alongside the code, together with the audit scripts needed to reproduce each attack regime. Full checkpoint reproduction is heavier: the trained checkpoints live on a separate \texttt{checkpoints} branch (base, oracle, and several unlearn adapters across seeds 42, 123, and 456), supplemented by theory-era and stage-2 checkpoints that are regenerated locally from the training scripts. Not all eight benchmark methods are checkpoint-covered across all three seeds on the main branch; the tracked JSON artifacts, not the checkpoints, are the primary reproducibility surface.
+
+\paragraph{Checkpoint reproducibility and a regenerated SalUn baseline.} A reproducibility audit of the distributed baseline checkpoints found that the shipped SalUn forget-class-0 LoRA adapter does not reproduce its reported clean-forget rate: audited from the published \texttt{checkpoints} branch it predicts the forgotten class on $28$--$53\%$ of clean forget inputs (depending on the saved sub-adapter), not the near-zero rate of Table~\ref{tab:subspace-defense}. The training \emph{recipe} is intact, however: retraining SalUn from the committed configuration (\texttt{configs/suites/repro\_salun.yaml}; objective \texttt{salun}, rank 8, 50 epochs, $\mathrm{lr}=10^{-3}$) reproduces proper unlearning across all three seeds---clean forget accuracy $0.0\%$ with a forget recovery median of $0.00349$, $0.00368$, $0.00417$ ($L_\infty$, \texttt{adam\_margin}, 40 steps) for seeds $42/123/456$ (retain median $\approx 0.005$). These regenerated checkpoints supersede the distributed SalUn baseline; regeneration is driven by \texttt{scripts/analysis/37\_regen\_salun\_baselines.sh} (summary in \texttt{results/analysis/reports/salun\_regen\_summary.txt}).
+
+\paragraph{Reconstructed BalDRO and ORBIT baselines; RURK unresolved.} The plain BalDRO, ORBIT, and RURK baseline recipes were not originally committed to version control (only \texttt{\_smoke} variants existed on any branch), so the originals cannot be regenerated. As a partial check, a BalDRO baseline \emph{reconstructed} by scaling the smoke recipe to the SalUn conventions (objective \texttt{bal\_dro}, rank 8, 50 epochs, $\mathrm{lr}=10^{-3}$; \texttt{configs/suites/recon\_baldro\_rurk.yaml}) reproduces proper unlearning across three seeds---clean forget accuracy $0.0\%$, forget recovery median $0.00417$, $0.00355$, $0.00447$ for seeds $42/123/456$. ORBIT, whose original objective code and recipe were likewise never committed, has been \emph{re-implemented} from its four-term paper specification---hinge-margin suppression of the forget logit, masked dark-knowledge distillation from the frozen retain-only oracle, oracle feature alignment, and forget-feature dispersion---as the committed objective \texttt{orbit} (\texttt{src/unlearning/objectives.py}) wired to load the retain-only oracle, with recipe \texttt{configs/suites/recon\_orbit.yaml}. The reconstruction unlearns cleanly and reproducibly across three seeds: clean forget accuracy $\le\!0.1\%$ (forget $0.913/0.926/0.859 \to 0.001/0.000/0.001$), retain accuracy preserved ($0.954/0.957/0.930$), and a \emph{selective} forget recovery median of $0.00377/0.00328/0.00319$ against retain controls at $0.00699/0.00686/0.00576$ ($L_\infty$, \texttt{adam\_margin}, seeds $42/123/456$)---forget inputs are $\approx\!2\times$ easier to recover than retain, consistent with ORBIT's leaker classification. Like the BalDRO reconstruction this is \emph{not} the original ORBIT and is not expected to match the orphaned Table~\ref{tab:subspace-defense} numbers; it is reported as a committed, runnable diagnostic that removes ORBIT's prior single-run status. Critically, the reconstruction also reproduces ORBIT's \emph{flagship} property---patch-positivity with retain-safety: a conditional $32\times32$ patch attack (\texttt{scripts/attacks/20\_conditional\_patch\_attack\_audit.py}) recovers the forgotten class on $34.4\%$ (seed 42) and $18.8\%$ (seed 123) of forget inputs at $0\%$ retain-to-forget success, qualitatively matching the original ORBIT behavior that made it the primary local-delivery vehicle. The RURK reconstruction was not completed (its objective's nested noisy forward made training prohibitively slow) and remains the one baseline not yet independently reproduced (\texttt{scripts/analysis/38\_recon\_baldro\_rurk.sh}).
+
+\section{Appendix: Adaptation Protocol}
+\label{sec:adaptation}
+A critical caveat for the fairness of this benchmark concerns CE-U, SGA, BalDRO, and RURK. These methods were originally proposed in the context of Large Language Models (LLMs) or against adversarial threat models. The implementations evaluated in this paper are \emph{objective-level adaptations} to the vision domain (CIFAR-10 classification with ViT architectures), not faithful reproductions of their original settings or training dynamics. They are included to provide a diverse set of algorithmic loss structures for the robustness microscope to probe, not to formally evaluate the original authors' claims in the domain they were intended for.
+
+Concretely, the adaptations differ from their sources as follows, and these fidelity labels appear in Table~\ref{tab:method-classification}. \textbf{CE-U} is implemented as cross-entropy \emph{ascent} (negative CE on the forget class)---the gradient-ascent objective that~\cite{yang2025ceu} was specifically designed to \emph{replace} with a stable corrected-target cross-entropy---so the CE-U row is a gradient-ascent baseline, not a reproduction of CE-U. \textbf{RURK}'s robustness term ascends on \emph{random} Gaussian-noise copies of forget inputs, whereas~\cite{hsu2025rurk} targets robustness to \emph{adversarial}/worst-case perturbed samples; random-noise robustness is strictly weaker. \textbf{BalDRO} is a softmax reweighting of hard forget samples, not the min--max distributionally robust optimization with the balancing constraint of~\cite{shao2026baldro}. \textbf{SGA} (label-smoothed gradient ascent) is the closest to its source~\cite{pang2025sga}. We keep the original method names as row labels for traceability, but read them through these fidelity caveats rather than as faithful baselines.
+
+\section{Appendix: Low-Shot Controls}
+The lower-shot prompt controls help separate real recovery from trivial prompt memorization. Figure~\ref{fig:kshot-controls} summarizes two useful trends: oracle controls remain flat near zero across the tracked shot counts, while KL and SCRUB can become vulnerable only in specific low-shot or high-shot regimes.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.92\linewidth]{kshot_controls.png}
+  \caption{K-shot prompt controls. Oracle stays flat, KL remains weakly vulnerable, and SCRUB only becomes unstable in the larger-shot follow-up.}
+  \label{fig:kshot-controls}
+\end{figure}
+
+\begin{thebibliography}{99}
+
+\bibitem{kurmanji2023scrub}
+Meghdad Kurmanji, Peter Triantafillou, Jamie Hayes, and Eleni Triantafillou.
+\newblock Towards unbounded machine unlearning.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2023.
+
+\bibitem{fan2024salun}
+Chongyu Fan, Jiancheng Liu, Yihua Zhang, Eric Wong, Dennis Wei, and Sijia Liu.
+\newblock {SalUn}: Empowering machine unlearning via gradient-based weight saliency in both image classification and generation.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2024.
+
+\bibitem{hu2022lora}
+Edward J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu Chen.
+\newblock {LoRA}: Low-rank adaptation of large language models.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2022.
+
+\bibitem{croce2020autoattack}
+Francesco Croce and Matthias Hein.
+\newblock Reliable evaluation of adversarial robustness with an ensemble of diverse parameter-free attacks.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2020.
+
+\bibitem{jia2022vpt}
+Menglin Jia, Luming Tang, Bor-Chun Chen, Claire Cardie, Serge Belongie, Bharath Hariharan, and Ser-Nam Lim.
+\newblock Visual prompt tuning.
+\newblock In \emph{European Conference on Computer Vision (ECCV)}, 2022.
+
+\bibitem{hsu2025rurk}
+Hsiang Hsu, Pradeep Niroula, Zichang He, Ivan Brugere, Freddy Lecue, and Chun-Fu Chen.
+\newblock The unseen threat: Residual knowledge in machine unlearning under perturbed samples.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2025.
+
+\bibitem{shi2024muse}
+Weijia Shi, Jaechan Lee, Yangsibo Huang, Sadhika Malladi, Jieyu Zhao, Ari Holtzman, Daogao Liu, Luke Zettlemoyer, Noah A. Smith, and Chiyuan Zhang.
+\newblock {MUSE}: Machine unlearning six-way evaluation for language models.
+\newblock \emph{arXiv preprint arXiv:2407.06460}, 2024.
+
+\bibitem{pang2025sga}
+Zirui Pang, Hao Zheng, Zhijie Deng, Ling Li, Zixin Zhong, and Jiaheng Wei.
+\newblock Label smoothing improves gradient ascent in {LLM} unlearning.
+\newblock \emph{arXiv preprint arXiv:2510.22376}, 2025.
+
+\bibitem{shao2026baldro}
+Pengyang Shao, Naixin Zhai, Lei Chen, Yonghui Yang, Fengbin Zhu, Xun Yang, and Meng Wang.
+\newblock {BalDRO}: A distributionally robust optimization based framework for large language model unlearning.
+\newblock \emph{arXiv preprint arXiv:2601.09172}, 2026.
+
+\bibitem{chien2024langevin}
+Eli Chien, Haoyu Wang, Ziang Chen, and Pan Li.
+\newblock Langevin unlearning: A new perspective of noisy gradient descent for machine unlearning.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2024.
+
+\bibitem{yang2025ceu}
+Bo Yang.
+\newblock {CE-U}: Cross entropy unlearning.
+\newblock \emph{arXiv preprint arXiv:2503.01224}, 2025.
+
+\bibitem{yu2026falw}
+Liheng Yu, Zhe Zhao, Yuxuan Wang, Pengkun Wang, Xiaofeng Cao, Binwu Wang, and Yang Wang.
+\newblock {FaLW}: A forgetting-aware loss reweighting for long-tailed unlearning.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2026.
+
+\bibitem{cohen2019certified}
+Jeremy Cohen, Elan Rosenfeld, and J.~Zico Kolter.
+\newblock Certified adversarial robustness via randomized smoothing.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2019.
+
+\bibitem{zhang2022pcmu}
+Zijie Zhang, Yang Zhou, Xin Zhao, Tianshi Che, and Lingjuan Lyu.
+\newblock Prompt certified machine unlearning with randomized gradient smoothing and quantization.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2022.
+
+\bibitem{xuan2025uma}
+Hao Xuan and Xingyu Li.
+\newblock Verifying robust unlearning: Probing residual knowledge in unlearned models.
+\newblock \emph{arXiv preprint arXiv:2504.14798}, 2025.
+
+\bibitem{goel2026pid}
+Anmol Goel, Alan Ritter, and Iryna Gurevych.
+\newblock Auditing language model unlearning via information decomposition.
+\newblock \emph{arXiv preprint arXiv:2601.15111}, 2026.
+
+\bibitem{ha2025prototypical}
+SeungBum Ha, Saerom Park, and Sung Whan Yoon.
+\newblock Unlearning's blind spots: Over-unlearning and prototypical relearning attack.
+\newblock \emph{arXiv preprint arXiv:2506.01318}, 2025.
+
+\bibitem{yu2026mirage}
+Zhenyu Yu, Yangchen Zeng, Chunlei Meng, Guangzhen Yao, and Shuigeng Zhou.
+\newblock Can vision models truly forget? {Mirage}: Representation-level certification of visual unlearning.
+\newblock \emph{arXiv preprint arXiv:2605.20282}, 2026.
+
+\bibitem{heinzler2026retain}
+Carolin Heinzler, Kasra Malihi, and Amartya Sanyal.
+\newblock Less noise, same certificate: Retain sensitivity for unlearning.
+\newblock \emph{arXiv preprint arXiv:2603.03172}, 2026.
+
+\bibitem{mu2025rewind}
+Siqiao Mu and Diego Klabjan.
+\newblock Rewind-to-delete: Certified machine unlearning for nonconvex functions.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2025.
+
+\bibitem{koloskova2025certified}
+Anastasia Koloskova, Youssef Allouah, Animesh Jha, Rachid Guerraoui, and Sanmi Koyejo.
+\newblock Certified unlearning for neural networks.
+\newblock \emph{arXiv preprint arXiv:2506.06985}, 2025.
+
+\bibitem{xue2026survey}
+Lulu Xue, Shengshan Hu, Wei Lu, Yan Shen, Dongxu Li, Peijin Guo, Ziqi Zhou, Minghui Li, Yanjun Zhang, and Leo Yu Zhang.
+\newblock Towards reliable forgetting: A survey on machine unlearning verification.
+\newblock \emph{ACM Computing Surveys}, 2026.
+
+\bibitem{pandey2026statistical}
+Aaradhya Pandey and Sanjeev Kulkarni.
+\newblock Statistical unlearning of distributions: A hypothesis testing approach.
+\newblock \emph{arXiv preprint arXiv:2605.16645}, 2026.
+
+\bibitem{yu2025impossibility}
+Jiatong Yu, Yinghui He, Anirudh Goyal, and Sanjeev Arora.
+\newblock On the impossibility of retrain equivalence in machine unlearning.
+\newblock \emph{arXiv preprint arXiv:2510.16629}, 2025.
+
+\bibitem{krishna2025amun}
+Ali Ebrahimpour-Boroojeny, Hari Sundaram, and Varun Chandrasekaran.
+\newblock {AMUN}: Adversarial machine UNlearning.
+\newblock \emph{arXiv preprint arXiv:2503.00917}, 2025.
+
+\end{thebibliography}
+
+\end{document}
